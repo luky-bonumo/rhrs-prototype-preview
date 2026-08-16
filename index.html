@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>rhrs — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<!-- Phosphor Icons (web font). Regular + fill + bold. Swap any icon by changing its ph-* class. -->
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<style>
+  /* ============================================================
+     TOKENS
+     ============================================================ */
+  :root {
+    /* Wine palette — light mode */
+    --noir:  #1C0A10;
+    --wine:  #7A1E2D;
+    --coral: #EF5350;
+    --stone: #E0E0E0;
+    --mist:  #F5F5F5;
+    --white: #FFFFFF;
+    --grey:  #BEBEBE;
+
+    /* Derived */
+    --coral-tint:   #FDECEB;
+    --coral-border: #F0A9A7;
+    --wine-tint:    #F3E7E9;
+    --wine-border:  #C9AAB0;
+    --text-body:    #241318;
+    --text-muted:   #9A9A9A;
+    --divider:      #EAEAEA;
+
+    --screen-bg: var(--mist);
+    --sheet-bg:  var(--white);
+    --card-bg:   #FAFAFA;          /* line cards in Listen / Rehearse */
+
+    --font-display: 'Platypi', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+    --font-mono:    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+
+    --line-height:  1.55;
+    --radius-card:  16px;
+    --radius-lcard: 20px;
+    --radius-note:  12px;
+    --radius-pill:  999px;
+
+    /* Per-mode accent. Overridden per screen; every control reads from it. */
+    --accent: var(--coral);
+    --accent-rgb: 239, 83, 80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    background: #c9c9c9;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; color: var(--text-body);
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone {
+    width: 393px; height: 852px;
+    background: var(--screen-bg);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35), 0 0 0 10px #111, 0 0 0 11px #333;
+    display: flex; flex-direction: column;
+  }
+
+  /* ---------- Status bar ---------- */
+  .statusbar {
+    height: 54px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px 0 34px;
+    font-weight: 600; font-size: 15px; color: var(--noir);
+    background: var(--mist);
+    transition: background .2s ease, color .2s ease;
+  }
+  .statusbar.on-wine { background: var(--wine); color: var(--mist); }
+  .statusbar .right { display: flex; gap: 6px; align-items: center; }
+  .statusbar svg { display: block; }
+
+  /* ---------- Screens ---------- */
+  .screen { display: none; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .screen.active { display: flex; }
+
+  /* ---------- Headers ---------- */
+  .top-header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 22px 16px;
+  }
+  .top-header .page-title { font-family: var(--font-display); font-weight: 700; font-size: 30px; color: var(--noir); }
+  .top-actions { display: flex; gap: 10px; }
+  .round-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--white); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wine); cursor: pointer; position: relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .round-btn:active { transform: scale(0.93); }
+  .round-btn .dot {
+    position: absolute; top: 10px; right: 11px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--coral); border: 2px solid var(--white);
+  }
+
+  .detail-header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 18px 14px;
+  }
+  .detail-header .back {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--white); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wine); cursor: pointer; flex: 0 0 auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .detail-header .back:active { transform: scale(0.93); }
+  .detail-header .h-title {
+    flex: 1; text-align: center;
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 18px; color: var(--wine);
+    line-height: 1.25; padding: 0 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .detail-header .spacer { width: 46px; flex: 0 0 auto; }
+
+  /* mode-screen header (Read / Listen / Rehearse / Evaluation) */
+  .header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 18px 14px;
+  }
+  .icon-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--white); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wine); box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    cursor: pointer; flex: 0 0 auto;
+    transition: transform .12s ease;
+  }
+  .icon-btn:active { transform: scale(0.93); }
+  .header-title {
+    flex: 1; text-align: center;
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 18px; line-height: 1.25;
+    color: var(--wine); padding: 0 2px;
+  }
+  /* Evaluation header is fully coral */
+  #evaluationScreen .icon-btn  { color: var(--coral); }
+  #evaluationScreen .header-title { color: var(--coral); font-weight: 700; }
+
+  /* ---------- List body (scripts / scenes / edit) ---------- */
+  .list { flex: 1 1 auto; overflow-y: auto; padding: 4px 20px 24px; }
+  .list::-webkit-scrollbar { width: 0; }
+  .list-sublabel {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 14px 4px 8px;
+  }
+
+  .card {
+    background: var(--white); border-radius: var(--radius-card);
+    padding: 18px; margin-bottom: 14px; cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    transition: transform .12s ease, box-shadow .12s ease;
+    border: 1.5px solid transparent;
+  }
+  .card:active { transform: scale(0.985); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .card .card-main { flex: 1 1 auto; min-width: 0; }
+  .card .card-title {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 19px; color: var(--noir);
+    line-height: 1.3; margin-bottom: 8px;
+  }
+  .card .card-meta { display: flex; align-items: center; gap: 10px; }
+  .card .meta-lines { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--coral); border: 1.5px solid var(--coral);
+    border-radius: 999px; padding: 2px 10px;
+  }
+  .card .chevron { color: var(--wine); flex: 0 0 auto; display: flex; }
+
+  .card.featured { background: var(--wine); border-color: var(--wine); }
+  .card.featured .card-title { color: var(--white); }
+  .card.featured .meta-lines { color: rgba(255,255,255,0.7); }
+  .card.featured .badge { color: #ffd9dd; border-color: rgba(255,217,221,0.6); }
+  .card.featured .chevron { color: rgba(255,255,255,0.85); }
+
+  /* ---------- Scroll area (mode screens) ---------- */
+  .scroll {
+    flex: 1 1 auto; overflow-y: auto;
+    position: relative;               /* cards measure offsetTop against this */
+    padding: 4px 22px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll::-webkit-scrollbar { width: 0; }
+  /* Listen / Rehearse: content dissolves into the transport controls */
+  .scroll.fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 96px), transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 96px), transparent 100%);
+  }
+
+  /* ============================================================
+     LINE — shared bits between Read (dividers) and Listen/Rehearse (cards)
+     ============================================================ */
+  .line-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .char-name { font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: 0.1px; }
+  .mine   .char-name { color: var(--coral); }
+  .others .char-name { color: var(--wine); }
+
+  .note-flags { display: flex; gap: 6px; align-items: center; margin-left: 2px; }
+  .flag {
+    width: 20px; height: 20px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white); border: none; padding: 0; cursor: pointer;
+  }
+  button.flag:active { transform: scale(0.88); }
+  .flag.private { background: var(--coral); }
+  .flag.stage   { background: var(--wine); }
+  .flag i { font-size: 13px !important; }
+
+  .line-menu-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 8px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+  }
+  .line-menu-btn .dots { display: flex; gap: 4px; }
+  .line-menu-btn .dots span { width: 6px; height: 6px; border-radius: 50%; }
+  .mine   .line-menu-btn .dots span { background: var(--coral); }
+  .others .line-menu-btn .dots span { background: var(--wine); }
+  .line-menu-btn:active { background: rgba(0,0,0,0.04); }
+
+  .line-text { font-size: 20px; line-height: var(--line-height); color: var(--text-body); font-weight: 400; }
+
+  /* ---------- Read: divider-separated lines ---------- */
+  .line { padding: 18px 0 20px; border-bottom: 1px solid var(--divider); }
+  .line:last-child { border-bottom: none; }
+  .line .line-menu-btn { margin-left: auto; }
+
+  .line.text-hidden .line-text { display: none; }
+  .line.text-hidden .placeholder {
+    display: block; font-size: 15px; color: var(--text-muted);
+    font-style: italic; padding: 4px 0;
+  }
+  .placeholder { display: none; }
+
+  /* ---------- Listen / Rehearse: line cards ---------- */
+  .lcard {
+    background: var(--card-bg);
+    border: 2px solid transparent;
+    border-radius: var(--radius-lcard);
+    padding: 16px 18px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.035);
+    transition: border-color .18s ease;
+  }
+  .lcard.active.mine   { border-color: var(--coral); }
+  .lcard.active.others { border-color: var(--wine); }
+  .lcard .line-head { margin-bottom: 10px; }
+  .lcard .line-head .spring { margin-left: auto; }
+
+  /* play / pause / mic control on a card */
+  .lc-btn {
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6px 4px; border-radius: 8px;
+  }
+  .lc-btn:active { transform: scale(0.9); }
+  .lcard.mine   .lc-btn { color: var(--coral); }
+  .lcard.others .lc-btn { color: var(--wine); }
+  /* Rehearse is a coral-accented mode throughout — every card control is coral. */
+  #rehearseScreen .lcard .lc-btn { color: var(--coral); }
+
+  /* the two actions shown on your own line in Listen */
+  .lc-actions { display: flex; gap: 12px; margin-top: 2px; }
+  .lc-action {
+    flex: 1 1 0;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--mist); border: 1.5px solid var(--stone);
+    border-radius: var(--radius-pill);
+    padding: 12px 10px; cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--noir);
+  }
+  .lc-action:active { transform: scale(0.97); }
+  .lc-action.accent { color: var(--coral); }
+
+  /* ---------- Notes ---------- */
+  .note {
+    border-radius: var(--radius-note);
+    padding: 12px 14px; margin-bottom: 12px;
+    background: transparent;
+  }
+  .note.private { border: 1.5px dashed var(--coral-border); }
+  .note.stage   { border: 1.5px dashed var(--wine-border); }
+  .note-head { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+  .note-head .flag { width: 18px; height: 18px; }
+  .note-label { font-weight: 700; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; }
+  .note.private .note-label { color: var(--coral); }
+  .note.stage   .note-label { color: var(--wine); }
+  .note-hide {
+    margin-left: auto; display: flex; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-family: var(--font-body);
+    font-weight: 600; font-size: 11px; letter-spacing: 0.4px;
+    text-transform: uppercase; padding: 2px 4px;
+  }
+  .note-body { font-style: italic; font-size: 16px; line-height: 1.45; }
+  .note.private .note-body { color: var(--coral); }
+  .note.stage   .note-body { color: var(--wine); }
+  .note.hidden { display: none; }
+
+  /* ============================================================
+     TRANSPORT — shared by Listen, Rehearse and Evaluation
+     ============================================================ */
+  .transport {
+    flex: 0 0 auto; position: relative;
+    padding: 0 22px 10px;
+  }
+  /* Evaluation has no mode bar under it, so the transport carries the safe area. */
+  .screen > .transport:last-child { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+
+  /* jump-to-active-line button, straddles the mini player */
+  .jump-btn {
+    position: absolute; top: -22px; right: 24px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--white); border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    color: var(--accent);
+    box-shadow: 0 3px 14px rgba(0,0,0,0.10);
+    z-index: 3;
+  }
+  .jump-btn.show { display: flex; }
+  .jump-btn:active { transform: scale(0.92); }
+
+  /* --- collapsed mini player --- */
+  .mini {
+    display: none; align-items: center; gap: 14px;
+    background: var(--card-bg); border-radius: 18px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  }
+  .mini.show { display: flex; }
+  .mini .t-time { font-family: var(--font-mono); font-size: 13px; color: var(--accent); flex: 0 0 auto; }
+  .mini .bar { flex: 1 1 auto; }
+  .mini .mini-toggle {
+    background: none; border: none; cursor: pointer; color: var(--accent);
+    display: flex; align-items: center; padding: 2px;
+  }
+  .mini .mini-toggle:active { transform: scale(0.9); }
+
+  /* --- expanded player --- */
+  .expanded { display: none; flex-direction: column; gap: 14px; padding-top: 6px; }
+  .expanded.show { display: flex; }
+
+  .t-main { display: flex; align-items: center; justify-content: center; gap: 26px; }
+  .skip-btn {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--white); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    flex: 0 0 auto;
+  }
+  .skip-btn:active { transform: scale(0.92); }
+
+  .big-btn {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; color: var(--white); flex: 0 0 auto;
+    box-shadow: 0 0 0 13px rgba(var(--accent-rgb), 0.28),
+                0 0 0 27px rgba(var(--accent-rgb), 0.13);
+    transition: transform .12s ease;
+  }
+  .big-btn:active { transform: scale(0.94); }
+  .big-btn .btn-time { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.5px; }
+
+  /* recording pulse (Rehearse — talking) */
+  .big-btn.recording {
+    width: 84px; height: 84px;
+    box-shadow: 0 0 0 16px rgba(var(--accent-rgb), 0.40),
+                0 0 0 34px rgba(var(--accent-rgb), 0.22),
+                0 0 0 52px rgba(var(--accent-rgb), 0.10);
+    animation: rec-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes rec-pulse {
+    0%, 100% { box-shadow: 0 0 0 16px rgba(var(--accent-rgb), 0.40),
+                           0 0 0 34px rgba(var(--accent-rgb), 0.22),
+                           0 0 0 52px rgba(var(--accent-rgb), 0.10); }
+    50%      { box-shadow: 0 0 0 20px rgba(var(--accent-rgb), 0.30),
+                           0 0 0 40px rgba(var(--accent-rgb), 0.16),
+                           0 0 0 60px rgba(var(--accent-rgb), 0.06); }
+  }
+
+  /* --- scrubber --- */
+  .bar {
+    position: relative; height: 8px; border-radius: 999px;
+    background: var(--stone); cursor: pointer;
+  }
+  .bar .fill {
+    position: absolute; inset: 0 auto 0 0;
+    border-radius: 999px; background: var(--accent);
+  }
+  .bar.with-thumb .fill::after {
+    content: ''; position: absolute; right: -9px; top: 50%;
+    width: 18px; height: 18px; margin-top: -9px;
+    border-radius: 50%; background: var(--white);
+    border: 3.5px solid var(--accent);
+  }
+
+  .t-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+  }
+  .t-meta .speed {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-mono); font-size: 17px; color: var(--accent);
+  }
+
+  /* --- Rehearse: paused action row --- */
+  .reh-take {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin: 0 auto; border: none; cursor: pointer;
+    background: var(--coral); color: var(--white);
+    border-radius: var(--radius-pill); padding: 10px 20px;
+  }
+  .reh-take:active { transform: scale(0.96); }
+  .reh-take .btn-time { font-family: var(--font-mono); font-size: 15px; }
+
+  .reh-actions { display: flex; align-items: flex-start; justify-content: space-around; padding-top: 4px; }
+  .reh-action {
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    color: var(--coral); padding: 4px 6px;
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.7px; text-transform: uppercase;
+  }
+  .reh-action:active { transform: scale(0.94); }
+
+  /* --- Rehearse: success flash --- */
+  .reh-success {
+    display: none; align-items: center; justify-content: center;
+    padding: 6px 0 10px;
+  }
+  .reh-success.show { display: flex; }
+  .reh-success .tick {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--coral); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 24px rgba(var(--accent-rgb), 0.35);
+    animation: tick-in .22s cubic-bezier(0.2, 1.4, 0.4, 1);
+  }
+  @keyframes tick-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ---------- Evaluation ---------- */
+  .eval-head { flex: 0 0 auto; padding: 0 22px 16px; border-bottom: 1px solid var(--divider); }
+  .eval-head .line-head { margin-bottom: 14px; }
+  .eval-showtext {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; background: var(--mist);
+    border: 1.5px solid var(--stone); border-radius: var(--radius-pill);
+    padding: 14px; cursor: pointer;
+    font-family: var(--font-body); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.6px; text-transform: uppercase; color: var(--noir);
+  }
+  .eval-showtext:active { transform: scale(0.98); }
+  .eval-label {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 22px; color: var(--coral); margin-bottom: 12px;
+  }
+
+  /* ---------- Bottom mode bar ---------- */
+  .modebar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+    background: var(--mist);
+  }
+  .mode {
+    display: flex; align-items: center; gap: 9px;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-display); font-weight: 700; font-size: 18px;
+    color: var(--wine); padding: 6px 8px;
+    transition: color .15s ease;
+  }
+  .mode.active { color: var(--coral); }
+  .mode:active { transform: scale(0.96); }
+
+  /* ---------- Bottom sheet ---------- */
+  .scrim {
+    position: absolute; inset: 0;
+    background: rgba(28,10,16,0.42);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease; z-index: 20;
+  }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  .sheet, .settings-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--sheet-bg);
+    border-radius: 26px 26px 0 0; z-index: 21;
+    transform: translateY(110%);
+    transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+    display: flex; flex-direction: column;
+  }
+  .sheet { padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 82%; }
+  .settings-sheet { padding-bottom: calc(20px + env(safe-area-inset-bottom)); max-height: 86%; }
+  .sheet.open, .settings-sheet.open { transform: translateY(0); }
+
+  .sheet-grabber {
+    width: 40px; height: 5px; border-radius: 3px;
+    background: var(--stone); margin: 10px auto 4px; flex: 0 0 auto;
+  }
+
+  .sheet-context { padding: 10px 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto; }
+  .sheet-context .ctx-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; margin-bottom: 3px; }
+  .sheet-context.mine   .ctx-name { color: var(--coral); }
+  .sheet-context.others .ctx-name { color: var(--wine); }
+  .sheet-context .ctx-line {
+    font-size: 14px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .sheet-items { padding: 8px 0; overflow-y: auto; }
+  .sheet-item {
+    display: flex; align-items: center; gap: 16px; width: 100%;
+    background: none; border: none; cursor: pointer;
+    padding: 15px 24px;
+    font-family: var(--font-body); font-size: 17px; font-weight: 500;
+    color: var(--noir); text-align: left;
+  }
+  .sheet-item:active { background: var(--mist); }
+  .sheet-item .item-ic {
+    width: 24px; height: 24px; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; color: var(--wine);
+  }
+  .sheet-item.accent, .sheet-item.accent .item-ic { color: var(--coral); }
+  .sheet-sep { height: 1px; background: var(--divider); margin: 6px 24px; }
+
+  /* ---------- Settings sheet ---------- */
+  .settings-title {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    color: var(--noir); padding: 6px 24px 4px;
+    display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto;
+  }
+  .settings-title .account-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--mist); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wine); cursor: pointer; flex: 0 0 auto;
+  }
+  .settings-title .account-btn:active { transform: scale(0.93); }
+
+  .settings-scroll { overflow-y: auto; padding: 8px 0 4px; }
+  .settings-scroll::-webkit-scrollbar { width: 0; }
+  .set-group { padding: 10px 0 4px; }
+  .set-group-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-muted); padding: 8px 24px;
+  }
+  .set-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 24px; gap: 16px; }
+  .set-row .set-label { font-size: 16px; font-weight: 500; color: var(--noir); }
+  .set-row .set-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .set-sep { height: 1px; background: var(--divider); margin: 6px 24px; }
+
+  .toggle {
+    width: 50px; height: 30px; border-radius: 999px;
+    background: var(--stone); border: none; position: relative;
+    cursor: pointer; flex: 0 0 auto; transition: background .2s ease;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform .2s ease;
+  }
+  .toggle.on { background: var(--coral); }
+  .toggle.on::after { transform: translateX(20px); }
+
+  .font-stepper { display: flex; align-items: center; gap: 4px; background: var(--mist); border-radius: 999px; padding: 4px; }
+  .font-stepper button {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: var(--white); color: var(--wine);
+    font-family: var(--font-body); font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .font-stepper button:active { transform: scale(0.92); }
+  .font-stepper button:disabled { opacity: 0.35; cursor: default; }
+  .font-stepper .fs-a { font-size: 15px; }
+  .font-stepper .fs-b { font-size: 21px; }
+  .font-stepper .fs-val { font-size: 14px; font-weight: 600; color: var(--noir); min-width: 34px; text-align: center; }
+
+  .segmented { display: flex; gap: 6px; background: var(--mist); border-radius: 999px; padding: 4px; }
+  .segmented button {
+    border: none; background: none; cursor: pointer;
+    font-family: var(--font-mono); font-size: 13px; color: var(--wine);
+    padding: 6px 10px; border-radius: 999px;
+  }
+  .segmented button.on { background: var(--white); color: var(--coral); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: absolute; bottom: 100px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--noir); color: var(--white);
+    padding: 11px 20px; border-radius: 999px;
+    font-size: 14px; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 30; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ============ DASHBOARD ============ */
+  #dashboardScreen { background: var(--wine); }
+  .dash-scroll { flex: 1 1 auto; overflow-y: auto; padding: 4px 22px 30px; display: flex; flex-direction: column; }
+  .dash-scroll::-webkit-scrollbar { width: 0; }
+  .dash-top { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 22px 20px; }
+  .dash-logo { color: var(--mist); display: flex; align-items: center; }
+  .dash-logo svg { height: 20px; width: auto; }
+  .dash-actions { display: flex; gap: 10px; }
+  .dash-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(245,245,245,0.12); border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mist); cursor: pointer; position: relative;
+  }
+  .dash-btn:active { transform: scale(0.93); }
+  .dash-btn .dot {
+    position: absolute; top: 9px; right: 10px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--coral); border: 2px solid var(--wine);
+  }
+  .dash-hero {
+    font-family: var(--font-display);
+    font-weight: 400; font-size: 29px; line-height: 1.2;
+    color: var(--mist); padding: 6px 4px 26px; flex: 0 0 auto; max-width: 100%;
+  }
+  .dash-hero .accent { color: var(--coral); font-weight: 700; }
+  .dash-card { background: var(--mist); border-radius: 22px; padding: 20px; margin-bottom: 14px; flex: 0 0 auto; }
+  .dash-card-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+  }
+  .recent-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 0;
+    cursor: pointer; border-bottom: 1px solid var(--divider);
+  }
+  .recent-row:last-of-type { border-bottom: none; }
+  .recent-row:active { opacity: 0.6; }
+  .recent-row .r-main { flex: 1 1 auto; min-width: 0; }
+  .recent-row .r-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--noir);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .recent-row .r-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .recent-row .r-chev { color: var(--wine); flex: 0 0 auto; display: flex; }
+  .dash-alllink {
+    margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); font-weight: 600; font-size: 15px;
+    color: var(--wine); padding: 6px;
+  }
+  .dash-row2 { display: flex; gap: 14px; flex: 0 0 auto; }
+  .dash-shortcut {
+    flex: 1 1 0; background: var(--mist); border-radius: 22px; padding: 20px 18px;
+    cursor: pointer; display: flex; flex-direction: column; gap: 12px;
+    min-height: 120px; justify-content: space-between;
+  }
+  .dash-shortcut:active { transform: scale(0.98); }
+  .dash-shortcut .sc-ic {
+    width: 40px; height: 40px; border-radius: 12px; background: var(--wine-tint);
+    display: flex; align-items: center; justify-content: center; color: var(--wine);
+  }
+  .dash-shortcut .sc-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    color: var(--noir); line-height: 1.2; margin-bottom: 3px;
+  }
+  .dash-shortcut .sc-sub { font-size: 12px; color: var(--text-muted); line-height: 1.3; }
+  .dash-stats { margin-top: 20px; flex: 0 0 auto; }
+  .dash-stats .stats-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: rgba(245,245,245,0.6); margin-bottom: 12px;
+  }
+  .stats-grid { display: flex; gap: 12px; }
+  .stat { flex: 1 1 0; background: rgba(245,245,245,0.1); border-radius: 16px; padding: 14px; }
+  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--mist); line-height: 1; }
+  .stat .stat-lbl { font-size: 12px; color: rgba(245,245,245,0.7); margin-top: 6px; }
+
+  /* ============ EDIT PLAY ============ */
+  .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .char-row { display: flex; align-items: center; gap: 14px; padding: 15px 18px; border-bottom: 1px solid var(--divider); }
+  .char-row:last-child { border-bottom: none; }
+  .char-row .cr-main { flex: 1 1 auto; min-width: 0; }
+  .char-row .cr-name {
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    color: var(--noir); display: flex; align-items: center; gap: 8px;
+  }
+  .char-row .cr-name .mine-tag {
+    font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    color: var(--coral); border: 1.5px solid var(--coral); border-radius: 999px; padding: 1px 7px;
+  }
+  .char-row .cr-lines { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+  .char-row .cr-edit {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--mist); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wine); flex: 0 0 auto;
+  }
+  .char-row .cr-edit:active { transform: scale(0.92); }
+  .edit-row {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 16px 18px; border-bottom: 1px solid var(--divider); text-align: left;
+  }
+  .edit-row:last-child { border-bottom: none; }
+  .edit-row:active { background: var(--mist); }
+  .edit-row .er-ic { width: 24px; height: 24px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: var(--wine); }
+  .edit-row .er-label { flex: 1 1 auto; font-size: 16px; font-weight: 500; color: var(--noir); }
+  .edit-row .er-chev { color: var(--text-muted); display: flex; }
+  .edit-row.danger .er-ic, .edit-row.danger .er-label { color: var(--coral); }
+
+  /* ============ PHOSPHOR ICON SIZING ============
+     Phosphor web-font icons inherit color (currentColor) and size via font-size.
+     Swap an icon by changing its ph-* class; size stays with the ic-* class. */
+  i.ph, i.ph-fill, i.ph-bold { line-height: 1; display: inline-flex; }
+  .ic-13 { font-size: 13px; }
+  .ic-14 { font-size: 14px; }
+  .ic-16 { font-size: 16px; }
+  .ic-18 { font-size: 18px; }
+  .ic-20 { font-size: 20px; }
+  .ic-21 { font-size: 21px; }
+  .ic-22 { font-size: 22px; }
+  .ic-24 { font-size: 24px; }
+  .ic-26 { font-size: 26px; }
+  .ic-28 { font-size: 28px; }
+  .ic-32 { font-size: 32px; }
+  .ic-38 { font-size: 38px; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="statusbar on-wine" id="statusbar">
+    <span>14:06</span>
+    <span class="right">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.5c2.3 0 4.4.9 6 2.4l-1.4 1.4C11.9 5.1 10.3 4.5 8.5 4.5S5.1 5.1 3.9 6.3L2.5 4.9C4.1 3.4 6.2 2.5 8.5 2.5zm0 3.5c1.3 0 2.5.5 3.4 1.4L8.5 11 5.1 7.4C6 6.5 7.2 6 8.5 6z"/></svg>
+      <svg width="26" height="13" viewBox="0 0 26 13" fill="none"><rect x="0.5" y="0.5" width="21" height="12" rx="3" stroke="currentColor"/><rect x="2" y="2" width="18" height="9" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="2" height="5" rx="1" fill="currentColor"/></svg>
+    </span>
+  </div>
+
+  <!-- ============ SCREEN: DASHBOARD ============ -->
+  <div class="screen active" id="dashboardScreen">
+    <div class="dash-top">
+      <span class="dash-logo"><svg viewBox="0 0 39 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.4149 14.0451C33.9354 14.0451 33.4379 14.0032 32.9224 13.9193C32.4069 13.8353 31.9094 13.7214 31.4298 13.5776C30.9623 13.4337 30.5547 13.2719 30.207 13.0921L31.268 10.3947H31.7895L34.2351 13.6136H32.3829V11.8153C32.5507 12.115 32.8384 12.3548 33.246 12.5346C33.6656 12.7144 34.1452 12.8043 34.6846 12.8043C35.1402 12.8043 35.4819 12.7324 35.7096 12.5886C35.9494 12.4447 36.0693 12.2229 36.0693 11.9232C36.0693 11.6235 35.9374 11.3837 35.6737 11.2039C35.4099 11.0121 35.0683 10.8503 34.6487 10.7184C34.2411 10.5745 33.8035 10.4307 33.336 10.2868C32.8804 10.143 32.4428 9.96313 32.0232 9.74735C31.6156 9.53156 31.28 9.24983 31.0162 8.90217C30.7525 8.55451 30.6206 8.11095 30.6206 7.57148C30.6206 6.57646 31.0042 5.8152 31.7715 5.28772C32.5507 4.74825 33.6596 4.47852 35.0982 4.47852C35.5418 4.47852 35.9973 4.51448 36.4649 4.58641C36.9444 4.65834 37.406 4.76024 37.8495 4.89211C38.2931 5.02398 38.6707 5.17983 38.9824 5.35965L37.9215 8.00306H37.4L34.9544 4.91009H36.8066V6.70833C36.6387 6.39663 36.351 6.15687 35.9434 5.98903C35.5478 5.80921 35.1282 5.7193 34.6846 5.7193C34.313 5.7193 34.0253 5.77924 33.8215 5.89912C33.6177 6.019 33.5158 6.18684 33.5158 6.40263C33.5158 6.70233 33.6477 6.94809 33.9114 7.1399C34.1751 7.33172 34.5168 7.50555 34.9364 7.66139C35.356 7.80525 35.7935 7.9551 36.2491 8.11095C36.7166 8.25481 37.1602 8.43463 37.5798 8.65042C37.9994 8.86621 38.341 9.14194 38.6048 9.47761C38.8685 9.81328 39.0004 10.2389 39.0004 10.7544C39.0004 11.8093 38.6048 12.6245 37.8136 13.2C37.0223 13.7634 35.8895 14.0451 34.4149 14.0451Z" fill="currentColor"/>
+<path d="M21.3576 13.7563V13.4326L22.7062 11.8861L22.4185 12.3896V7.12078L23.1918 8.5234L21.1777 6.23964V5.80806L25.008 4.58526H25.6014L25.4755 6.3835H25.6553V12.3896L25.3676 11.8142L27.2558 13.4326V13.7563H21.3576ZM25.3137 7.6063L25.3856 6.3835H25.5654C25.9011 5.78409 26.3327 5.31055 26.8602 4.96289C27.3876 4.61524 27.9331 4.44141 28.4966 4.44141C29.012 4.44141 29.4736 4.5493 29.8812 4.76509L28.4966 8.61331H27.9751L25.7632 6.3835L27.9571 6.77911C27.3337 6.77911 26.8002 6.85104 26.3567 6.9949C25.9251 7.12677 25.5774 7.33057 25.3137 7.6063Z" fill="currentColor"/>
+<path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
+<path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
+      <div class="dash-actions">
+        <button class="dash-btn" onclick="toast('Notifications')" aria-label="Notifications">
+          <i class="ph ph-bell ic-20"></i>
+          <span class="dot"></span>
+        </button>
+        <button class="dash-btn" onclick="toast('Settings')" aria-label="Settings">
+          <i class="ph ph-gear-six ic-20"></i>
+        </button>
+        <button class="dash-btn" onclick="toast('User account')" aria-label="Account">
+          <i class="ph ph-user ic-20"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="dash-scroll">
+      <div class="dash-hero">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
+
+      <div class="dash-card">
+        <div class="dash-card-label">Last open</div>
+        <div id="recentList"></div>
+        <button class="dash-alllink" onclick="showScreen('scriptsScreen')">
+          All scripts
+          <i class="ph ph-caret-right ic-18"></i>
+        </button>
+      </div>
+
+      <div class="dash-row2">
+        <div class="dash-shortcut" onclick="toast('Self tape')">
+          <div class="sc-ic"><i class="ph ph-video-camera ic-21"></i></div>
+          <div>
+            <div class="sc-title">Self tape</div>
+            <div class="sc-sub">Record an audition</div>
+          </div>
+        </div>
+        <div class="dash-shortcut" onclick="toast('My characters')">
+          <div class="sc-ic"><i class="ph ph-users ic-21"></i></div>
+          <div>
+            <div class="sc-title">My characters</div>
+            <div class="sc-sub">Roles you play</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-stats">
+        <div class="stats-label">Stats</div>
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-num">12</div><div class="stat-lbl">Scenes rehearsed</div></div>
+          <div class="stat"><div class="stat-num">4.2</div><div class="stat-lbl">Hours this week</div></div>
+          <div class="stat"><div class="stat-num">89%</div><div class="stat-lbl">Line accuracy</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: ALL SCRIPTS ============ -->
+  <div class="screen" id="scriptsScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title" style="font-size:22px;font-weight:700;">All Scripts</span>
+      <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
+    </div>
+    <div class="list" id="scriptsList"></div>
+  </div>
+
+  <!-- ============ SCREEN: SCRIPT DETAIL (scenes) ============ -->
+  <div class="screen" id="detailScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title" id="detailTitle">I love you, you're fine, but change…</span>
+      <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit play"><i class="ph ph-pencil-simple ic-21"></i></button>
+    </div>
+    <div class="list" id="scenesList"></div>
+  </div>
+
+  <!-- ============ SCREEN: EDIT PLAY ============ -->
+  <div class="screen" id="editPlayScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title" style="font-size:22px;font-weight:700;">Edit play</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list">
+      <div class="list-sublabel">Characters</div>
+      <div class="edit-card" id="charactersList"></div>
+      <div class="list-sublabel">Scenes</div>
+      <div class="edit-card">
+        <button class="edit-row" onclick="toast('Reorder scenes')">
+          <span class="er-ic"><i class="ph ph-list-dashes ic-21"></i></span>
+          <span class="er-label">Reorder scenes</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
+        </button>
+        <button class="edit-row" onclick="toast('Edit scenes')">
+          <span class="er-ic"><i class="ph ph-pencil-simple ic-21"></i></span>
+          <span class="er-label">Edit scenes</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
+        </button>
+        <button class="edit-row danger" onclick="toast('Delete scenes')">
+          <span class="er-ic"><i class="ph ph-trash ic-21"></i></span>
+          <span class="er-label">Delete scenes</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: READ ============ -->
+  <div class="screen" id="readScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <button class="icon-btn" onclick="openSettings('read')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
+    </div>
+
+    <div class="scroll" id="readScroll"></div>
+
+    <div class="modebar">
+      <button class="mode active" onclick="switchMode('read')"><i class="ph-fill ph-book-open ic-24"></i>Read</button>
+      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i>Listen</button>
+      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i>Rehearse</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: LISTEN ============ -->
+  <div class="screen" id="listenScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <button class="icon-btn" onclick="openSettings('listen')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
+    </div>
+
+    <div class="scroll fade-b" id="listenScroll"></div>
+
+    <div class="transport">
+      <!-- jump back to the line that is currently playing -->
+      <button class="jump-btn" id="listenJump" onclick="scrollToActive('listen')" aria-label="Go to current line">
+        <i class="ph-bold ph-caret-up ic-24" id="listenJumpIc"></i>
+      </button>
+
+      <!-- collapsed -->
+      <div class="mini" id="listenMini">
+        <span class="t-time" id="listenMiniTime">00:59</span>
+        <div class="bar" onclick="seek(event)"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
+        <button class="mini-toggle" onclick="togglePlay('listen')" aria-label="Play / pause">
+          <i class="ph-fill ph-pause ic-28" id="listenMiniIc"></i>
+        </button>
+      </div>
+
+      <!-- expanded -->
+      <div class="expanded show" id="listenExpanded">
+        <div class="t-main">
+          <button class="skip-btn" onclick="stepLine('listen', -1)" aria-label="Previous line"><i class="ph-bold ph-arrow-left ic-26"></i></button>
+          <button class="big-btn" onclick="togglePlay('listen')" aria-label="Play / pause">
+            <i class="ph-fill ph-pause ic-38" id="listenBigIc"></i>
+          </button>
+          <button class="skip-btn" onclick="stepLine('listen', 1)" aria-label="Next line"><i class="ph-bold ph-arrow-right ic-26"></i></button>
+        </div>
+        <div class="bar with-thumb" onclick="seek(event)"><div class="fill" id="listenFill" style="width:42%"></div></div>
+        <div class="t-meta">
+          <span id="listenElapsed">00:59</span>
+          <button class="speed" onclick="cycleSpeed()" id="listenSpeed">1.0x</button>
+          <span id="listenTotal">01:21</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modebar">
+      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i>Read</button>
+      <button class="mode active" onclick="switchMode('listen')"><i class="ph-fill ph-headphones ic-24"></i>Listen</button>
+      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i>Rehearse</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: REHEARSE ============ -->
+  <div class="screen" id="rehearseScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
+    </div>
+
+    <div class="scroll fade-b" id="rehearseScroll"></div>
+
+    <div class="transport">
+      <!-- state: talking (recording) -->
+      <div class="expanded show" id="rehTalking">
+        <div class="t-main">
+          <button class="big-btn recording" onclick="rehSetState('paused')" aria-label="Stop recording">
+            <i class="ph-fill ph-microphone ic-32"></i>
+            <span class="btn-time" id="rehRecTime">2:25</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- state: paused (a take exists) -->
+      <div class="expanded" id="rehPaused">
+        <button class="reh-take" onclick="toast('Play my take')">
+          <i class="ph-fill ph-play ic-20"></i>
+          <span class="btn-time">2:25</span>
+        </button>
+        <div class="reh-actions">
+          <button class="reh-action" onclick="rehSetState('talking'); toast('Retake')">
+            <i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake
+          </button>
+          <button class="reh-action" onclick="rehSetState('talking')">
+            <i class="ph-fill ph-microphone ic-28"></i>Resume
+          </button>
+          <button class="reh-action" onclick="openEvaluation()">
+            <i class="ph-fill ph-star-four ic-28"></i>Evaluate
+          </button>
+          <button class="reh-action" onclick="rehComplete()">
+            <i class="ph-bold ph-arrow-right ic-28"></i>Skip
+          </button>
+        </div>
+      </div>
+
+      <!-- state: success flash -->
+      <div class="reh-success" id="rehSuccess">
+        <span class="tick"><i class="ph-bold ph-check ic-38"></i></span>
+      </div>
+    </div>
+
+    <div class="modebar">
+      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i>Read</button>
+      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i>Listen</button>
+      <button class="mode active" onclick="switchMode('rehearse')"><i class="ph-fill ph-microphone ic-24"></i>Rehearse</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: EVALUATION ============ -->
+  <div class="screen" id="evaluationScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Close"><i class="ph-bold ph-x ic-22"></i></button>
+      <div class="header-title">Evaluation</div>
+      <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
+    </div>
+
+    <div class="eval-head mine">
+      <div class="line-head">
+        <span class="char-name" id="evalName">My character</span>
+        <span class="note-flags">
+          <span class="flag private"><i class="ph-fill ph-note ic-13"></i></span>
+          <span class="flag stage"><i class="ph-fill ph-note ic-13"></i></span>
+        </span>
+        <button class="line-menu-btn" style="margin-left:auto" onclick="toast('Line menu')" aria-label="Line menu">
+          <span class="dots"><span></span><span></span><span></span></span>
+        </button>
+      </div>
+      <button class="eval-showtext" onclick="toast('Show original text')">
+        <i class="ph ph-eye ic-20"></i> Show text
+      </button>
+    </div>
+
+    <div class="scroll" style="padding-top:22px">
+      <div class="eval-label">Transcript</div>
+      <div class="line-text" id="evalTranscript"></div>
+    </div>
+
+    <div class="transport">
+      <div class="expanded show">
+        <div class="t-main">
+          <button class="reh-action" onclick="toast('Retake')"><i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake</button>
+          <button class="big-btn" onclick="toast('Play / pause take')" aria-label="Play / pause"><i class="ph-fill ph-pause ic-38"></i></button>
+          <button class="reh-action" onclick="toast('Skip')"><i class="ph-bold ph-arrow-right ic-28"></i>Skip</button>
+        </div>
+        <div class="bar with-thumb" onclick="seek(event)"><div class="fill" style="width:42%"></div></div>
+        <div class="t-meta">
+          <span>00:59</span>
+          <button class="speed" onclick="cycleSpeed()">1.0x</button>
+          <span>01:21</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCRIM + SHEETS ============ -->
+  <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+
+  <div class="sheet" id="sheet">
+    <div class="sheet-grabber"></div>
+    <div class="sheet-context" id="sheetContext">
+      <div class="ctx-name" id="ctxName">My character</div>
+      <div class="ctx-line" id="ctxLine">Aliquam at sollicitudin sem…</div>
+    </div>
+    <div class="sheet-items" id="sheetItems"></div>
+  </div>
+
+  <div class="settings-sheet" id="settingsSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title">
+      <span id="settingsTitle">Read Settings</span>
+      <button class="account-btn" onclick="sheetAction('User account')" aria-label="User account">
+        <i class="ph ph-user ic-22"></i>
+      </button>
+    </div>
+    <div class="settings-scroll">
+
+      <div class="set-group">
+        <div class="set-group-label">Text</div>
+        <div class="set-row">
+          <div><div class="set-label">Font size</div></div>
+          <div class="font-stepper">
+            <button class="fs-a" onclick="fontStep(-1)" id="fsDown">A</button>
+            <span class="fs-val" id="fsVal">20</span>
+            <button class="fs-b" onclick="fontStep(1)" id="fsUp">A</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">My lines</div>
+            <div class="set-sub">Show the text of my lines</div>
+          </div>
+          <button class="toggle on" data-target="mine" onclick="toggleLines(this)"></button>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">Others' lines</div>
+            <div class="set-sub">Show the text of other characters</div>
+          </div>
+          <button class="toggle on" data-target="others" onclick="toggleLines(this)"></button>
+        </div>
+      </div>
+
+      <div class="set-sep"></div>
+
+      <div class="set-group">
+        <div class="set-group-label">Notes — default state</div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">Private notes</div>
+            <div class="set-sub">Show when opening the scene</div>
+          </div>
+          <button class="toggle on" data-note="private" onclick="toggleNoteDefault(this)"></button>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">Stage directions</div>
+            <div class="set-sub">Show when opening the scene</div>
+          </div>
+          <button class="toggle on" data-note="stage" onclick="toggleNoteDefault(this)"></button>
+        </div>
+      </div>
+
+      <!-- Listen-only -->
+      <div id="setListen">
+        <div class="set-sep"></div>
+        <div class="set-group">
+          <div class="set-group-label">Playback</div>
+          <div class="set-row">
+            <div><div class="set-label">Speed</div></div>
+            <div class="segmented" id="speedSeg">
+              <button onclick="setSpeed('0.75x', this)">0.75x</button>
+              <button class="on" onclick="setSpeed('1.0x', this)">1.0x</button>
+              <button onclick="setSpeed('1.25x', this)">1.25x</button>
+              <button onclick="setSpeed('1.5x', this)">1.5x</button>
+            </div>
+          </div>
+          <div class="set-row">
+            <div>
+              <div class="set-label">Pause on my line</div>
+              <div class="set-sub">Wait instead of reading it aloud</div>
+            </div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rehearse-only -->
+      <div id="setRehearse">
+        <div class="set-sep"></div>
+        <div class="set-group">
+          <div class="set-group-label">Rehearsal</div>
+          <div class="set-row">
+            <div>
+              <div class="set-label">Auto-evaluate</div>
+              <div class="set-sub">Evaluate each take when it ends</div>
+            </div>
+            <button class="toggle" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="set-row">
+            <div>
+              <div class="set-label">Hide my line text</div>
+              <div class="set-sub">Recite from memory</div>
+            </div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  /* ============================================================
+     DATA
+     ============================================================ */
+  const SCRIPTS = [
+    { id:'s1', title:"I love you, you're fine, but change quickly", scenes:8, assigned:true },
+    { id:'s2', title:"The Cherry Orchard", scenes:12, assigned:true },
+    { id:'s3', title:"Waiting for Godot", scenes:2, assigned:false }
+  ];
+  const SCENES = [
+    { title:"Opening — the kitchen argument", lines:61, assigned:true },
+    { title:"Late night phone call", lines:42, assigned:true },
+    { title:"The confession", lines:88, assigned:true },
+    { title:"Morning after", lines:35, assigned:false },
+    { title:"Final goodbye", lines:54, assigned:true }
+  ];
+
+  const BODY = "Aliquam at sollicitudin sem. Morbi faucibus facilisis enim, id tristique nisi laoreet quis. Proin ut arcu sagittis, convallis magna et, semper eros. Morbi at velit ut massa ullamcorper aliquet. Maecenas rutrum sed felis vitae";
+  const SNIP = "Aliquam at sollicitudin sem. Morbi faucibus…";
+  const PNOTE = "Proin ut arcu sagittis, convallis magna et, semper eros. Morbi!!!";
+  const SNOTE = "Id tristique nisi laoreet quis. Proin ut arcu sagittis, convallis magna et, semper eros.";
+
+  // Each line carries its notes; visibility is state, not markup.
+  const LINES = [
+    { mine:true,  name:"My character", body:BODY, privateNote:PNOTE, stageNote:SNOTE },
+    { mine:false, name:"Someone",      body:BODY, privateNote:PNOTE, stageNote:SNOTE },
+    { mine:false, name:"Someone",      body:BODY, privateNote:null,  stageNote:SNOTE },
+    { mine:true,  name:"My character", body:BODY, privateNote:PNOTE, stageNote:SNOTE },
+    { mine:false, name:"Someone",      body:BODY, privateNote:null,  stageNote:SNOTE },
+    { mine:true,  name:"My character", body:BODY, privateNote:PNOTE, stageNote:SNOTE }
+  ];
+
+  const CHARACTERS = [
+    { name: "Nina", lines: 61, mine: true },
+    { name: "Michael", lines: 54, mine: false },
+    { name: "Anna", lines: 42, mine: false },
+    { name: "The Waiter", lines: 8, mine: false }
+  ];
+
+  /* Icons — swap any ph-* name from https://phosphoricons.com */
+  const ICON = {
+    chevron:  '<i class="ph ph-caret-right ic-20"></i>',
+    play:     '<i class="ph-fill ph-play ic-22"></i>',
+    pause:    '<i class="ph-fill ph-pause ic-22"></i>',
+    mic:      '<i class="ph-fill ph-microphone ic-22"></i>',
+    plus:     '<i class="ph ph-plus ic-20"></i>',
+    listen:   '<i class="ph ph-headphones ic-22"></i>',
+    rehearse: '<i class="ph ph-microphone ic-22"></i>',
+    edit:     '<i class="ph ph-pencil-simple ic-22"></i>',
+    note:     '<i class="ph ph-note ic-22"></i>',
+    record:   '<i class="ph ph-microphone ic-22"></i>'
+  };
+  const FLAG_IC = '<i class="ph-fill ph-note ic-13"></i>';
+  const EYE_OFF = '<i class="ph ph-eye-slash ic-16"></i>';
+  const DOTS    = '<span class="dots"><span></span><span></span><span></span></span>';
+
+  /* Global default note visibility (driven by the settings toggles) */
+  const defaults = { private:true, stage:true };
+
+  /* Playback / rehearsal state */
+  let currentMode = 'read';        // read | listen | rehearse
+  let activeIdx   = 0;             // the line currently being played / rehearsed
+  let playing     = true;
+  let rehState    = 'talking';     // talking | paused | success
+  const SUCCESS_MS = 300;          // duration of the success flash (per design)
+  const SPEEDS = ['0.75x','1.0x','1.25x','1.5x'];
+  let speedIdx = 1;
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  const MODE_SCREENS = { read:'readScreen', listen:'listenScreen', rehearse:'rehearseScreen' };
+  const navStack = ['dashboardScreen'];
+
+  function paint(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('statusbar').classList.toggle('on-wine', id === 'dashboardScreen');
+  }
+  function showScreen(id) {
+    paint(id);
+    if (navStack[navStack.length - 1] !== id) navStack.push(id);
+  }
+  function goBack() {
+    if (navStack.length > 1) {
+      navStack.pop();
+      paint(navStack[navStack.length - 1]);
+    }
+  }
+  function openScript(id) {
+    const s = SCRIPTS.find(x => x.id === id);
+    document.getElementById('detailTitle').textContent = s.title;
+    renderScenes();
+    showScreen('detailScreen');
+  }
+  function openScene(name) {
+    document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
+    currentMode = 'read';
+    renderRead();
+    showScreen('readScreen');
+  }
+
+  /* Switching mode replaces the current mode screen instead of stacking it,
+     so Back always returns to the scene list. */
+  function switchMode(m) {
+    currentMode = m;
+    const cur = navStack[navStack.length - 1];
+    if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
+    if (m === 'read')     renderRead();
+    if (m === 'listen')   { renderCards('listen'); }
+    if (m === 'rehearse') { ensureRehearseLine(); renderCards('rehearse'); rehSetState('talking'); }
+    showScreen(MODE_SCREENS[m]);
+    if (m !== 'read') requestAnimationFrame(() => { scrollToActive(m, 'auto'); });
+  }
+
+  /* ============================================================
+     SHARED LINE PIECES
+     ============================================================ */
+  function noteBlock(idx, type, text, hidden) {
+    const label = type === 'private' ? 'Your private note' : 'Stage directions';
+    return `<div class="note ${type} ${hidden ? 'hidden' : ''}" data-idx="${idx}" data-type="${type}">
+      <div class="note-head">
+        <span class="flag ${type}">${FLAG_IC}</span>
+        <span class="note-label">${label}</span>
+        <button class="note-hide" onclick="hideNote(${idx}, '${type}')">${EYE_OFF} Hide</button>
+      </div>
+      <div class="note-body">${text}</div>
+    </div>`;
+  }
+  function flagBtn(idx, type) {
+    return `<button class="flag ${type}" onclick="showNote(${idx}, '${type}')" title="Show ${type === 'private' ? 'private note' : 'stage direction'}">${FLAG_IC}</button>`;
+  }
+  function flagsFor(line, idx) {
+    let flags = '';
+    if (line.privateNote && !defaults.private) flags += flagBtn(idx, 'private');
+    if (line.stageNote   && !defaults.stage)   flags += flagBtn(idx, 'stage');
+    return flags ? `<span class="note-flags">${flags}</span>` : '';
+  }
+  function notesFor(line, idx) {
+    let html = '';
+    if (line.privateNote) html += noteBlock(idx, 'private', line.privateNote, !defaults.private);
+    if (line.stageNote)   html += noteBlock(idx, 'stage',   line.stageNote,   !defaults.stage);
+    return html;
+  }
+
+  /* ============================================================
+     READ — divider-separated lines
+     ============================================================ */
+  function renderRead() {
+    document.getElementById('readScroll').innerHTML = LINES.map((line, idx) => `
+      <div class="line ${line.mine ? 'mine' : 'others'}" data-idx="${idx}">
+        <div class="line-head">
+          <span class="char-name">${line.name}</span>
+          ${flagsFor(line, idx)}
+          <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
+        </div>
+        ${notesFor(line, idx)}
+        <div class="line-text">${line.body}</div>
+      </div>`).join('');
+    applyFontSize();
+  }
+
+  /* ============================================================
+     LISTEN / REHEARSE — line cards
+     ============================================================ */
+  function renderCards(mode) {
+    const isReh = mode === 'rehearse';
+    document.getElementById(mode + 'Scroll').innerHTML = LINES.map((line, idx) => {
+      const isActive = idx === activeIdx;
+
+      // control in the card header: mic on the active rehearsed line, otherwise play/pause
+      let ctrl;
+      if (isReh && isActive)      ctrl = '<i class="ph-fill ph-microphone ic-22"></i>';
+      else if (isActive && playing) ctrl = ICON.pause;
+      else                          ctrl = ICON.play;
+
+      /* Body of the card.
+         Rehearse hides the text of the line you are performing — you recite it from memory.
+         Listen hides your own line until you ask for it, and offers the two turn actions. */
+      let body;
+      if (isReh && isActive && line.mine) {
+        body = '';
+      } else if (mode === 'listen' && isActive && line.mine) {
+        body = `<div class="lc-actions">
+            <button class="lc-action" onclick="revealText(${idx})"><i class="ph ph-eye ic-18"></i>Show text</button>
+            <button class="lc-action accent" onclick="runThisLine(${idx})"><i class="ph-fill ph-microphone ic-18"></i>Run this line</button>
+          </div>`;
+      } else {
+        body = `<div class="line-text">${line.body}</div>`;
+      }
+
+      return `<div class="lcard ${line.mine ? 'mine' : 'others'} ${isActive ? 'active' : ''}" data-idx="${idx}">
+        <div class="line-head">
+          <span class="char-name">${line.name}</span>
+          ${flagsFor(line, idx)}
+          <button class="lc-btn spring" onclick="cardControl('${mode}', ${idx})" aria-label="Play line">${ctrl}</button>
+          <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
+        </div>
+        ${isActive ? notesFor(line, idx) : ''}
+        ${body}
+      </div>`;
+    }).join('');
+    applyFontSize();
+    applyAccent(mode);
+  }
+
+  /* In Listen the whole transport takes the colour of whoever is speaking:
+     coral for your own character, wine for everyone else. Rehearse is always
+     coral — every line down there is yours. */
+  function applyAccent(mode) {
+    if (mode !== 'listen') return;
+    const t = document.querySelector('#listenScreen .transport');
+    const own = LINES[activeIdx].mine;
+    t.style.setProperty('--accent', own ? 'var(--coral)' : 'var(--wine)');
+    t.style.setProperty('--accent-rgb', own ? '239, 83, 80' : '122, 30, 45');
+  }
+
+  function cardControl(mode, idx) {
+    if (idx === activeIdx) { togglePlay(mode); return; }
+    activeIdx = idx;
+    playing = true;
+    if (mode === 'rehearse') { ensureRehearseLine(); rehSetState('talking'); }
+    renderCards(mode);
+    scrollToActive(mode);
+  }
+
+  function revealText(idx) {
+    const card = document.querySelector('#listenScroll .lcard[data-idx="' + idx + '"]');
+    card.querySelector('.lc-actions').outerHTML = `<div class="line-text">${LINES[idx].body}</div>`;
+    applyFontSize();
+  }
+  function runThisLine(idx) {
+    activeIdx = idx;
+    switchMode('rehearse');
+  }
+
+  /* ============================================================
+     TRANSPORT
+     ============================================================ */
+  function togglePlay(mode) {
+    playing = !playing;
+    const ic = playing ? 'ph-pause' : 'ph-play';
+    ['listenBigIc','listenMiniIc'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.className = el.className.replace(/ph-(pause|play)/, ic);
+    });
+    renderCards(mode);
+  }
+  function stepLine(mode, dir) {
+    activeIdx = Math.max(0, Math.min(LINES.length - 1, activeIdx + dir));
+    playing = true;
+    renderCards(mode);
+    scrollToActive(mode);
+  }
+  function seek(e) {
+    const bar = e.currentTarget;
+    const pct = Math.max(0, Math.min(1, (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth));
+    bar.querySelector('.fill').style.width = (pct * 100) + '%';
+  }
+  function cycleSpeed() {
+    speedIdx = (speedIdx + 1) % SPEEDS.length;
+    document.getElementById('listenSpeed').textContent = SPEEDS[speedIdx];
+    document.querySelectorAll('#speedSeg button').forEach((b, i) => b.classList.toggle('on', i === speedIdx));
+  }
+  function setSpeed(val, btn) {
+    speedIdx = SPEEDS.indexOf(val);
+    document.getElementById('listenSpeed').textContent = val;
+    document.querySelectorAll('#speedSeg button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  /* The player collapses to a mini bar whenever the line being played is
+     scrolled out of view; the chevron points to where that line is. */
+  function updateTransport(mode) {
+    const scroll = document.getElementById(mode + 'Scroll');
+    const card = scroll.querySelector('.lcard.active');
+    if (!card) return;
+    const cr = card.getBoundingClientRect(), sr = scroll.getBoundingClientRect();
+    const visible = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
+
+    if (mode === 'listen') {
+      document.getElementById('listenExpanded').classList.toggle('show', visible);
+      document.getElementById('listenMini').classList.toggle('show', !visible);
+      const jump = document.getElementById('listenJump');
+      jump.classList.toggle('show', !visible);
+      document.getElementById('listenJumpIc').className =
+        'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
+    }
+  }
+  /* Scroll the container itself — scrollIntoView() would also scroll the
+     phone frame, which is only clipped by overflow:hidden, not unscrollable. */
+  function scrollToActive(mode, behavior) {
+    const scroll = document.getElementById(mode + 'Scroll');
+    const card = scroll.querySelector('.lcard.active');
+    if (card) {
+      scroll.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: behavior || 'smooth' });
+    }
+    setTimeout(() => updateTransport(mode), 400);
+  }
+
+  /* ============================================================
+     REHEARSE STATES
+     ============================================================ */
+  function ensureRehearseLine() {
+    // you can only rehearse your own lines
+    if (!LINES[activeIdx].mine) {
+      const next = LINES.findIndex((l, i) => l.mine && i >= activeIdx);
+      activeIdx = next !== -1 ? next : LINES.findIndex(l => l.mine);
+    }
+  }
+  function rehSetState(state) {
+    rehState = state;
+    document.getElementById('rehTalking').classList.toggle('show', state === 'talking');
+    document.getElementById('rehPaused').classList.toggle('show',  state === 'paused');
+    document.getElementById('rehSuccess').classList.toggle('show', state === 'success');
+  }
+  function rehComplete() {
+    rehSetState('success');
+    setTimeout(() => {
+      activeIdx = Math.min(LINES.length - 1, activeIdx + 1);
+      ensureRehearseLine();
+      renderCards('rehearse');
+      rehSetState('talking');
+      scrollToActive('rehearse');
+    }, SUCCESS_MS);
+  }
+  function openEvaluation() {
+    document.getElementById('evalName').textContent = LINES[activeIdx].name;
+    document.getElementById('evalTranscript').textContent = LINES[activeIdx].body;
+    applyFontSize();
+    showScreen('evaluationScreen');
+  }
+
+  /* ============================================================
+     NOTES
+     ============================================================ */
+  function showNote(idx, type) {
+    activeScrollEl().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.remove('hidden');
+    refreshFlags(idx);
+  }
+  function hideNote(idx, type) {
+    activeScrollEl().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.add('hidden');
+    refreshFlags(idx);
+  }
+  function activeScrollEl() {
+    return document.querySelector('.screen.active .scroll');
+  }
+  function refreshFlags(idx) {
+    const data = LINES[idx];
+    const row = activeScrollEl().querySelector(`[data-idx="${idx}"]`);
+    if (!row) return;
+    const pHidden = row.querySelector('.note.private')?.classList.contains('hidden');
+    const sHidden = row.querySelector('.note.stage')?.classList.contains('hidden');
+    let flags = '';
+    if (data.privateNote && pHidden) flags += flagBtn(idx, 'private');
+    if (data.stageNote && sHidden)   flags += flagBtn(idx, 'stage');
+    let holder = row.querySelector('.note-flags');
+    if (flags) {
+      if (!holder) {
+        holder = document.createElement('span');
+        holder.className = 'note-flags';
+        row.querySelector('.char-name').after(holder);
+      }
+      holder.innerHTML = flags;
+    } else if (holder) {
+      holder.remove();
+    }
+  }
+
+  /* ============================================================
+     SHEETS
+     ============================================================ */
+  function buildItems(isMine) {
+    let html = '';
+    html += item('listen', 'Listen from here', false, "Listen from this line");
+    html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
+    html += '<div class="sheet-sep"></div>';
+    html += item('edit', 'Edit line', false, "Open line editor");
+    html += item('note', 'Add / edit private note', false, "Private note");
+    if (isMine) html += item('record', 'Audio', true, "Open Audio Edit");
+    return html;
+  }
+  function item(icon, label, accent, msg) {
+    return `<button class="sheet-item ${accent ? 'accent' : ''}" onclick="sheetAction('${msg}')">
+      <span class="item-ic">${ICON[icon]}</span>${label}</button>`;
+  }
+  function openSheet(idx) {
+    const line = LINES[idx];
+    document.getElementById('sheetContext').className = 'sheet-context ' + (line.mine ? 'mine' : 'others');
+    document.getElementById('ctxName').textContent = line.name;
+    document.getElementById('ctxLine').textContent = SNIP;
+    document.getElementById('sheetItems').innerHTML = buildItems(line.mine);
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+  function closeSheet() {
+    document.getElementById('scrim').classList.remove('open');
+    document.getElementById('sheet').classList.remove('open');
+    document.getElementById('settingsSheet').classList.remove('open');
+  }
+  function openSettings(mode) {
+    const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
+    document.getElementById('settingsTitle').textContent = label;
+    document.getElementById('setListen').style.display   = mode === 'listen'   ? '' : 'none';
+    document.getElementById('setRehearse').style.display = mode === 'rehearse' ? '' : 'none';
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('settingsSheet').classList.add('open');
+  }
+  function sheetAction(msg) {
+    closeSheet();
+    setTimeout(() => toast(msg), 180);
+  }
+
+  /* ============================================================
+     SETTINGS BEHAVIOUR
+     ============================================================ */
+  const FS_STEPS = [16, 18, 20, 22, 25, 28];
+  let fsIdx = 2;
+  function applyFontSize() {
+    document.querySelectorAll('.line-text').forEach(el => el.style.fontSize = FS_STEPS[fsIdx] + 'px');
+  }
+  function fontStep(dir) {
+    fsIdx = Math.max(0, Math.min(FS_STEPS.length - 1, fsIdx + dir));
+    document.getElementById('fsVal').textContent = FS_STEPS[fsIdx];
+    applyFontSize();
+    document.getElementById('fsDown').disabled = (fsIdx === 0);
+    document.getElementById('fsUp').disabled = (fsIdx === FS_STEPS.length - 1);
+  }
+  function toggleLines(btn) {
+    btn.classList.toggle('on');
+    const on = btn.classList.contains('on');
+    const target = btn.dataset.target;
+    activeScrollEl().querySelectorAll('.' + target).forEach(row => {
+      row.classList.toggle('text-hidden', !on);
+      const txt = row.querySelector('.line-text');
+      if (!on && txt && !row.querySelector('.placeholder')) {
+        const ph = document.createElement('div');
+        ph.className = 'placeholder';
+        ph.textContent = '— text hidden —';
+        txt.after(ph);
+      }
+    });
+  }
+  function toggleNoteDefault(btn) {
+    btn.classList.toggle('on');
+    const on = btn.classList.contains('on');
+    defaults[btn.dataset.note] = on;
+    activeScrollEl().querySelectorAll('.note.' + btn.dataset.note).forEach(n => n.classList.toggle('hidden', !on));
+    LINES.forEach((_, idx) => refreshFlags(idx));
+  }
+
+  /* ============================================================
+     LIST RENDERERS
+     ============================================================ */
+  function renderScripts() {
+    document.getElementById('scriptsList').innerHTML = SCRIPTS.map(s => `
+      <div class="card" onclick="openScript('${s.id}')">
+        <div class="card-main">
+          <div class="card-title">${s.title}</div>
+          <div class="card-meta">
+            <span class="meta-lines">${s.scenes} scenes</span>
+            ${s.assigned ? '<span class="badge">Assigned</span>' : ''}
+          </div>
+        </div>
+        <span class="chevron">${ICON.chevron}</span>
+      </div>`).join('');
+  }
+  function renderScenes() {
+    let html = `
+      <div class="card featured" onclick="openScene('Whole play')">
+        <div class="card-main">
+          <div class="card-title">Whole play</div>
+          <div class="card-meta">
+            <span class="meta-lines">320 lines · all scenes</span>
+            <span class="badge">Assigned</span>
+          </div>
+        </div>
+        <span class="chevron">${ICON.chevron}</span>
+      </div>
+      <div class="list-sublabel">Scenes</div>`;
+    html += SCENES.map(sc => `
+      <div class="card" onclick="openScene('${sc.title}')">
+        <div class="card-main">
+          <div class="card-title">${sc.title}</div>
+          <div class="card-meta">
+            <span class="meta-lines">${sc.lines} lines</span>
+            ${sc.assigned ? '<span class="badge">Assigned</span>' : ''}
+          </div>
+        </div>
+        <span class="chevron">${ICON.chevron}</span>
+      </div>`).join('');
+    document.getElementById('scenesList').innerHTML = html;
+  }
+  function renderRecent() {
+    const scenesByScript = { s1:'Opening — the kitchen argument', s2:'Act II — the arrival', s3:'Act I' };
+    document.getElementById('recentList').innerHTML = SCRIPTS.slice(0, 3).map(s => `
+      <div class="recent-row" onclick="openScript('${s.id}')">
+        <div class="r-main">
+          <div class="r-title">${s.title}</div>
+          <div class="r-sub">Last: ${scenesByScript[s.id] || 'Scene 1'}</div>
+        </div>
+        <span class="r-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </div>`).join('');
+  }
+  function renderCharacters() {
+    document.getElementById('charactersList').innerHTML = CHARACTERS.map(c => `
+      <div class="char-row">
+        <div class="cr-main">
+          <div class="cr-name">${c.name}${c.mine ? '<span class="mine-tag">Me</span>' : ''}</div>
+          <div class="cr-lines">${c.lines} lines</div>
+        </div>
+        <button class="cr-edit" onclick="toast('Edit ${c.name}')" aria-label="Edit character">
+          <i class="ph ph-pencil-simple ic-18"></i>
+        </button>
+      </div>`).join('');
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+  }
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen'));
+  document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse'));
+
+  renderRecent();
+  renderScripts();
+  renderCharacters();
+  renderRead();
+</script>
+
+<!-- ==== preview shell — added by tools/build-preview.py, not part of the prototype ==== -->
+<style>
+  @media (max-width: 520px) {
+    body { background: var(--mist); align-items: stretch; }
+    .phone {
+      width: 100vw; height: 100dvh; max-width: none;
+      border-radius: 0; box-shadow: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
+  }
+</style>
+<script>
+  (function () {
+    var phone = document.querySelector('.phone');
+    function fit() {
+      if (window.innerWidth <= 520) { phone.style.transform = ''; return; }
+      var s = Math.min(1, (window.innerHeight - 24) / 876);
+      phone.style.transform = s < 1 ? 'scale(' + s + ')' : '';
+    }
+    fit();
+    window.addEventListener('resize', fit);
+  })();
+</script>
+</body>
+</html>
