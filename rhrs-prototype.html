@@ -798,6 +798,35 @@
   .edit-row.danger .er-ic, .edit-row.danger .er-label { color: var(--coral); }
 
 
+
+  /* ---------- Next scene ---------- */
+  .next-scene {
+    border-radius: var(--radius-lcard);
+    padding: 22px 20px 20px;
+    margin: 6px 0 4px;
+    text-align: center;
+  }
+  .next-scene .ns-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.9px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .next-scene .ns-name {
+    font-family: var(--font-display); font-weight: 600; font-size: 19px;
+    color: var(--noir); margin-bottom: 16px;
+  }
+  .next-scene .ns-go {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--wine); color: var(--mist); border: none; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 13px 24px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    box-shadow: 0 5px 18px rgba(122, 30, 45, 0.28);
+  }
+  .next-scene .ns-go:active { transform: scale(0.97); }
+
+  /* A stage direction between lines needs the same menu affordance a line has. */
+  .stage-only .line-menu-btn { margin-left: auto; }
+
   /* ============ LIQUID GLASS ============
      A translucent fill, a soft shadow dropped down-right, and a 1.5px rim that
      catches light at the top-left and bottom-right and fades away through the
@@ -815,7 +844,7 @@
   }
 
   .round-btn, .detail-header .back, .icon-btn,
-  .card, .lcard, .edit-card,
+  .card, .lcard, .edit-card, .next-scene,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
   .eval-showtext, .speed-opt {
@@ -825,7 +854,7 @@
   }
 
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
-  .card::before, .lcard::before, .edit-card::before,
+  .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   .mini::before, .skip-btn::before, .jump-btn::before,
   .settings-title .account-btn::before, .char-row .cr-edit::before,
   .font-stepper button::before,
@@ -1138,7 +1167,7 @@
           <button class="reh-action" onclick="openEvaluation()">
             <i class="ph-fill ph-star-four ic-28"></i>Evaluate
           </button>
-          <button class="reh-action" onclick="rehComplete()">
+          <button class="reh-action" onclick="stepLine('rehearse', 1)">
             <i class="ph-bold ph-arrow-right ic-28"></i>Skip
           </button>
         </div>
@@ -1342,34 +1371,85 @@
     { id:'s3', title:"Waiting for Godot", scenes:2, assigned:false }
   ];
   const SCENES = [
-    { title:"Opening — the kitchen argument", lines:61, assigned:true },
+    { title:"Opening — the kitchen argument", lines:0, assigned:true },  // filled from SCRIPT
     { title:"Late night phone call", lines:42, assigned:true },
     { title:"The confession", lines:88, assigned:true },
     { title:"Morning after", lines:35, assigned:false },
     { title:"Final goodbye", lines:54, assigned:true }
   ];
 
-  const BODY = "Aliquam at sollicitudin sem. Morbi faucibus facilisis enim, id tristique nisi laoreet quis. Proin ut arcu sagittis, convallis magna et, semper eros. Morbi at velit ut massa ullamcorper aliquet. Maecenas rutrum sed felis vitae";
-  const SNIP = "Aliquam at sollicitudin sem. Morbi faucibus…";
-  const PNOTE = "Proin ut arcu sagittis, convallis magna et, semper eros. Morbi!!!";
-  const SNOTE = "Id tristique nisi laoreet quis. Proin ut arcu sagittis, convallis magna et, semper eros.";
+  /* The scene, as one ordered list of script items. Two kinds:
+       { stage }                        a stage direction standing on its own
+       { who, mine, text, note?, dir? } a spoken line, with an optional private
+                                        note and an optional stage direction of
+                                        its own
+     Everyone but you is wine; you are coral. Per-character colours may come
+     later, but the rule today is one colour for the scene and one for you.
+     Kept in sync by hand with scene.html, which is the specimen for it. */
+  const SCRIPT = [
+    { stage: "A kitchen, ten past two in the morning. The big light is off. MICHAEL is eating cereal standing up, over the sink, in the dark." },
 
-  // Each line carries its notes; visibility is state, not markup.
-  const LINES = [
-    { mine:true,  name:"My character", body:BODY, privateNote:PNOTE, stageNote:SNOTE },
-    { mine:false, name:"Someone",      body:BODY, privateNote:PNOTE, stageNote:SNOTE },
-    { mine:true,  name:"My character", body:BODY, privateNote:null,  stageNote:SNOTE },
-    { mine:false, name:"Someone",      body:BODY, privateNote:null,  stageNote:SNOTE },
-    { mine:false, name:"Someone",      body:BODY, privateNote:null,  stageNote:SNOTE },
-    { mine:true,  name:"My character", body:BODY, privateNote:PNOTE, stageNote:SNOTE }
+    { who:'Nina',    mine:true,  text:"You're eating." },
+    { who:'Michael', mine:false, text:"I'm eating." },
+    { who:'Nina',    mine:true,  text:"It's ten past two." },
+    { who:'Michael', mine:false, text:"I'm aware. I looked at the clock on the way in. And I thought, well — if I'm going to be awake, I may as well be awake somewhere that has food in it." },
+    { who:'Nina',    mine:true,  text:"Michael." },
+    { who:'Michael', mine:false, text:"What." },
+    { who:'Nina',    mine:true,  text:"I'm not doing the thing tonight. Where I ask you what's wrong and you say nothing, and then at four you tell me anyway, in the dark, facing the wall, where I can't see your face and you don't have to watch mine. I'm too tired for the four o'clock version. Say it now. With the light on.",
+      dir:"She does not raise her voice at any point in this.",
+      note:"Not angry. She's exhausted. The anger in this scene is all his — if I play it too, we've nowhere to go by the end." },
+    { who:'Michael', mine:false, text:"It's not a light. It's the extractor fan." },
+    { who:'Nina',    mine:true,  text:"Then say it with the extractor fan on." },
+
+    { stage: "A pause. He puts the bowl down. He does not say it." },
+
+    { who:'Michael', mine:false, text:"She's been on that sofa nine weeks." },
+    { who:'Nina',    mine:true,  text:"I know how long she's been on the sofa. I change the sheets." },
+    { who:'Michael', mine:false, text:"I know you do. That's — I know. And I keep meaning to say something, and then she makes that face, the one where she's already apologising before you've opened your mouth, and I think, one more week won't kill anybody. And then it's nine weeks, and I'm standing in my own kitchen at two in the morning eating dry cereal so I don't have to lie next to you not saying it." },
+    { who:'Nina',    mine:true,  text:"So say it to her." },
+    { who:'Michael', mine:false, text:"She's my sister." },
+    { who:'Nina',    mine:true,  text:"She's my sofa." },
+    { who:'Michael', mine:false, text:"That's not fair and you know it isn't." },
+    { who:'Nina',    mine:true,  text:"It's completely fair. It's just not kind. Those are different things, and you have never once been able to tell them apart.",
+      note:"Land on 'kind'. Everything after it is throwaway." },
+
+    { stage: "ANNA is in the doorway, wrapped in a duvet. Neither of them knows how long she has been there." },
+
+    { who:'Anna',    mine:false, text:"Is there coffee?" },
+    { who:'Nina',    mine:true,  text:"It's two in the morning." },
+    { who:'Anna',    mine:false, text:"That's not a no." },
+
+    { stage: "She comes in. She does not sit down." },
+
+    { who:'Anna',    mine:false, text:"I heard my name. I'm not going to pretend I didn't, because then we all do the thing where we talk about the weather for nine minutes and I go back to the sofa and lie there working out exactly what you said. So say it again. To me this time." },
+    { who:'Michael', mine:false, text:"Anna —" },
+    { who:'Anna',    mine:false, text:"To me, Michael." },
+    { who:'Nina',    mine:true,  text:"He's been trying to ask you to leave since the third week. He is very bad at it. It is one of the things I love about him and it is, tonight, the single most annoying thing about him.",
+      dir:"To Anna, not to him." },
+    { who:'Anna',    mine:false, text:"Oh." },
+    { who:'Anna',    mine:false, text:"Is that all?" },
+    { who:'Anna',    mine:false, text:"I thought one of you was ill." },
+    { who:'Nina',    mine:true,  text:"We thought you would take it badly. There was a whole plan. He was going to do it on Sunday, over a roast, so you would have to be polite about it." },
+    { who:'Anna',    mine:false, text:"I'll go Thursday. I've had a room since October. I just liked it here." },
+    { who:'Michael', mine:false, text:"Since October?" },
+    { who:'Anna',    mine:false, text:"Goodnight." }
   ];
 
-  const CHARACTERS = [
-    { name: "Nina", lines: 61, mine: true },
-    { name: "Michael", lines: 54, mine: false },
-    { name: "Anna", lines: 42, mine: false },
-    { name: "The Waiter", lines: 8, mine: false }
-  ];
+  /* Only spoken lines can hold the playhead; stage directions are stepped over. */
+  const isLine  = i => !!SCRIPT[i] && !!SCRIPT[i].who;
+  const lineIdx = () => SCRIPT.map((it, i) => it.who ? i : -1).filter(i => i >= 0);
+  function stepIdx(from, dir) {
+    let i = from + dir;
+    while (SCRIPT[i] && !isLine(i)) i += dir;
+    return isLine(i) ? i : from;
+  }
+  const shorten = t => t.length > 44 ? t.slice(0, 43).trimEnd() + '…' : t;
+
+  const CHARACTERS = ['Nina', 'Michael', 'Anna'].map(name => ({
+    name,
+    lines: SCRIPT.filter(it => it.who === name).length,
+    mine: SCRIPT.some(it => it.who === name && it.mine)
+  }));
 
   /* Icons — swap any ph-* name from https://phosphoricons.com */
   const ICON = {
@@ -1382,7 +1462,8 @@
     rehearse: '<i class="ph ph-microphone ic-22"></i>',
     edit:     '<i class="ph ph-pencil-simple ic-22"></i>',
     note:     '<i class="ph ph-note ic-22"></i>',
-    record:   '<i class="ph ph-microphone ic-22"></i>'
+    record:   '<i class="ph ph-microphone ic-22"></i>',
+    trash:    '<i class="ph ph-trash ic-22"></i>'
   };
   const FLAG_IC = '<i class="ph-fill ph-note ic-13"></i>';
   const EYE_OFF = '<i class="ph ph-eye-slash ic-16"></i>';
@@ -1396,7 +1477,8 @@
   let activeIdx   = 0;             // the line currently being played / rehearsed
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
-  const SUCCESS_MS = 300;          // duration of the success flash (per design)
+  const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
+  const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
   const SPEEDS = ['0.5x', '1.0x', '1.25x', '1.5x', '2.0x'];
   const speed = { mine: '1.0x', others: '1.0x' };
 
@@ -1433,7 +1515,8 @@
     currentMode = 'read';
     activeIdx = 0;
     playing = true;
-    renderRead();
+    SCENES[0].lines = lineIdx().length;   // the one scene we actually have text for
+  renderRead();
   renderSpeedSheet();
     showScreen('readScreen');
   }
@@ -1472,31 +1555,76 @@
   }
   function flagsFor(line, idx) {
     let flags = '';
-    if (line.privateNote && !defaults.private) flags += flagBtn(idx, 'private');
-    if (line.stageNote   && !defaults.stage)   flags += flagBtn(idx, 'stage');
+    if (line.note && !defaults.private) flags += flagBtn(idx, 'private');
+    if (line.dir  && !defaults.stage)   flags += flagBtn(idx, 'stage');
     return flags ? `<span class="note-flags">${flags}</span>` : '';
   }
   function notesFor(line, idx) {
     let html = '';
-    if (line.privateNote) html += noteBlock(idx, 'private', line.privateNote, !defaults.private);
-    if (line.stageNote)   html += noteBlock(idx, 'stage',   line.stageNote,   !defaults.stage);
+    if (line.note) html += noteBlock(idx, 'private', line.note, !defaults.private);
+    if (line.dir)  html += noteBlock(idx, 'stage',   line.dir,  !defaults.stage);
     return html;
+  }
+
+  /* A stage direction standing between lines. It is a script item in its own
+     right, so it carries the same menu a line does. */
+  function stageBlock(idx, text) {
+    return `<div class="stage-only" data-idx="${idx}">
+      <div class="note stage" data-idx="${idx}" data-type="stage">
+        <div class="note-head">
+          <span class="flag stage">${FLAG_IC}</span>
+          <span class="note-label">Stage directions</span>
+          <button class="line-menu-btn" onclick="openStageSheet(${idx})" aria-label="Stage direction menu">${DOTS}</button>
+        </div>
+        <div class="note-body">${text}</div>
+      </div>
+    </div>`;
+  }
+
+  /* The scene ends with the way out of it. In the prototype it loops back to the
+     top of this same sample scene. */
+  const NEXT_SCENE = 'Late night phone call';
+  function nextSceneCard() {
+    return `<div class="next-scene">
+      <div class="ns-label">Next scene</div>
+      <div class="ns-name cap-trim">${NEXT_SCENE}</div>
+      <button class="ns-go" onclick="goNextScene()">
+        Continue <i class="ph-bold ph-arrow-right ic-18"></i>
+      </button>
+    </div>`;
+  }
+  function goNextScene() {
+    document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = NEXT_SCENE);
+    activeIdx = lineIdx()[0];
+    playing = true;
+    if (currentMode === 'read') {
+      renderRead();
+      document.getElementById('readScroll').scrollTop = 0;
+    } else {
+      if (currentMode === 'rehearse') openOnCueLine();
+      renderCards(currentMode);
+      document.getElementById(currentMode + 'Scroll').scrollTop = 0;
+      if (currentMode === 'rehearse') syncRehearse();
+      updateTransport(currentMode);
+    }
   }
 
   /* ============================================================
      READ — divider-separated lines
      ============================================================ */
   function renderRead() {
-    document.getElementById('readScroll').innerHTML = LINES.map((line, idx) => `
-      <div class="line ${line.mine ? 'mine' : 'others'}" data-idx="${idx}">
+    document.getElementById('readScroll').innerHTML = SCRIPT.map((item, idx) => {
+      if (!item.who) return stageBlock(idx, item.stage);
+      return `<div class="line ${item.mine ? 'mine' : 'others'}" data-idx="${idx}">
         <div class="line-head">
-          <span class="char-name cap-trim">${line.name}</span>
-          ${flagsFor(line, idx)}
+          <span class="char-name cap-trim">${item.who}</span>
+          ${flagsFor(item, idx)}
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
-        ${notesFor(line, idx)}
-        <div class="line-text">${line.body}</div>
-      </div>`).join('');
+        ${notesFor(item, idx)}
+        <div class="line-text">${item.text}</div>
+      </div>`;
+    }).join('') + nextSceneCard();
     applyFontSize();
   }
 
@@ -1505,7 +1633,8 @@
      ============================================================ */
   function renderCards(mode) {
     const isReh = mode === 'rehearse';
-    document.getElementById(mode + 'Scroll').innerHTML = LINES.map((line, idx) => {
+    document.getElementById(mode + 'Scroll').innerHTML = SCRIPT.map((line, idx) => {
+      if (!line.who) return stageBlock(idx, line.stage);
       const isActive = idx === activeIdx;
 
       /* Control in the card header. A mic only on the line you are performing;
@@ -1521,15 +1650,15 @@
 
       return `<div class="lcard ${line.mine ? 'mine' : 'others'} ${isActive ? 'active' : ''}" data-idx="${idx}">
         <div class="line-head">
-          <span class="char-name cap-trim">${line.name}</span>
+          <span class="char-name cap-trim">${line.who}</span>
           ${flagsFor(line, idx)}
           <button class="lc-btn spring" onclick="cardControl('${mode}', ${idx})" aria-label="Play line">${ctrl}</button>
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(line, idx)}
-        <div class="line-text">${line.body}</div>
+        <div class="line-text">${line.text}</div>
       </div>`;
-    }).join('');
+    }).join('') + nextSceneCard();
     applyFontSize();
     applyAccent(mode);
   }
@@ -1539,7 +1668,7 @@
   function applyAccent(mode) {
     if (mode === 'read') return;
     const t = document.querySelector('#' + mode + 'Screen .transport');
-    const own = LINES[activeIdx].mine;
+    const own = SCRIPT[activeIdx].mine;
     t.style.setProperty('--accent', own ? 'var(--coral)' : 'var(--wine)');
     t.style.setProperty('--accent-rgb', own ? '239, 83, 80' : '122, 30, 45');
     syncSpeedLabels();
@@ -1570,7 +1699,7 @@
     renderCards(mode);
   }
   function stepLine(mode, dir) {
-    activeIdx = Math.max(0, Math.min(LINES.length - 1, activeIdx + dir));
+    activeIdx = stepIdx(activeIdx, dir);
     playing = true;
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
@@ -1598,7 +1727,7 @@
     syncSpeedLabels();
   }
   function syncSpeedLabels() {
-    const who = LINES[activeIdx].mine ? 'mine' : 'others';
+    const who = SCRIPT[activeIdx].mine ? 'mine' : 'others';
     document.querySelectorAll('.speed').forEach(el => el.textContent = speed[who]);
   }
   function openSpeedSheet() {
@@ -1658,13 +1787,13 @@
 
   /* Entering the mode should land on a cue, not on your own line. */
   function openOnCueLine() {
-    if (!LINES[activeIdx].mine) return;
-    const after = LINES.findIndex((l, i) => !l.mine && i > activeIdx);
-    const cue = after !== -1 ? after : LINES.findIndex(l => !l.mine);
-    if (cue !== -1) activeIdx = cue;
+    if (!SCRIPT[activeIdx].mine) return;
+    const cues = lineIdx().filter(i => !SCRIPT[i].mine);
+    const cue = cues.find(i => i > activeIdx) ?? cues[0];
+    if (cue !== undefined) activeIdx = cue;
   }
   function syncRehearse() {
-    rehSetState(LINES[activeIdx].mine ? 'talking' : 'audio');
+    rehSetState(SCRIPT[activeIdx].mine ? 'talking' : 'audio');
   }
   function rehSetState(state) {
     rehState = state;
@@ -1675,7 +1804,7 @@
   function rehComplete() {
     rehSetState('success');
     setTimeout(() => {
-      activeIdx = Math.min(LINES.length - 1, activeIdx + 1);
+      activeIdx = stepIdx(activeIdx, 1);
       renderCards('rehearse');
       syncRehearse();
       scrollToActive('rehearse');
@@ -1683,7 +1812,7 @@
   }
 
   /* ---- Recording: running clock + level rings ---- */
-  let recRAF = null, recTick = null, recStart = 0;
+  let recRAF = null, recTick = null, recDone = null, recStart = 0;
 
   function clock(seconds) {
     return Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
@@ -1695,6 +1824,8 @@
     const time = document.getElementById('rehRecTime');
     time.textContent = '0:00';
     recTick = setInterval(() => { time.textContent = clock((Date.now() - recStart) / 1000); }, 200);
+    /* A real take ends when you stop talking. Here it ends on the clock. */
+    recDone = setTimeout(rehComplete, TAKE_MS);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -1717,15 +1848,16 @@
   function stopRecording() {
     if (recRAF)  { cancelAnimationFrame(recRAF); recRAF = null; }
     if (recTick) { clearInterval(recTick); recTick = null; }
+    if (recDone) { clearTimeout(recDone); recDone = null; }
     const btn = document.getElementById('rehRecBtn');
     if (btn) btn.style.boxShadow = '';
   }
   function openEvaluation() {
-    const line = LINES[activeIdx];
+    const line = SCRIPT[activeIdx];
     // in practice always your own line, but the colour should come from the data
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
     document.getElementById('evalName').textContent = line.name;
-    document.getElementById('evalTranscript').textContent = LINES[activeIdx].body;
+    document.getElementById('evalTranscript').textContent = SCRIPT[activeIdx].text;
     applyFontSize();
     showScreen('evaluationScreen');
   }
@@ -1745,14 +1877,14 @@
     return document.querySelector('.screen.active .scroll');
   }
   function refreshFlags(idx) {
-    const data = LINES[idx];
+    const data = SCRIPT[idx];
     const row = activeScrollEl().querySelector(`[data-idx="${idx}"]`);
     if (!row) return;
     const pHidden = row.querySelector('.note.private')?.classList.contains('hidden');
     const sHidden = row.querySelector('.note.stage')?.classList.contains('hidden');
     let flags = '';
-    if (data.privateNote && pHidden) flags += flagBtn(idx, 'private');
-    if (data.stageNote && sHidden)   flags += flagBtn(idx, 'stage');
+    if (data.note && pHidden) flags += flagBtn(idx, 'private');
+    if (data.dir && sHidden)  flags += flagBtn(idx, 'stage');
     let holder = row.querySelector('.note-flags');
     if (flags) {
       if (!holder) {
@@ -1784,11 +1916,23 @@
       <span class="item-ic">${ICON[icon]}</span>${label}</button>`;
   }
   function openSheet(idx) {
-    const line = LINES[idx];
+    const line = SCRIPT[idx];
     document.getElementById('sheetContext').className = 'sheet-context ' + (line.mine ? 'mine' : 'others');
-    document.getElementById('ctxName').textContent = line.name;
-    document.getElementById('ctxLine').textContent = SNIP;
+    document.getElementById('ctxName').textContent = line.who;
+    document.getElementById('ctxLine').textContent = shorten(line.text);
     document.getElementById('sheetItems').innerHTML = buildItems(line.mine);
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+  function openStageSheet(idx) {
+    document.getElementById('sheetContext').className = 'sheet-context others';
+    document.getElementById('ctxName').textContent = 'Stage directions';
+    document.getElementById('ctxLine').textContent = shorten(SCRIPT[idx].stage);
+    document.getElementById('sheetItems').innerHTML =
+      item('edit', 'Edit stage direction', false, 'Edit stage direction') +
+      item('note', 'Add a private note', false, 'Private note') +
+      '<div class="sheet-sep"></div>' +
+      item('trash', 'Delete', true, 'Delete stage direction');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -1846,7 +1990,7 @@
     const on = btn.classList.contains('on');
     defaults[btn.dataset.note] = on;
     activeScrollEl().querySelectorAll('.note.' + btn.dataset.note).forEach(n => n.classList.toggle('hidden', !on));
-    LINES.forEach((_, idx) => refreshFlags(idx));
+    SCRIPT.forEach((_, idx) => refreshFlags(idx));
   }
 
   /* ============================================================
@@ -1966,6 +2110,25 @@
 
 <!-- ==== preview shell — added by tools/build-preview.py, not part of the prototype ==== -->
 <style>
+  /* Desktop: name the screen above the mock, with a way back to the map.
+     Not on a handset, where the frame is the whole viewport. */
+  #screen-tag { display: none; }
+  @media (min-width: 521px) {
+    body { flex-direction: column; gap: 16px; }
+    #screen-tag {
+      display: flex; align-items: baseline; gap: 16px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    #screen-tag b {
+      font-family: 'Platypi', Georgia, serif; font-weight: 700;
+      font-size: 21px; color: #7A1E2D;
+    }
+    #screen-tag a {
+      font-size: 13px; font-weight: 600; color: #7A1E2D;
+      opacity: .6; text-decoration: none;
+    }
+    #screen-tag a:hover { opacity: 1; text-decoration: underline; }
+  }
   @media (max-width: 520px) {
     body { background: var(--mist); align-items: stretch; }
     .phone {
@@ -1985,9 +2148,34 @@
 <script>
   (function () {
     var phone = document.querySelector('.phone');
+
+    var NAMES = {
+      dashboardScreen: 'Dashboard',  scriptsScreen: 'All scripts',
+      detailScreen: 'Script detail', editPlayScreen: 'Edit play',
+      readScreen: 'Read',            listenScreen: 'Listen',
+      rehearseScreen: 'Rehearse',    evaluationScreen: 'Evaluation'
+    };
+
+    var tag = document.createElement('div');
+    tag.id = 'screen-tag';
+    tag.innerHTML = '<b></b><a href="sitemap.html">Screen map \u2192</a>';
+    document.body.insertBefore(tag, phone);
+    var label = tag.querySelector('b');
+
+    /* The prototype swaps a class to change screens, so watch for that rather
+       than patching its navigation. */
+    function name() {
+      var on = document.querySelector('.screen.active');
+      if (on) label.textContent = NAMES[on.id] || on.id;
+    }
+    new MutationObserver(name).observe(phone, {
+      subtree: true, attributes: true, attributeFilter: ['class']
+    });
+    name();
+
     function fit() {
       if (window.innerWidth <= 520) { phone.style.transform = ''; return; }
-      var s = Math.min(1, (window.innerHeight - 24) / 876);
+      var s = Math.min(1, (window.innerHeight - 90) / 876);
       phone.style.transform = s < 1 ? 'scale(' + s + ')' : '';
     }
     fit();
