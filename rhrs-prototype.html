@@ -619,6 +619,30 @@
   .align-opt:active { transform: scale(0.94); }
   .align-opt.on { background: var(--coral); color: var(--white); box-shadow: 0 3px 10px rgba(239, 83, 80, 0.28); }
 
+
+  /* A row that states its current value and opens the detail for it. Ten speed
+     options inline would swamp the Text and Notes groups above. */
+  .set-link {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 13px 24px; text-align: left;
+    font-family: var(--font-body);
+  }
+  .set-link:active { background: rgba(0,0,0,0.03); }
+  .set-link .link-left { display: grid; gap: 2px; }
+  .set-link .link-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .set-link .set-value {
+    font-size: 15px; font-weight: 500; color: var(--wine);
+    font-variant-numeric: tabular-nums;
+  }
+  .set-link .link-right i { color: var(--text-muted); }
+
+  /* The two note kinds carry their own mark here too, so the switch and the thing
+     it switches read as the same object. */
+  .set-label { display: flex; align-items: center; gap: 9px; }
+  .lbl-ic.private { color: var(--coral); }
+  .lbl-ic.stage   { color: var(--wine); }
+
   .set-sep { height: 1px; background: var(--divider); margin: 6px 24px; }
 
   .toggle {
@@ -1306,14 +1330,14 @@
         <div class="set-group-label">Notes — default state</div>
         <div class="set-row">
           <div>
-            <div class="set-label">Private notes</div>
+            <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic private"></i>Private notes</div>
             <div class="set-sub">Show when opening the scene</div>
           </div>
           <button class="toggle on" data-note="private" onclick="toggleNoteDefault(this)"></button>
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Stage directions</div>
+            <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Stage directions</div>
             <div class="set-sub">Show when opening the scene</div>
           </div>
           <button class="toggle on" data-note="stage" onclick="toggleNoteDefault(this)"></button>
@@ -1324,10 +1348,16 @@
       <div id="setListen">
         <div class="set-sep"></div>
         <div class="set-group">
-          <div class="set-group-label">Playback</div>
-          <button class="set-link" onclick="openSpeedSheet()">
-            <span class="link-left">Playback speed</span>
-            <span class="chev" id="speedSummary">1.0x / 1.0x</span>
+          <div class="set-group-label">Audio</div>
+          <button class="set-link" onclick="openSpeedFromSettings()">
+            <span class="link-left">
+              <span class="set-label">Playback speed</span>
+              <span class="set-sub">My lines / others' lines</span>
+            </span>
+            <span class="link-right">
+              <span class="set-value" id="speedSummary">1.0x / 1.0x</span>
+              <i class="ph ph-caret-right ic-20"></i>
+            </span>
           </button>
           <div class="set-row">
             <div>
@@ -1749,6 +1779,12 @@
   function syncSpeedLabels() {
     const who = SCRIPT[activeIdx].mine ? 'mine' : 'others';
     document.querySelectorAll('.speed').forEach(el => el.textContent = speed[who]);
+  }
+  /* Swap sheets rather than stacking them — the speed sheet is the detail of
+     this row, not something on top of it. */
+  function openSpeedFromSettings() {
+    document.getElementById('settingsSheet').classList.remove('open');
+    setTimeout(openSpeedSheet, 180);
   }
   function openSpeedSheet() {
     renderSpeedSheet();
