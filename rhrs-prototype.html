@@ -1349,7 +1349,7 @@
               <span class="set-sub">My lines / others' lines</span>
             </span>
             <span class="link-right">
-              <span class="set-value" id="speedSummary">1.0x / 1.0x</span>
+              <span class="set-value js-speed-both">1.0x / 1.0x</span>
               <i class="ph ph-caret-right ic-20"></i>
             </span>
           </button>
@@ -1358,7 +1358,7 @@
               <div class="set-label">Pause on my line</div>
               <div class="set-sub">Wait instead of reading it aloud</div>
             </div>
-            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+            <button class="toggle" onclick="this.classList.toggle('on')"></button>
           </div>
         </div>
       </div>
@@ -1367,13 +1367,27 @@
       <div id="setRehearse">
         <div class="set-sep"></div>
         <div class="set-group">
+          <div class="set-group-label">Audio</div>
+          <button class="set-link" onclick="openSpeedFromSettings()">
+            <span class="link-left">
+              <span class="set-label">Playback speed</span>
+              <span class="set-sub">Others' lines · you speak your own</span>
+            </span>
+            <span class="link-right">
+              <span class="set-value js-speed-others">1.0x</span>
+              <i class="ph ph-caret-right ic-20"></i>
+            </span>
+          </button>
+        </div>
+        <div class="set-sep"></div>
+        <div class="set-group">
           <div class="set-group-label">Rehearsal</div>
           <div class="set-row">
             <div>
               <div class="set-label">Auto-evaluate</div>
               <div class="set-sub">Evaluate each take when it ends</div>
             </div>
-            <button class="toggle" onclick="this.classList.toggle('on')"></button>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
           </div>
           <div class="set-row">
             <div>
@@ -1392,7 +1406,7 @@
   <div class="settings-sheet" id="speedSheet">
     <div class="sheet-grabber"></div>
     <div class="speed-title cap-trim">Playback speed</div>
-    <div class="speed-group">
+    <div class="speed-group" id="speedMineGroup">
       <div class="speed-label mine cap-trim">My lines</div>
       <div class="speed-row mine" id="speedMine"></div>
     </div>
@@ -1763,7 +1777,8 @@
         `<button class="speed-opt ${speed[group] === v ? 'on' : ''}" onclick="setSpeed('${group}', '${v}')">${v}</button>`
       ).join('');
     }
-    document.getElementById('speedSummary').textContent = `${speed.mine} / ${speed.others}`;
+    document.querySelectorAll('.js-speed-both').forEach(el => el.textContent = `${speed.mine} / ${speed.others}`);
+    document.querySelectorAll('.js-speed-others').forEach(el => el.textContent = speed.others);
   }
   function setSpeed(group, value) {
     speed[group] = value;
@@ -1781,6 +1796,10 @@
     setTimeout(openSpeedSheet, 180);
   }
   function openSpeedSheet() {
+    /* In Rehearse the app only ever reads the cues — your own lines are yours to
+       say, so there is no speed to set for them. */
+    document.getElementById('speedMineGroup').style.display =
+      currentMode === 'rehearse' ? 'none' : '';
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('speedSheet').classList.add('open');
