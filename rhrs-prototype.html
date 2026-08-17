@@ -862,8 +862,19 @@
   }
   .next-scene .ns-go:active { transform: scale(0.97); }
 
-  /* A stage direction between lines needs the same menu affordance a line has. */
+  /* A stage direction standing between lines is its own beat in the script, so it
+     gets its own band: space and a rule on both sides, rather than reading as a
+     tail on the line above. In the card modes the gap does that job already. */
+  #readScroll .stage-only {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--divider);
+  }
+  #listenScroll .stage-only, #rehearseScroll .stage-only { margin-bottom: 14px; }
+
+  /* The menu needs the same affordance a line's does. The dots take their colour
+     from .mine / .others, which a standalone direction has neither of. */
   .stage-only .line-menu-btn { margin-left: auto; }
+  .stage-only .line-menu-btn .dots span { background: var(--wine); }
 
   /* ============ LIQUID GLASS ============
      A translucent fill, a soft shadow dropped down-right, and a 1.5px rim that
