@@ -342,9 +342,10 @@
   /* Evaluation has no mode bar under it, so the transport carries the safe area. */
   .screen > .transport:last-child { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
 
-  /* jump-to-active-line button, straddles the mini player */
+  /* Jump back to the line that is playing. Sits clear above the transport —
+     16px, so it reads as pointing away from the player rather than sitting on it. */
   .jump-btn {
-    position: absolute; top: -22px; right: 24px;
+    position: absolute; bottom: calc(100% + 16px); right: 24px;
     width: 52px; height: 52px; border-radius: 50%;
     background: var(--white); border: none; cursor: pointer;
     display: none; align-items: center; justify-content: center;
@@ -356,10 +357,11 @@
   .jump-btn:active { transform: scale(0.92); }
 
   /* --- collapsed mini player --- */
+  /* The whole bar expands the player; its own controls opt out of that. */
   .mini {
     display: none; align-items: center; gap: 14px;
     background: var(--card-bg); border-radius: 18px;
-    padding: 14px 18px;
+    padding: 14px 18px; cursor: pointer;
     box-shadow: 0 1px 8px rgba(0,0,0,0.05);
   }
   .mini.show { display: flex; }
@@ -403,9 +405,11 @@
      The values below are the resting state and the reduced-motion fallback. */
   .big-btn.recording {
     width: 84px; height: 84px;
-    box-shadow: 0 0 0 14px rgba(var(--accent-rgb), 0.34),
-                0 0 0 30px rgba(var(--accent-rgb), 0.16);
+    box-shadow: 0 0 0 11px rgba(var(--accent-rgb), 0.34),
+                0 0 0 22px rgba(var(--accent-rgb), 0.16);
   }
+  /* Room for the rings to breathe at full level without reaching the mode bar. */
+  #rehTalking { padding-block: 10px 22px; }
 
   /* --- scrubber --- */
   .bar {
@@ -912,11 +916,11 @@
         <i class="ph-bold ph-caret-up ic-24" id="listenJumpIc"></i>
       </button>
 
-      <!-- collapsed -->
-      <div class="mini" id="listenMini">
+      <!-- collapsed — tapping the bar itself opens the full transport back up -->
+      <div class="mini" id="listenMini" onclick="expandPlayer('listen')">
         <span class="t-time" id="listenMiniTime">00:59</span>
-        <div class="bar" onclick="seek(event)"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
-        <button class="mini-toggle" onclick="togglePlay('listen')" aria-label="Play / pause">
+        <div class="bar" onclick="event.stopPropagation(); seek(event)"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
+        <button class="mini-toggle" onclick="event.stopPropagation(); togglePlay('listen')" aria-label="Play / pause">
           <i class="ph-fill ph-pause ic-28" id="listenMiniIc"></i>
         </button>
       </div>
@@ -1294,6 +1298,7 @@
      so Back always returns to the scene list. */
   function switchMode(m) {
     currentMode = m;
+    forcedOpen = false;
     const cur = navStack[navStack.length - 1];
     if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
     if (m === 'read')     renderRead();
@@ -1462,19 +1467,32 @@
   }
 
   /* The player collapses to a mini bar whenever the line being played is
-     scrolled out of view; the chevron points to where that line is. */
+     scrolled out of view. Tapping the bar overrides that and opens it back up;
+     the override lasts until you are back at the line, which is the point at
+     which it stops meaning anything. */
+  let forcedOpen = false;
+
+  function expandPlayer(mode) {
+    forcedOpen = true;
+    updateTransport(mode);
+  }
+
   function updateTransport(mode) {
     const scroll = document.getElementById(mode + 'Scroll');
     const card = scroll.querySelector('.lcard.active');
     if (!card) return;
     const cr = card.getBoundingClientRect(), sr = scroll.getBoundingClientRect();
-    const visible = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
+    const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
+    if (atLine) forcedOpen = false;
 
     if (mode === 'listen') {
-      document.getElementById('listenExpanded').classList.toggle('show', visible);
-      document.getElementById('listenMini').classList.toggle('show', !visible);
+      const open = atLine || forcedOpen;
+      document.getElementById('listenExpanded').classList.toggle('show', open);
+      document.getElementById('listenMini').classList.toggle('show', !open);
+      /* The chevron follows the line, not the player, so expanding by hand
+         keeps your way back. */
       const jump = document.getElementById('listenJump');
-      jump.classList.toggle('show', !visible);
+      jump.classList.toggle('show', !atLine);
       document.getElementById('listenJumpIc').className =
         'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
     }
@@ -1547,7 +1565,7 @@
     (function step() {
       if (frame++ % 7 === 0) target = 0.12 + Math.random() * 0.88;
       level += (target - level) * 0.16;
-      const inner = 10 + level * 12, outer = 22 + level * 26;
+      const inner = 7 + level * 8, outer = 15 + level * 13;
       btn.style.boxShadow =
         `0 0 0 ${inner.toFixed(1)}px rgba(var(--accent-rgb), ${(0.40 - level * 0.10).toFixed(3)}), ` +
         `0 0 0 ${outer.toFixed(1)}px rgba(var(--accent-rgb), ${(0.20 - level * 0.07).toFixed(3)})`;
