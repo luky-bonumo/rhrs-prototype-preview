@@ -1533,7 +1533,7 @@
   function openScene(name) {
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
-    activeIdx = 0;
+    activeIdx = lineIdx()[0];   // index 0 may be a stage direction
     playing = true;
     SCENES[0].lines = lineIdx().length;   // the one scene we actually have text for
   renderRead();
@@ -1807,9 +1807,9 @@
 
   /* Entering the mode should land on a cue, not on your own line. */
   function openOnCueLine() {
-    if (!SCRIPT[activeIdx].mine) return;
+    if (isLine(activeIdx) && !SCRIPT[activeIdx].mine) return;
     const cues = lineIdx().filter(i => !SCRIPT[i].mine);
-    const cue = cues.find(i => i > activeIdx) ?? cues[0];
+    const cue = cues.find(i => i >= activeIdx) ?? cues[0];
     if (cue !== undefined) activeIdx = cue;
   }
   function syncRehearse() {
