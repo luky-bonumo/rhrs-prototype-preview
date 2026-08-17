@@ -1613,7 +1613,10 @@
     if (btn) btn.style.boxShadow = '';
   }
   function openEvaluation() {
-    document.getElementById('evalName').textContent = LINES[activeIdx].name;
+    const line = LINES[activeIdx];
+    // in practice always your own line, but the colour should come from the data
+    document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
+    document.getElementById('evalName').textContent = line.name;
     document.getElementById('evalTranscript').textContent = LINES[activeIdx].body;
     applyFontSize();
     showScreen('evaluationScreen');
