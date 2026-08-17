@@ -34,7 +34,9 @@
     --wine-border:  #DFCCD0;
     --text-body:    #241318;
     --text-muted:   #9A9A9A;
-    --divider:      #EAEAEA;
+    /* Rules sit on mist and on translucent glass, not on white — stone is what
+       still reads at that contrast. */
+    --divider:      var(--stone);
 
     --screen-bg: var(--mist);
     --sheet-bg:  var(--white);
@@ -515,7 +517,7 @@
   .mode {
     display: flex; align-items: center; gap: 9px;
     background: none; border: none; cursor: pointer;
-    font-family: var(--font-display); font-weight: 700; font-size: 18px;
+    font-family: var(--font-display); font-weight: 600; font-size: 16px;
     color: var(--wine); padding: 6px 8px;
     transition: color .15s ease;
   }
