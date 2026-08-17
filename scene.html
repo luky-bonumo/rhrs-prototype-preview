@@ -174,7 +174,8 @@
   .spread .b { display: grid; grid-template-columns: 92px 1fr 58px; gap: 12px; align-items: center; }
   .spread .k { font-size: 12.5px; color: var(--text-muted); }
   .spread .track { height: 12px; background: var(--mist); border-radius: 999px; overflow: hidden; }
-  .spread .fill { height: 100%; border-radius: 999px; background: var(--wine); }
+  /* block, or the span takes neither the height nor the width */
+  .spread .fill { display: block; height: 100%; border-radius: 999px; background: var(--wine); }
   .spread .n { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); text-align: right; }
 
   .ask { margin-top: 18px; border-radius: 16px; padding: 20px 22px;
@@ -300,6 +301,8 @@
     { who: 'Nina',    text: "So say it to her." },
     { who: 'Michael', text: "She's my sister." },
     { who: 'Nina',    text: "She's my sofa." },
+    { who: 'Michael', text: "That's not fair and you know it isn't." },
+    { who: 'Nina',    text: "It's completely fair. It's just not kind. Those are different things, and you have never once been able to tell them apart." },
 
     { stage: 'ANNA is in the doorway, wrapped in a duvet. Neither of them knows how long she has been there.' },
 
@@ -313,7 +316,11 @@
     { who: 'Nina',    text: "He's been trying to ask you to leave since the third week. He is very bad at it. It is one of the things I love about him and it is, tonight, the single most annoying thing about him." },
     { who: 'Anna',    text: "Oh." },
     { who: 'Anna',    text: "Is that all?" },
-    { who: 'Anna',    text: "I thought one of you was ill." }
+    { who: 'Anna',    text: "I thought one of you was ill." },
+    { who: 'Nina',    text: "We thought you would take it badly. There was a whole plan. He was going to do it on Sunday, over a roast, so you would have to be polite about it." },
+    { who: 'Anna',    text: "I'll go Thursday. I've had a room since October. I just liked it here." },
+    { who: 'Michael', text: "Since October?" },
+    { who: 'Anna',    text: "Goodnight." }
   ];
 
   const isMine = who => CAST.find(c => c.name === who)?.mine;
@@ -378,9 +385,10 @@
         <span class="track"><span class="fill" style="width:${max ? (n / max) * 100 : 0}%"></span></span>
         <span class="n">${n}</span>
       </div>`).join('');
+    const min = Math.min(...counts);
     document.getElementById('spreadNote').textContent =
       `${lines.length} lines, ${SCENE.length - lines.length} stage directions. ` +
-      `Shortest ${Math.min(...counts)} words, longest ${Math.max(...counts)}.`;
+      `Shortest ${min} ${min === 1 ? 'word' : 'words'}, longest ${Math.max(...counts)}.`;
   }
 
   /* ---- page tools ---- */

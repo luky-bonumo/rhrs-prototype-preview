@@ -42,7 +42,6 @@
 
     --font-display: 'Platypi', Georgia, serif;
     --font-body:    'DM Sans', system-ui, sans-serif;
-    --font-mono:    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
 
     --line-height:  1.55;
     --radius-card:  16px;
@@ -373,7 +372,7 @@
     box-shadow: 0 1px 8px rgba(0,0,0,0.05);
   }
   .mini.show { display: flex; }
-  .mini .t-time { font-family: var(--font-mono); font-size: 13px; color: var(--accent); flex: 0 0 auto; }
+  .mini .t-time { font-size: 13px; font-weight: 500; color: var(--accent); flex: 0 0 auto; }
   .mini .bar { flex: 1 1 auto; }
   .mini .mini-toggle {
     background: none; border: none; cursor: pointer; color: var(--accent);
@@ -420,7 +419,7 @@
     transition: transform .12s ease;
   }
   .big-btn:active { transform: scale(0.94); }
-  .big-btn .btn-time { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.5px; }
+  .big-btn .btn-time { font-size: 13px; font-weight: 500; letter-spacing: 0.3px; }
 
   /* Recording (Rehearse — talking). Two rings, driven frame by frame from the
      mic level in JS, so they track the voice instead of pulsing on a timer.
@@ -449,13 +448,16 @@
     border: 3.5px solid var(--accent);
   }
 
+  /* fixed-width digits so a running clock does not shuffle sideways */
+  .t-time, .btn-time, .t-meta, .speed { font-variant-numeric: tabular-nums; }
+
   .t-meta {
     display: flex; align-items: center; justify-content: space-between;
-    font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+    font-size: 13px; font-weight: 500; color: var(--accent);
   }
   .t-meta .speed {
     background: none; border: none; cursor: pointer;
-    font-family: var(--font-mono); font-size: 17px; color: var(--accent);
+    font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--accent);
   }
 
   /* --- Rehearse: paused action row --- */
@@ -466,7 +468,7 @@
     border-radius: var(--radius-pill); padding: 10px 20px;
   }
   .reh-take:active { transform: scale(0.96); }
-  .reh-take .btn-time { font-family: var(--font-mono); font-size: 15px; }
+  .reh-take .btn-time { font-size: 15px; font-weight: 600; }
 
   .reh-actions { display: flex; align-items: flex-start; justify-content: space-around; padding-top: 4px; }
   .reh-action {
@@ -633,13 +635,36 @@
   .font-stepper .fs-b { font-size: 21px; }
   .font-stepper .fs-val { font-size: 14px; font-weight: 600; color: var(--noir); min-width: 34px; text-align: center; }
 
-  .segmented { display: flex; gap: 6px; background: var(--mist); border-radius: 999px; padding: 4px; }
-  .segmented button {
-    border: none; background: none; cursor: pointer;
-    font-family: var(--font-mono); font-size: 13px; color: var(--wine);
-    padding: 6px 10px; border-radius: 999px;
+  /* ---------- Playback speed sheet ----------
+     Two speeds, because the two jobs are different: your own lines are a cue you
+     want at natural pace, the other parts are something you may want to push
+     through faster. */
+  .speed-title {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    color: var(--wine); text-align: center;
+    padding: 8px 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
   }
-  .segmented button.on { background: var(--white); color: var(--coral); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .speed-group { padding: 20px 20px 24px; }
+  .speed-group + .speed-group { border-top: 1px solid var(--divider); }
+  .speed-label {
+    font-family: var(--font-display); font-weight: 700; font-size: 19px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .speed-label.mine   { color: var(--coral); }
+  .speed-label.others { color: var(--wine); }
+  .speed-row { display: flex; gap: 8px; }
+  .speed-opt {
+    flex: 1 1 0; border: none; cursor: pointer;
+    background: var(--mist); border-radius: 999px; padding: 13px 4px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: background .15s ease, color .15s ease;
+  }
+  .speed-opt:active { transform: scale(0.95); }
+  .speed-row.mine   .speed-opt { color: var(--coral); }
+  .speed-row.others .speed-opt { color: var(--wine); }
+  .speed-row.mine   .speed-opt.on { background: var(--coral); color: var(--white); }
+  .speed-row.others .speed-opt.on { background: var(--wine);  color: var(--mist); }
 
   /* ---------- Toast ---------- */
   .toast {
@@ -959,7 +984,7 @@
         <div class="bar with-thumb" onclick="seek(event)"><div class="fill" id="listenFill" style="width:42%"></div></div>
         <div class="t-meta">
           <span id="listenElapsed">00:59</span>
-          <button class="speed" onclick="cycleSpeed()" id="listenSpeed">1.0x</button>
+          <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span id="listenTotal">01:21</span>
         </div>
       </div>
@@ -995,7 +1020,7 @@
         <div class="bar with-thumb" onclick="seek(event)"><div class="fill" style="width:42%"></div></div>
         <div class="t-meta">
           <span>00:59</span>
-          <button class="speed" onclick="cycleSpeed()">1.0x</button>
+          <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span>01:21</span>
         </div>
       </div>
@@ -1084,7 +1109,7 @@
         <div class="bar with-thumb" onclick="seek(event)"><div class="fill" style="width:42%"></div></div>
         <div class="t-meta">
           <span>00:59</span>
-          <button class="speed" onclick="cycleSpeed()">1.0x</button>
+          <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span>01:21</span>
         </div>
       </div>
@@ -1164,15 +1189,10 @@
         <div class="set-sep"></div>
         <div class="set-group">
           <div class="set-group-label">Playback</div>
-          <div class="set-row">
-            <div><div class="set-label">Speed</div></div>
-            <div class="segmented" id="speedSeg">
-              <button onclick="setSpeed('0.75x', this)">0.75x</button>
-              <button class="on" onclick="setSpeed('1.0x', this)">1.0x</button>
-              <button onclick="setSpeed('1.25x', this)">1.25x</button>
-              <button onclick="setSpeed('1.5x', this)">1.5x</button>
-            </div>
-          </div>
+          <button class="set-link" onclick="openSpeedSheet()">
+            <span class="link-left">Playback speed</span>
+            <span class="chev" id="speedSummary">1.0x / 1.0x</span>
+          </button>
           <div class="set-row">
             <div>
               <div class="set-label">Pause on my line</div>
@@ -1205,6 +1225,20 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- playback speed, opened from the figure under the scrubber -->
+  <div class="settings-sheet" id="speedSheet">
+    <div class="sheet-grabber"></div>
+    <div class="speed-title cap-trim">Playback speed</div>
+    <div class="speed-group">
+      <div class="speed-label mine cap-trim">My lines</div>
+      <div class="speed-row mine" id="speedMine"></div>
+    </div>
+    <div class="speed-group">
+      <div class="speed-label others cap-trim">Others' lines</div>
+      <div class="speed-row others" id="speedOthers"></div>
     </div>
   </div>
 
@@ -1276,8 +1310,8 @@
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
   const SUCCESS_MS = 300;          // duration of the success flash (per design)
-  const SPEEDS = ['0.75x','1.0x','1.25x','1.5x'];
-  let speedIdx = 1;
+  const SPEEDS = ['0.5x', '1.0x', '1.25x', '1.5x', '2.0x'];
+  const speed = { mine: '1.0x', others: '1.0x' };
 
   /* ============================================================
      NAVIGATION
@@ -1313,6 +1347,7 @@
     activeIdx = 0;
     playing = true;
     renderRead();
+  renderSpeedSheet();
     showScreen('readScreen');
   }
 
@@ -1420,6 +1455,7 @@
     const own = LINES[activeIdx].mine;
     t.style.setProperty('--accent', own ? 'var(--coral)' : 'var(--wine)');
     t.style.setProperty('--accent-rgb', own ? '239, 83, 80' : '122, 30, 45');
+    syncSpeedLabels();
   }
 
   /* Playing a line you can already see should not move the page under you —
@@ -1458,16 +1494,30 @@
     const pct = Math.max(0, Math.min(1, (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth));
     bar.querySelector('.fill').style.width = (pct * 100) + '%';
   }
-  function cycleSpeed() {
-    speedIdx = (speedIdx + 1) % SPEEDS.length;
-    document.getElementById('listenSpeed').textContent = SPEEDS[speedIdx];
-    document.querySelectorAll('#speedSeg button').forEach((b, i) => b.classList.toggle('on', i === speedIdx));
+  /* Two speeds, shown one at a time: the transport always reports the speed of
+     whoever currently holds the line, which is the one its buttons would change. */
+  function renderSpeedSheet() {
+    for (const group of ['mine', 'others']) {
+      const box = document.getElementById(group === 'mine' ? 'speedMine' : 'speedOthers');
+      box.innerHTML = SPEEDS.map(v =>
+        `<button class="speed-opt ${speed[group] === v ? 'on' : ''}" onclick="setSpeed('${group}', '${v}')">${v}</button>`
+      ).join('');
+    }
+    document.getElementById('speedSummary').textContent = `${speed.mine} / ${speed.others}`;
   }
-  function setSpeed(val, btn) {
-    speedIdx = SPEEDS.indexOf(val);
-    document.getElementById('listenSpeed').textContent = val;
-    document.querySelectorAll('#speedSeg button').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
+  function setSpeed(group, value) {
+    speed[group] = value;
+    renderSpeedSheet();
+    syncSpeedLabels();
+  }
+  function syncSpeedLabels() {
+    const who = LINES[activeIdx].mine ? 'mine' : 'others';
+    document.querySelectorAll('.speed').forEach(el => el.textContent = speed[who]);
+  }
+  function openSpeedSheet() {
+    renderSpeedSheet();
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('speedSheet').classList.add('open');
   }
 
   /* The player collapses to a mini bar whenever the line being played is
@@ -1659,6 +1709,7 @@
     document.getElementById('scrim').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
     document.getElementById('settingsSheet').classList.remove('open');
+    document.getElementById('speedSheet').classList.remove('open');
   }
   function openSettings(mode) {
     const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
