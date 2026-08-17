@@ -279,8 +279,8 @@
   .show-text, .eval-showtext {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     width: 100%; background: none; box-shadow: none;
-    border: 1.5px solid var(--stone); border-radius: var(--radius-pill);
-    padding: 14px; cursor: pointer;
+    border: 1.5px solid var(--stone); border-radius: var(--radius-note);
+    padding: 10px 14px; cursor: pointer;
     font-family: var(--font-body); font-size: 12px; font-weight: 700;
     letter-spacing: 0.6px; text-transform: uppercase; color: var(--noir);
   }
@@ -506,7 +506,9 @@
   @keyframes tick-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
   /* ---------- Evaluation ---------- */
-  .eval-head { flex: 0 0 auto; padding: 18px 22px 22px; border-bottom: 1px solid var(--divider); }
+  /* Inside the scroll, so the line and its transcript move together — pinned, it
+     squeezed the transcript into a slot too small to read. */
+  .eval-head { padding: 14px 0 22px; margin-bottom: 22px; border-bottom: 1px solid var(--divider); }
   .eval-head .line-head { margin-bottom: 18px; }
 
   .eval-head .line-text { margin-top: 16px; }
@@ -1292,14 +1294,13 @@
       <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
-    <div class="eval-head mine">
-      <div class="line-head" id="evalHead"></div>
-      <div id="evalNotes"></div>
-      <button class="eval-showtext" id="evalToggle" onclick="toggleEvalText()"></button>
-      <div class="line-text hidden" id="evalOriginal"></div>
-    </div>
-
-    <div class="scroll" style="padding-top:22px">
+    <div class="scroll">
+      <div class="eval-head mine">
+        <div class="line-head" id="evalHead"></div>
+        <div id="evalNotes"></div>
+        <button class="show-text" id="evalToggle" onclick="toggleEvalText()"></button>
+        <div class="line-text hidden" id="evalOriginal"></div>
+      </div>
       <div class="eval-label">Transcript</div>
       <div class="line-text" id="evalTranscript"></div>
     </div>
@@ -2106,11 +2107,21 @@
 
   function renderEvalHead() {
     const line = SCRIPT[activeIdx];
+    /* Here the notes always start collapsed into their flags: this screen is for
+       comparing what you said with what is written, and the notes are aside. */
+    const head = document.querySelector('.eval-head');
+    head.dataset.idx = activeIdx;
+    let flags = '';
+    if (line.note) flags += flagBtn(activeIdx, 'private');
+    if (line.dir)  flags += flagBtn(activeIdx, 'stage');
+
     document.getElementById('evalHead').innerHTML =
       `<span class="char-name cap-trim">${line.who}</span>` +
-      flagsFor(line, activeIdx) +
+      (flags ? `<span class="note-flags">${flags}</span>` : '') +
       `<button class="line-menu-btn" style="margin-left:auto" onclick="openSheet(${activeIdx})" aria-label="Line menu">${DOTS}</button>`;
-    document.getElementById('evalNotes').innerHTML = notesFor(line, activeIdx);
+    document.getElementById('evalNotes').innerHTML =
+      (line.note ? noteBlock(activeIdx, 'private', line.note, true) : '') +
+      (line.dir  ? noteBlock(activeIdx, 'stage',   line.dir,  true) : '');
 
     document.getElementById('evalToggle').innerHTML = evalTextShown
       ? '<i class="ph ph-eye-slash ic-20"></i> Hide text'
