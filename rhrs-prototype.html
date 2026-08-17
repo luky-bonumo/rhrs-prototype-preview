@@ -608,6 +608,17 @@
   .set-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 24px; gap: 16px; }
   .set-row .set-label { font-size: 16px; font-weight: 500; color: var(--noir); }
   .set-row .set-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .align-group { display: flex; gap: 4px; background: var(--mist); border-radius: 999px; padding: 4px; }
+  .align-opt {
+    width: 40px; height: 34px; border: none; background: none; cursor: pointer;
+    border-radius: 999px; color: var(--wine);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .align-opt:active { transform: scale(0.94); }
+  .align-opt.on { background: var(--coral); color: var(--white); box-shadow: 0 3px 10px rgba(239, 83, 80, 0.28); }
+
   .set-sep { height: 1px; background: var(--divider); margin: 6px 24px; }
 
   .toggle {
@@ -1265,6 +1276,15 @@
           </div>
         </div>
         <div class="set-row">
+          <div><div class="set-label">Text align</div></div>
+          <div class="align-group" id="alignGroup">
+            <button class="align-opt on" onclick="setAlign('left', this)" aria-label="Align left"><i class="ph ph-text-align-left ic-20"></i></button>
+            <button class="align-opt" onclick="setAlign('center', this)" aria-label="Align centre"><i class="ph ph-text-align-center ic-20"></i></button>
+            <button class="align-opt" onclick="setAlign('right', this)" aria-label="Align right"><i class="ph ph-text-align-right ic-20"></i></button>
+            <button class="align-opt" onclick="setAlign('justify', this)" aria-label="Justify"><i class="ph ph-text-align-justify ic-20"></i></button>
+          </div>
+        </div>
+        <div class="set-row">
           <div>
             <div class="set-label">My lines</div>
             <div class="set-sub">Show the text of my lines</div>
@@ -1625,7 +1645,7 @@
         <div class="line-text">${item.text}</div>
       </div>`;
     }).join('') + nextSceneCard();
-    applyFontSize();
+    applyTextStyle();
   }
 
   /* ============================================================
@@ -1659,7 +1679,7 @@
         <div class="line-text">${line.text}</div>
       </div>`;
     }).join('') + nextSceneCard();
-    applyFontSize();
+    applyTextStyle();
     applyAccent(mode);
   }
 
@@ -1858,7 +1878,7 @@
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
     document.getElementById('evalName').textContent = line.name;
     document.getElementById('evalTranscript').textContent = SCRIPT[activeIdx].text;
-    applyFontSize();
+    applyTextStyle();
     showScreen('evaluationScreen');
   }
 
@@ -1963,6 +1983,20 @@
   function applyFontSize() {
     document.querySelectorAll('.line-text').forEach(el => el.style.fontSize = FS_STEPS[fsIdx] + 'px');
   }
+  /* Alignment rides on the line text only. Notes stay left — they are annotations
+     on the text, not part of it. */
+  let textAlign = 'left';
+  function setAlign(value, btn) {
+    textAlign = value;
+    document.querySelectorAll('#alignGroup .align-opt').forEach(b => b.classList.toggle('on', b === btn));
+    applyAlign();
+  }
+  function applyAlign() {
+    document.querySelectorAll('.line-text').forEach(el => el.style.textAlign = textAlign);
+  }
+  /* Rendering replaces the nodes, so both text settings are reapplied together. */
+  function applyTextStyle() { applyFontSize(); applyAlign(); }
+
   function fontStep(dir) {
     fsIdx = Math.max(0, Math.min(FS_STEPS.length - 1, fsIdx + dir));
     document.getElementById('fsVal').textContent = FS_STEPS[fsIdx];
