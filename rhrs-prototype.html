@@ -274,12 +274,19 @@
   .line:last-child { border-bottom: none; }
   .line .line-menu-btn { margin-left: auto; }
 
-  .line.text-hidden .line-text { display: none; }
-  .line.text-hidden .placeholder {
-    display: block; font-size: 15px; color: var(--text-muted);
-    font-style: italic; padding: 4px 0;
+  /* An outline on the ground, not a raised surface — so no glass and no fill.
+     Shared with Evaluation, which is the same offer in a different place. */
+  .show-text, .eval-showtext {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; background: none; box-shadow: none;
+    border: 1.5px solid var(--stone); border-radius: var(--radius-pill);
+    padding: 14px; cursor: pointer;
+    font-family: var(--font-body); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.6px; text-transform: uppercase; color: var(--noir);
   }
-  .placeholder { display: none; }
+  .show-text::before, .eval-showtext::before { content: none; }
+  .show-text:active, .eval-showtext:active { transform: scale(0.98); }
+  .show-text { margin-top: 4px; }
 
   /* ---------- Listen / Rehearse: line cards ---------- */
   .lcard {
@@ -501,15 +508,7 @@
   /* ---------- Evaluation ---------- */
   .eval-head { flex: 0 0 auto; padding: 18px 22px 22px; border-bottom: 1px solid var(--divider); }
   .eval-head .line-head { margin-bottom: 18px; }
-  .eval-showtext {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; background: var(--mist);
-    border: 1.5px solid transparent; border-radius: var(--radius-pill);
-    padding: 14px; cursor: pointer;
-    font-family: var(--font-body); font-size: 12px; font-weight: 700;
-    letter-spacing: 0.6px; text-transform: uppercase; color: var(--noir);
-  }
-  .eval-showtext:active { transform: scale(0.98); }
+
   .eval-head .line-text { margin-top: 16px; }
   .eval-head .line-text.hidden { display: none; }
   .eval-label {
@@ -865,7 +864,7 @@
   .next-scene {
     border-radius: var(--radius-lcard);
     padding: 22px 20px 20px;
-    margin: 6px 0 4px;
+    margin: 24px 0 4px;   /* clear of the rule that ends the last line */
     text-align: center;
   }
   .next-scene .ns-label {
@@ -898,8 +897,9 @@
     padding: 20px;
     margin-bottom: 14px;
   }
-  /* the note is the whole content of this card, so it carries no trailing margin */
-  #listenScroll .stage-only .note, #rehearseScroll .stage-only .note { margin-bottom: 0; }
+  /* the note is the whole content of the block, so it carries no trailing margin —
+     in every mode, or the space below it doubles */
+  .stage-only .note { margin-bottom: 0; }
   .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
   /* the narrator's play control sits with the label, before the menu */
   .stage-only .lc-btn { color: var(--wine); margin-left: auto; }
@@ -1576,8 +1576,11 @@
   const narrate = { listen: true, rehearse: false };
 
   function playableIdx(mode) {
-    return SCRIPT.map((it, i) => (it.who || (narrate[mode] && it.stage)) ? i : -1)
-                 .filter(i => i >= 0);
+    /* A direction that is switched off is not on screen, so it is not a place the
+       playhead can stop either. */
+    return SCRIPT.map((it, i) =>
+      (it.who || (narrate[mode] && defaults.stage && it.stage)) ? i : -1
+    ).filter(i => i >= 0);
   }
   function stepIdx(from, dir, mode = 'listen') {
     const list = playableIdx(mode);
@@ -1618,11 +1621,20 @@
   const defaults = { private:true, stage:true };
   const showText = { mine:true, others:true };
 
-  /* The body of a line, or a stand-in when that side is switched off. */
-  function lineBody(item) {
-    return showText[item.mine ? 'mine' : 'others']
-      ? `<div class="line-text">${item.text}</div>`
-      : '<div class="placeholder">— text hidden —</div>';
+  /* A hidden line is not a dead end: it offers to show itself, one line at a time,
+     without touching the setting that hid it. */
+  const revealed = new Set();
+  function lineBody(item, idx) {
+    if (showText[item.mine ? 'mine' : 'others'] || revealed.has(idx)) {
+      return `<div class="line-text">${item.text}</div>`;
+    }
+    return `<button class="show-text" onclick="revealLine(${idx})">
+      <i class="ph ph-eye ic-20"></i> Show text
+    </button>`;
+  }
+  function revealLine(idx) {
+    revealed.add(idx);
+    rerenderCurrent();
   }
 
   /* Playback / rehearsal state */
@@ -1773,7 +1785,7 @@
      ============================================================ */
   function renderRead() {
     document.getElementById('readScroll').innerHTML = SCRIPT.map((item, idx) => {
-      if (!item.who) return stageBlock(idx, item.stage);
+      if (!item.who) return defaults.stage ? stageBlock(idx, item.stage) : '';
       return `<div class="line ${item.mine ? 'mine' : 'others'}" data-idx="${idx}">
         <div class="line-head">
           <span class="char-name cap-trim">${item.who}</span>
@@ -1781,7 +1793,7 @@
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(item, idx)}
-        ${lineBody(item)}
+        ${lineBody(item, idx)}
       </div>`;
     }).join('') + nextSceneCard();
     applyTextStyle();
@@ -1793,15 +1805,15 @@
   function renderCards(mode) {
     const isReh = mode === 'rehearse';
     document.getElementById(mode + 'Scroll').innerHTML = SCRIPT.map((line, idx) => {
-      if (!line.who) return stageBlock(idx, line.stage, mode);
+      if (!line.who) return defaults.stage ? stageBlock(idx, line.stage, mode) : '';
       const isActive = idx === activeIdx;
 
       /* Control in the card header. A mic only on the line you are performing;
          a cue line plays as audio, so it keeps play/pause. */
       let ctrl;
-      if (isReh && isActive && line.mine) ctrl = ICON.mic;
-      else if (isActive && playing)       ctrl = ICON.pause;
-      else                                ctrl = ICON.play;
+      if (isReh && line.mine)       ctrl = ICON.mic;   // yours to say, never to play back
+      else if (isActive && playing) ctrl = ICON.pause;
+      else                          ctrl = ICON.play;
 
       /* Being the active line changes the border and nothing else. The text and
          the notes stay exactly as they were — what a line shows is the reader's
@@ -1815,7 +1827,7 @@
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(line, idx)}
-        ${lineBody(line)}
+        ${lineBody(line, idx)}
       </div>`;
     }).join('') + nextSceneCard();
     applyTextStyle();
@@ -2248,12 +2260,16 @@
   function toggleLines(btn) {
     btn.classList.toggle('on');
     showText[btn.dataset.target] = btn.classList.contains('on');
+    revealed.clear();
     rerenderCurrent();
   }
   function toggleNoteDefault(btn) {
     btn.classList.toggle('on');
     defaults[btn.dataset.note] = btn.classList.contains('on');
+    /* Do not strand the playhead on a direction we have just hidden. */
+    if (!defaults.stage && !isLine(activeIdx)) activeIdx = stepIdx(activeIdx, 1, currentMode);
     rerenderCurrent();
+    if (currentMode === 'rehearse') syncRehearse();
   }
 
   /* ============================================================
