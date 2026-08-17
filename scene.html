@@ -221,6 +221,16 @@
             mask-composite: exclude;
     pointer-events: none;
   }
+
+  /* A stage direction can stand between lines rather than hang off one, so it is a
+     script item in its own right and carries the same menu a line does. */
+  .stage-only .line-menu-btn {
+    margin-left: auto; background: none; border: none; cursor: pointer;
+    padding: 4px 2px 4px 10px; display: flex; align-items: center;
+  }
+  .stage-only .dots { display: flex; gap: 4px; }
+  .stage-only .dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--wine); }
+  .stage-only .line-menu-btn:active { transform: scale(0.9); }
 </style>
 </head>
 <body>
@@ -376,7 +386,18 @@
   function render() {
     document.getElementById('scene').innerHTML = SCENE.map(item => {
       if (item.stage) {
-        return `<div class="stage-only">${noteBlock('stage', 'Stage directions', item.stage)}</div>`;
+        return `<div class="stage-only">
+          <div class="note stage">
+            <div class="note-head">
+              <i class="ph-fill ph-note"></i>
+              <span class="note-label">Stage directions</span>
+              <button class="line-menu-btn" aria-label="Stage direction menu">
+                <span class="dots"><span></span><span></span><span></span></span>
+              </button>
+            </div>
+            <div class="note-body">${item.stage}</div>
+          </div>
+        </div>`;
       }
       const before = item.stageBefore ? noteBlock('stage', 'Stage directions', item.stageBefore) : '';
       const note = item.note ? noteBlock('private', 'Your private note', item.note) : '';
