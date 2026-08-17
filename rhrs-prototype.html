@@ -502,6 +502,8 @@
     letter-spacing: 0.6px; text-transform: uppercase; color: var(--noir);
   }
   .eval-showtext:active { transform: scale(0.98); }
+  .eval-head .line-text { margin-top: 16px; }
+  .eval-head .line-text.hidden { display: none; }
   .eval-label {
     font-family: var(--font-display); font-weight: 700;
     font-size: 22px; color: var(--coral); margin-bottom: 12px;
@@ -883,7 +885,7 @@
   .card, .lcard, .edit-card, .next-scene,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
-  .eval-showtext, .speed-opt {
+  .speed-opt {
     position: relative;
     background: var(--glass-fill);
     box-shadow: var(--glass-shadow);
@@ -894,7 +896,7 @@
   .mini::before, .skip-btn::before, .jump-btn::before,
   .settings-title .account-btn::before, .char-row .cr-edit::before,
   .font-stepper button::before,
-  .eval-showtext::before, .speed-opt::before {
+  .speed-opt::before {
     content: '';
     position: absolute; inset: 0;
     border-radius: inherit;
@@ -1189,9 +1191,9 @@
 
       <!-- state: paused (a take exists) -->
       <div class="expanded" id="rehPaused">
-        <button class="reh-take" onclick="toast('Play my take')">
-          <i class="ph-fill ph-play ic-20"></i>
-          <span class="btn-time">2:25</span>
+        <button class="reh-take" onclick="toggleTake()">
+          <i class="ph-fill ph-play ic-20" id="rehTakeIc"></i>
+          <span class="btn-time" id="rehTakeTime">0:10</span>
         </button>
         <div class="reh-actions">
           <button class="reh-action" onclick="rehSetState('talking'); toast('Retake')">
@@ -1231,19 +1233,10 @@
     </div>
 
     <div class="eval-head mine">
-      <div class="line-head">
-        <span class="char-name cap-trim" id="evalName">My character</span>
-        <span class="note-flags">
-          <span class="flag private"><i class="ph-fill ph-note ic-13"></i></span>
-          <span class="flag stage"><i class="ph-fill ph-note ic-13"></i></span>
-        </span>
-        <button class="line-menu-btn" style="margin-left:auto" onclick="toast('Line menu')" aria-label="Line menu">
-          <span class="dots"><span></span><span></span><span></span></span>
-        </button>
-      </div>
-      <button class="eval-showtext" onclick="toast('Show original text')">
-        <i class="ph ph-eye ic-20"></i> Show text
-      </button>
+      <div class="line-head" id="evalHead"></div>
+      <div id="evalNotes"></div>
+      <button class="eval-showtext" id="evalToggle" onclick="toggleEvalText()"></button>
+      <div class="line-text hidden" id="evalOriginal"></div>
     </div>
 
     <div class="scroll" style="padding-top:22px">
@@ -1857,7 +1850,34 @@
     Object.entries(REH_STATES).forEach(([key, id]) =>
       document.getElementById(id).classList.toggle('show', key === state));
     if (state === 'talking') startRecording(); else stopRecording();
+    if (state !== 'paused') stopTake();
   }
+  /* Playing the take back is play/pause on the pill itself. A scrubber for ten
+     seconds of speech would be furniture, and the full transport already exists
+     one step on, in Evaluation, which is where you go to study a take. */
+  let takePlaying = false, takeTick = null, takeAt = 0;
+
+  function setTakeIcon(kind) {
+    document.getElementById('rehTakeIc').className = 'ph-fill ph-' + kind + ' ic-20';
+  }
+  function toggleTake() {
+    if (takePlaying) { stopTake(); return; }
+    takePlaying = true;
+    takeAt = 0;
+    setTakeIcon('pause');
+    takeTick = setInterval(() => {
+      takeAt += 0.25;
+      if (takeAt >= TAKE_MS / 1000) { stopTake(); return; }
+      document.getElementById('rehTakeTime').textContent = clock(takeAt);
+    }, 250);
+  }
+  function stopTake() {
+    takePlaying = false;
+    if (takeTick) { clearInterval(takeTick); takeTick = null; }
+    setTakeIcon('play');
+    document.getElementById('rehTakeTime').textContent = clock(TAKE_MS / 1000);
+  }
+
   function rehComplete() {
     rehSetState('success');
     setTimeout(() => {
@@ -1909,33 +1929,60 @@
     const btn = document.getElementById('rehRecBtn');
     if (btn) btn.style.boxShadow = '';
   }
+  /* Evaluation is the line as written against the line as spoken, so it needs the
+     same head a line carries anywhere else: the name, its notes, its menu. */
+  let evalTextShown = false;
+
   function openEvaluation() {
     const line = SCRIPT[activeIdx];
-    // in practice always your own line, but the colour should come from the data
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
-    document.getElementById('evalName').textContent = line.name;
-    document.getElementById('evalTranscript').textContent = SCRIPT[activeIdx].text;
-    applyTextStyle();
+    evalTextShown = false;
+    renderEvalHead();
+    document.getElementById('evalTranscript').textContent = line.text;
     showScreen('evaluationScreen');
+  }
+
+  function renderEvalHead() {
+    const line = SCRIPT[activeIdx];
+    document.getElementById('evalHead').innerHTML =
+      `<span class="char-name cap-trim">${line.who}</span>` +
+      flagsFor(line, activeIdx) +
+      `<button class="line-menu-btn" style="margin-left:auto" onclick="openSheet(${activeIdx})" aria-label="Line menu">${DOTS}</button>`;
+    document.getElementById('evalNotes').innerHTML = notesFor(line, activeIdx);
+
+    document.getElementById('evalToggle').innerHTML = evalTextShown
+      ? '<i class="ph ph-eye-slash ic-20"></i> Hide text'
+      : '<i class="ph ph-eye ic-20"></i> Show text';
+    const original = document.getElementById('evalOriginal');
+    original.textContent = line.text;
+    original.classList.toggle('hidden', !evalTextShown);
+    applyTextStyle();
+  }
+
+  function toggleEvalText() {
+    evalTextShown = !evalTextShown;
+    renderEvalHead();
   }
 
   /* ============================================================
      NOTES
      ============================================================ */
   function showNote(idx, type) {
-    activeScrollEl().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.remove('hidden');
+    activeScreen().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.remove('hidden');
     refreshFlags(idx);
   }
   function hideNote(idx, type) {
-    activeScrollEl().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.add('hidden');
+    activeScreen().querySelector(`[data-idx="${idx}"] .note[data-type="${type}"]`)?.classList.add('hidden');
     refreshFlags(idx);
   }
-  function activeScrollEl() {
-    return document.querySelector('.screen.active .scroll');
+  /* The whole active screen, not just its scroller — Evaluation keeps its notes
+     in the header, above the scrolling transcript. */
+  function activeScreen() {
+    return document.querySelector('.screen.active');
   }
   function refreshFlags(idx) {
     const data = SCRIPT[idx];
-    const row = activeScrollEl().querySelector(`[data-idx="${idx}"]`);
+    const row = activeScreen().querySelector(`[data-idx="${idx}"]`);
     if (!row) return;
     const pHidden = row.querySelector('.note.private')?.classList.contains('hidden');
     const sHidden = row.querySelector('.note.stage')?.classList.contains('hidden');
@@ -2045,7 +2092,7 @@
     btn.classList.toggle('on');
     const on = btn.classList.contains('on');
     const target = btn.dataset.target;
-    activeScrollEl().querySelectorAll('.' + target).forEach(row => {
+    activeScreen().querySelectorAll('.' + target).forEach(row => {
       row.classList.toggle('text-hidden', !on);
       const txt = row.querySelector('.line-text');
       if (!on && txt && !row.querySelector('.placeholder')) {
@@ -2060,7 +2107,7 @@
     btn.classList.toggle('on');
     const on = btn.classList.contains('on');
     defaults[btn.dataset.note] = on;
-    activeScrollEl().querySelectorAll('.note.' + btn.dataset.note).forEach(n => n.classList.toggle('hidden', !on));
+    activeScreen().querySelectorAll('.note.' + btn.dataset.note).forEach(n => n.classList.toggle('hidden', !on));
     SCRIPT.forEach((_, idx) => refreshFlags(idx));
   }
 
