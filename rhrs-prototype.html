@@ -606,8 +606,9 @@
     text-transform: uppercase; color: var(--text-muted); padding: 8px 24px;
   }
   .set-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 24px; gap: 16px; }
-  .set-row .set-label { font-size: 16px; font-weight: 500; color: var(--noir); }
-  .set-row .set-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  /* Not scoped to .set-row — a drill-in row uses the same label and sub-line. */
+  .set-label { font-size: 16px; font-weight: 500; color: var(--noir); }
+  .set-sub   { font-size: 13px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
 
   .align-group { display: flex; gap: 4px; background: var(--mist); border-radius: 999px; padding: 4px; }
   .align-opt {
