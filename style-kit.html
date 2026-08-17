@@ -532,6 +532,32 @@
 
     <div class="comps">
       <div class="card">
+        <h3>Glass</h3>
+        <p style="font-size:14.5px;color:var(--text-muted);margin-bottom:14px">
+          Every raised surface — buttons, cards, lines, sheets — is the same three things: a
+          half-transparent white fill, a soft shadow dropped down and right, and a 1.5px rim
+          that catches light at the top-left and bottom-right and fades away through the middle.
+          Nothing in the app is a flat white box.
+        </p>
+        <pre style="background:var(--mist);border-radius:12px;padding:16px 18px;overflow-x:auto"><code>background: rgba(255, 255, 255, 0.5);
+box-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
+
+/* the rim, as a masked gradient on ::before */
+border-radius: inherit;
+padding: 1.5px;
+background: linear-gradient(135deg,
+  #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+mask: linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+mask-composite: exclude;</code></pre>
+        <p class="cap">
+          Surfaces with a colour of their own — the wine card, a selected speed, the record
+          button — keep that colour and take the rim only. Sheets sit over live content, so they
+          add <code>backdrop-filter: blur(20px)</code>, where the glass has something to bend.
+        </p>
+      </div>
+
+      <div class="card">
         <h3>Notes</h3>
         <div class="k-note private">
           <div class="nh">
