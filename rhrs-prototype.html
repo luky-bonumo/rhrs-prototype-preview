@@ -349,7 +349,10 @@
   .jump-btn {
     position: absolute; bottom: calc(100% + 16px); right: 24px;
     width: 52px; height: 52px; border-radius: 50%;
-    background: var(--white); border: none; cursor: pointer;
+    /* the one control that floats over moving content, so the one that earns a blur */
+    background: rgba(255, 255, 255, 0.72); border: none; cursor: pointer;
+    -webkit-backdrop-filter: blur(14px) saturate(1.6);
+            backdrop-filter: blur(14px) saturate(1.6);
     display: none; align-items: center; justify-content: center;
     color: var(--accent);
     box-shadow: 0 3px 14px rgba(0,0,0,0.10);
@@ -363,9 +366,14 @@
   .mini {
     display: none; align-items: center; gap: 14px;
     background: var(--card-bg); border-radius: 18px;
-    padding: 14px 18px; cursor: pointer;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    padding: 9px 16px; cursor: pointer;
   }
+  /* Not a scrubber — seeking belongs to the full transport. It only says where
+     you are, and it stays out of the way of the tap that opens the big player. */
+  .mini .mini-bar { height: 3px; cursor: inherit; pointer-events: none; }
+  /* Collapsed, it should cost as little of the script as possible. */
+  .transport.collapsed { padding-bottom: 0; }
+  .transport.collapsed .mini { margin-bottom: -4px; }
   .mini.show { display: flex; }
   .mini .t-time { font-size: 13px; font-weight: 500; color: var(--accent); flex: 0 0 auto; }
   .mini .bar { flex: 1 1 auto; }
@@ -887,9 +895,12 @@
   }
   #listenScroll .stage-only, #rehearseScroll .stage-only {
     border-radius: var(--radius-lcard);
-    padding: 18px 20px;
+    padding: 20px;
     margin-bottom: 14px;
   }
+  /* the note is the whole content of this card, so it carries no trailing margin */
+  #listenScroll .stage-only .note, #rehearseScroll .stage-only .note { margin-bottom: 0; }
+  .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
   /* the narrator's play control sits with the label, before the menu */
   .stage-only .lc-btn { color: var(--wine); margin-left: auto; }
   .stage-only .lc-btn + .line-menu-btn { margin-left: 0; }
@@ -1198,6 +1209,10 @@
     <div class="scroll fade-b" id="rehearseScroll"></div>
 
     <div class="transport">
+      <button class="jump-btn" id="rehearseJump" onclick="scrollToActive('rehearse')" aria-label="Go to current line">
+        <i class="ph-bold ph-caret-up ic-24" id="rehearseJumpIc"></i>
+      </button>
+
       <!-- state: audio — someone else is speaking, you just listen. Next moves on to your line. -->
       <div class="expanded show" id="rehAudio">
         <div class="t-main">
@@ -1213,6 +1228,15 @@
           <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span>01:21</span>
         </div>
+      </div>
+
+      <!-- collapsed cue playback, same idea as Listen -->
+      <div class="mini" id="rehMini" onclick="expandPlayer('rehearse')">
+        <span class="t-time" id="rehMiniTime">00:59</span>
+        <div class="bar mini-bar"><div class="fill" style="width:32%"></div></div>
+        <button class="mini-toggle" onclick="event.stopPropagation(); togglePlay('rehearse')" aria-label="Play / pause">
+          <i class="ph-fill ph-pause ic-24" id="rehMiniIc"></i>
+        </button>
       </div>
 
       <!-- state: talking (recording your line) -->
@@ -1395,7 +1419,7 @@
               <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
               <div class="set-sub">A narrator reads them between the lines</div>
             </div>
-            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+            <button class="toggle on" onclick="toggleNarrate('listen', this)"></button>
           </div>
           <div class="set-row">
             <div>
@@ -1431,7 +1455,7 @@
               <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
               <div class="set-sub">Off by default here — a narrator between cues throws your timing</div>
             </div>
-            <button class="toggle" onclick="this.classList.toggle('on')"></button>
+            <button class="toggle" onclick="toggleNarrate('rehearse', this)"></button>
           </div>
           <div class="set-row">
             <div>
@@ -1544,13 +1568,26 @@
     { who:'Anna',    mine:false, text:"Goodnight." }
   ];
 
-  /* Only spoken lines can hold the playhead; stage directions are stepped over. */
   const isLine  = i => !!SCRIPT[i] && !!SCRIPT[i].who;
   const lineIdx = () => SCRIPT.map((it, i) => it.who ? i : -1).filter(i => i >= 0);
-  function stepIdx(from, dir) {
-    let i = from + dir;
-    while (SCRIPT[i] && !isLine(i)) i += dir;
-    return isLine(i) ? i : from;
+
+  /* Whether the narrator reads the stage directions aloud. On in Listen, where you
+     are learning the play; off in Rehearse, where a voice between cues throws the
+     timing you are drilling. It decides what the playhead can stop on. */
+  const narrate = { listen: true, rehearse: false };
+
+  function playableIdx(mode) {
+    return SCRIPT.map((it, i) => (it.who || (narrate[mode] && it.stage)) ? i : -1)
+                 .filter(i => i >= 0);
+  }
+  function stepIdx(from, dir, mode = 'listen') {
+    const list = playableIdx(mode);
+    const at = list.indexOf(from);
+    if (at === -1) {
+      const off = dir > 0 ? list.find(i => i > from) : [...list].reverse().find(i => i < from);
+      return off ?? from;
+    }
+    return list[at + dir] ?? from;
   }
   const shorten = t => t.length > 44 ? t.slice(0, 43).trimEnd() + '…' : t;
 
@@ -1677,11 +1714,13 @@
 
   /* A stage direction standing between lines. It is a script item in its own
      right, so it carries the same menu a line does. */
-  function stageBlock(idx, text, playable) {
-    const play = playable
-      ? `<button class="lc-btn" onclick="toast('Narrator reads the direction')" aria-label="Read aloud">${ICON.play}</button>`
+  function stageBlock(idx, text, mode) {
+    const isActive = mode && idx === activeIdx;
+    const play = mode
+      ? `<button class="lc-btn" onclick="cardControl('${mode}', ${idx})" aria-label="Read aloud">${
+          isActive && playing ? ICON.pause : ICON.play}</button>`
       : '';
-    return `<div class="stage-only" data-idx="${idx}">
+    return `<div class="stage-only ${isActive ? 'active' : ''}" data-idx="${idx}">
       <div class="note stage" data-idx="${idx}" data-type="stage">
         <div class="note-head">
           <span class="flag stage">${FLAG_IC}</span>
@@ -1747,7 +1786,7 @@
   function renderCards(mode) {
     const isReh = mode === 'rehearse';
     document.getElementById(mode + 'Scroll').innerHTML = SCRIPT.map((line, idx) => {
-      if (!line.who) return stageBlock(idx, line.stage, true);
+      if (!line.who) return stageBlock(idx, line.stage, mode);
       const isActive = idx === activeIdx;
 
       /* Control in the card header. A mic only on the line you are performing;
@@ -1790,6 +1829,16 @@
   /* Playing a line you can already see should not move the page under you —
      no scroll here. The transport's next/previous do scroll, because there the
      line you are moving to may well be off screen. */
+  function toggleNarrate(mode, btn) {
+    btn.classList.toggle('on');
+    narrate[mode] = btn.classList.contains('on');
+    /* If the playhead was parked on a direction we have just silenced, move it on. */
+    if (!narrate[mode] && !isLine(activeIdx)) activeIdx = stepIdx(activeIdx, 1, mode);
+    renderCards(mode);
+    if (mode === 'rehearse') syncRehearse();
+    updateTransport(mode);
+  }
+
   function cardControl(mode, idx) {
     if (idx === activeIdx) { togglePlay(mode); return; }
     activeIdx = idx;
@@ -1805,14 +1854,14 @@
   function togglePlay(mode) {
     playing = !playing;
     const ic = playing ? 'ph-pause' : 'ph-play';
-    ['listenBigIc','listenMiniIc','rehAudioIc'].forEach(id => {
+    ['listenBigIc','listenMiniIc','rehAudioIc','rehMiniIc'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.className = el.className.replace(/ph-(pause|play)/, ic);
     });
     renderCards(mode);
   }
   function stepLine(mode, dir) {
-    activeIdx = stepIdx(activeIdx, dir);
+    activeIdx = stepIdx(activeIdx, dir, mode);
     playing = true;
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
@@ -1864,38 +1913,49 @@
      scrolled out of view. Tapping the bar overrides that and opens it back up;
      the override lasts until you are back at the line, which is the point at
      which it stops meaning anything. */
-  let forcedOpen = false;
+  const forcedOpen = { listen: false, rehearse: false };
+  const TRANSPORT = {
+    listen:   { expanded: 'listenExpanded', mini: 'listenMini', jump: 'listenJump',   jumpIc: 'listenJumpIc' },
+    rehearse: { expanded: 'rehAudio',       mini: 'rehMini',    jump: 'rehearseJump', jumpIc: 'rehearseJumpIc' }
+  };
 
   function expandPlayer(mode) {
-    forcedOpen = true;
+    forcedOpen[mode] = true;
     updateTransport(mode);
   }
 
   function updateTransport(mode) {
+    const t = TRANSPORT[mode];
+    if (!t) return;
     const scroll = document.getElementById(mode + 'Scroll');
-    const card = scroll.querySelector('.lcard.active');
+    const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (!card) return;
     const cr = card.getBoundingClientRect(), sr = scroll.getBoundingClientRect();
     const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
-    if (atLine) forcedOpen = false;
+    if (atLine) forcedOpen[mode] = false;
 
-    if (mode === 'listen') {
-      const open = atLine || forcedOpen;
-      document.getElementById('listenExpanded').classList.toggle('show', open);
-      document.getElementById('listenMini').classList.toggle('show', !open);
-      /* The chevron follows the line, not the player, so expanding by hand
-         keeps your way back. */
-      const jump = document.getElementById('listenJump');
-      jump.classList.toggle('show', !atLine);
-      document.getElementById('listenJumpIc').className =
-        'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
-    }
+    /* Rehearse only collapses while it is playing a cue. The mic states stay put —
+       there is nothing to scroll away from when you are the one talking. */
+    const collapsible = mode === 'listen' || rehState === 'audio';
+    const open = !collapsible || atLine || forcedOpen[mode];
+
+    document.getElementById(t.expanded).classList.toggle('show', open);
+    document.getElementById(t.mini).classList.toggle('show', collapsible && !open);
+    scroll.closest('.screen').querySelector('.transport')
+      .classList.toggle('collapsed', collapsible && !open);
+
+    /* The chevron follows the line, not the player, so expanding by hand keeps
+       your way back. */
+    const jump = document.getElementById(t.jump);
+    jump.classList.toggle('show', collapsible && !atLine);
+    document.getElementById(t.jumpIc).className =
+      'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
   }
   /* Scroll the container itself — scrollIntoView() would also scroll the
      phone frame, which is only clipped by overflow:hidden, not unscrollable. */
   function scrollToActive(mode, behavior) {
     const scroll = document.getElementById(mode + 'Scroll');
-    const card = scroll.querySelector('.lcard.active');
+    const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (card) {
       scroll.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: behavior || 'smooth' });
     }
@@ -1923,6 +1983,11 @@
     rehState = state;
     Object.entries(REH_STATES).forEach(([key, id]) =>
       document.getElementById(id).classList.toggle('show', key === state));
+    if (state !== 'audio') {
+      document.getElementById('rehMini').classList.remove('show');
+      document.getElementById('rehearseJump').classList.remove('show');
+      document.querySelector('#rehearseScreen .transport').classList.remove('collapsed');
+    }
     if (state === 'talking') startRecording(); else stopRecording();
     if (state !== 'paused') stopTake();
   }
@@ -1957,7 +2022,7 @@
   function rehComplete() {
     rehSetState('success');
     setTimeout(() => {
-      activeIdx = stepIdx(activeIdx, 1);
+      activeIdx = stepIdx(activeIdx, 1, 'rehearse');
       renderCards('rehearse');
       syncRehearse();
       scrollToActive('rehearse');
