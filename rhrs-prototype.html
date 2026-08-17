@@ -1616,6 +1616,14 @@
 
   /* Global default note visibility (driven by the settings toggles) */
   const defaults = { private:true, stage:true };
+  const showText = { mine:true, others:true };
+
+  /* The body of a line, or a stand-in when that side is switched off. */
+  function lineBody(item) {
+    return showText[item.mine ? 'mine' : 'others']
+      ? `<div class="line-text">${item.text}</div>`
+      : '<div class="placeholder">— text hidden —</div>';
+  }
 
   /* Playback / rehearsal state */
   let currentMode = 'read';        // read | listen | rehearse
@@ -1670,7 +1678,7 @@
      so Back always returns to the scene list. */
   function switchMode(m) {
     currentMode = m;
-    forcedOpen = false;
+    forcedOpen.listen = forcedOpen.rehearse = false;
     const cur = navStack[navStack.length - 1];
     if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
     if (m === 'read')     renderRead();
