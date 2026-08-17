@@ -117,7 +117,7 @@
   .line.mine   .char-name { color: var(--coral); }
   .line.others .char-name { color: var(--wine); }
   .line-text {
-    font-size: var(--line-size, 20px); line-height: 1.55;
+    font-size: var(--line-size, 16px); line-height: 1.55;
     color: var(--text-body); font-weight: 400;
   }
 
@@ -253,7 +253,7 @@
           <span class="lbl">Text</span>
           <span class="grp">
             <button onclick="stepSize(-1)" aria-label="Smaller">A</button>
-            <span class="val" id="sizeVal">20px</span>
+            <span class="val" id="sizeVal">16px</span>
             <button onclick="stepSize(1)" style="font-size:17px" aria-label="Larger">A</button>
           </span>
           <span class="grp">
@@ -428,8 +428,8 @@
   }
 
   /* ---- page tools ---- */
-  const SIZES = [16, 18, 20, 22, 25, 28];
-  let sizeIdx = 2;
+  const SIZES = [14, 16, 18, 20, 22, 25, 28];
+  let sizeIdx = 1;
   function stepSize(dir) {
     sizeIdx = Math.max(0, Math.min(SIZES.length - 1, sizeIdx + dir));
     document.querySelector('.phone').style.setProperty('--line-size', SIZES[sizeIdx] + 'px');

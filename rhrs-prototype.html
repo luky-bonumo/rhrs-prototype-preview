@@ -151,7 +151,7 @@
     font-family: var(--font-display);
     font-weight: 600; font-size: 18px; color: var(--wine);
     line-height: 1.25; padding: 0 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-wrap: balance;
   }
   .detail-header .spacer { width: 46px; flex: 0 0 auto; }
 
@@ -265,7 +265,7 @@
   .others .line-menu-btn .dots span { background: var(--wine); }
   .line-menu-btn:active { background: rgba(0,0,0,0.04); }
 
-  .line-text { font-size: 20px; line-height: var(--line-height); color: var(--text-body); font-weight: 400; }
+  .line-text { font-size: 16px; line-height: var(--line-height); color: var(--text-body); font-weight: 400; }
 
   /* ---------- Read: divider-separated lines ---------- */
   .line { padding: 18px 0 20px; border-bottom: 1px solid var(--divider); }
@@ -1223,7 +1223,7 @@
           <div><div class="set-label">Font size</div></div>
           <div class="font-stepper">
             <button class="fs-a" onclick="fontStep(-1)" id="fsDown">A</button>
-            <span class="fs-val" id="fsVal">20</span>
+            <span class="fs-val" id="fsVal">16</span>
             <button class="fs-b" onclick="fontStep(1)" id="fsUp">A</button>
           </div>
         </div>
@@ -1806,8 +1806,8 @@
   /* ============================================================
      SETTINGS BEHAVIOUR
      ============================================================ */
-  const FS_STEPS = [16, 18, 20, 22, 25, 28];
-  let fsIdx = 2;
+  const FS_STEPS = [14, 16, 18, 20, 22, 25, 28];
+  let fsIdx = 1;
   function applyFontSize() {
     document.querySelectorAll('.line-text').forEach(el => el.style.fontSize = FS_STEPS[fsIdx] + 'px');
   }
