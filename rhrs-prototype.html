@@ -1304,14 +1304,14 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">My lines</div>
+            <div class="set-label"><i class="ph ph-text-t ic-18 lbl-ic private"></i>My lines</div>
             <div class="set-sub">Show the text of my lines</div>
           </div>
           <button class="toggle on" data-target="mine" onclick="toggleLines(this)"></button>
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Others' lines</div>
+            <div class="set-label"><i class="ph ph-text-t ic-18 lbl-ic stage"></i>Others' lines</div>
             <div class="set-sub">Show the text of other characters</div>
           </div>
           <button class="toggle on" data-target="others" onclick="toggleLines(this)"></button>
@@ -1855,7 +1855,7 @@
   /* Playing the take back is play/pause on the pill itself. A scrubber for ten
      seconds of speech would be furniture, and the full transport already exists
      one step on, in Evaluation, which is where you go to study a take. */
-  let takePlaying = false, takeTick = null, takeAt = 0;
+  let takePlaying = false, takeTick = null, takeStart = 0;
 
   function setTakeIcon(kind) {
     document.getElementById('rehTakeIc').className = 'ph-fill ph-' + kind + ' ic-20';
@@ -1863,13 +1863,15 @@
   function toggleTake() {
     if (takePlaying) { stopTake(); return; }
     takePlaying = true;
-    takeAt = 0;
+    takeStart = Date.now();
     setTakeIcon('pause');
+    /* Read the wall clock rather than counting ticks: a backgrounded tab clamps
+       timers to about a second and an accumulator would drift with it. */
     takeTick = setInterval(() => {
-      takeAt += 0.25;
-      if (takeAt >= TAKE_MS / 1000) { stopTake(); return; }
-      document.getElementById('rehTakeTime').textContent = clock(takeAt);
-    }, 250);
+      const at = (Date.now() - takeStart) / 1000;
+      if (at >= TAKE_MS / 1000) { stopTake(); return; }
+      document.getElementById('rehTakeTime').textContent = clock(at);
+    }, 200);
   }
   function stopTake() {
     takePlaying = false;
