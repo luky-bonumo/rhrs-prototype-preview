@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rhrs — screen map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  /* ---- shared shell for the rhrs design pages (kept inline: no build step) ---- */
+  :root {
+    --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
+    --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
+    --coral-tint:#FDECEB; --coral-border:#F0A9A7;
+    --wine-tint:#F3E7E9;  --wine-border:#C9AAB0;
+    --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
+    --font-display:'Platypi', Georgia, serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+    --page:#F2EDEE; --shell:1120px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body); background: var(--page); color: var(--text-body);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--wine); }
+  :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+
+  .top { background: var(--wine); color: var(--mist); padding: 26px 0 34px; }
+  .shell { max-width: var(--shell); margin: 0 auto; padding: 0 28px; }
+  .top .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(245,245,245,0.8); text-decoration: none;
+    font-size: 14px; font-weight: 600; margin-bottom: 22px;
+  }
+  .top .back:hover { color: var(--mist); }
+  .top h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
+    text-wrap: balance; max-width: 20ch;
+  }
+  .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
+  .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
+
+  main { padding: 40px 0 70px; }
+  section + section { margin-top: 46px; }
+  .sec-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 12px;
+  }
+  h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 25px;
+    color: var(--noir); margin-bottom: 6px; text-wrap: balance;
+  }
+  .note-line { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin-bottom: 20px; }
+  footer {
+    border-top: 1px solid var(--divider); padding: 26px 0 60px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  footer a { font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  /* ---- diagram ---- */
+  .map {
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 20px; padding: 12px; overflow-x: auto;
+  }
+  .map svg { display: block; width: 100%; min-width: 880px; height: auto; }
+
+  .node rect { transition: filter .15s ease; }
+  .node:hover rect { filter: drop-shadow(0 3px 10px rgba(122,30,45,.22)); }
+  .n-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; fill: var(--noir); }
+  .n-sub   { font-family: var(--font-body); font-size: 11.5px; fill: var(--text-muted); }
+  .n-entry .n-title { fill: #FFFFFF; }
+  .n-entry .n-sub   { fill: rgba(255,255,255,.72); }
+  .n-planned .n-title { fill: #8A7C7F; font-weight: 500; }
+  .n-overlay .n-title { fill: var(--coral); font-size: 15px; }
+  .g-label {
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; fill: var(--wine); text-transform: uppercase;
+  }
+  .g-note { font-family: var(--font-body); font-size: 11.5px; fill: var(--text-muted); }
+  .edge { stroke: var(--wine); stroke-width: 2; opacity: .42; fill: none; }
+  .edge-planned { stroke: var(--grey); stroke-width: 2; stroke-dasharray: 5 5; opacity: .75; fill: none; }
+
+  /* ---- legend ---- */
+  .legend { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px; }
+  .legend span { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text-muted); }
+  .legend .sw { width: 26px; height: 17px; border-radius: 5px; flex: 0 0 auto; }
+  .sw-entry   { background: var(--wine); }
+  .sw-built   { background: var(--white); border: 1.5px solid var(--wine-border); }
+  .sw-overlay { background: var(--white); border: 1.5px dashed var(--coral-border); }
+  .sw-planned { background: transparent; border: 1.5px dashed var(--grey); }
+
+  /* ---- screens table ---- */
+  .rows { display: grid; gap: 10px; }
+  .row {
+    display: grid; grid-template-columns: 190px 1fr auto; gap: 18px; align-items: center;
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 14px; padding: 15px 20px;
+  }
+  .row .r-name { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--noir); }
+  .row .r-what { color: var(--text-muted); font-size: 14.5px; }
+  .row .r-state {
+    font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+    border-radius: 999px; padding: 3px 11px; white-space: nowrap;
+  }
+  .st-built   { color: var(--wine);  border: 1.5px solid var(--wine-border); }
+  .st-overlay { color: var(--coral); border: 1.5px solid var(--coral-border); }
+  .st-todo    { color: #8A7C7F; border: 1.5px dashed var(--grey); }
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr auto; }
+    .row .r-what { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="shell">
+    <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
+    <h1>Every screen,<br>and how you <em>get there</em>.</h1>
+    <p class="lede">
+      The whole app in one picture. Solid boxes are drawn in the prototype — click one to open
+      it. Dashed boxes are still to be designed. Sheets slide up over whatever mode you are in.
+    </p>
+  </div>
+</header>
+
+<main class="shell">
+
+  <section>
+    <div class="map">
+      <svg viewBox="0 0 1040 620" role="img" aria-label="Map of the rhrs app screens and the routes between them">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
+          </marker>
+          <marker id="arrow-both" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
+          </marker>
+        </defs>
+
+        <!-- ===== scene group ===== -->
+        <rect x="282" y="190" width="718" height="396" rx="22"
+              fill="#7A1E2D" fill-opacity="0.035" stroke="#C9AAB0" stroke-dasharray="2 5"/>
+        <text class="g-label" x="308" y="218">One scene · three modes</text>
+        <text class="g-note"  x="308" y="580">The mode bar at the bottom of the phone switches between the three without leaving the scene.</text>
+
+        <!-- ===== spine ===== -->
+        <path class="edge" d="M140,112 L140,162" marker-end="url(#arrow)"/>
+        <path class="edge" d="M140,232 L140,282" marker-end="url(#arrow)"/>
+        <path class="edge" d="M140,352 L140,402" marker-end="url(#arrow)"/>
+        <!-- script detail → the scene -->
+        <path class="edge" d="M240,320 C272,320 274,272 300,272" marker-end="url(#arrow)"/>
+        <!-- dashboard → planned destinations -->
+        <path class="edge-planned" d="M240,80 C266,80 268,40 294,40"/>
+        <path class="edge-planned" d="M240,80 L294,88"/>
+        <path class="edge-planned" d="M240,80 C266,80 268,136 294,136"/>
+        <!-- between the modes — two-way, the mode bar moves you either direction -->
+        <path class="edge" d="M480,272 L520,272" marker-start="url(#arrow-both)" marker-end="url(#arrow-both)"/>
+        <path class="edge" d="M704,272 L744,272" marker-start="url(#arrow-both)" marker-end="url(#arrow-both)"/>
+        <!-- rehearse → evaluation -->
+        <path class="edge" d="M836,304 L836,364" marker-end="url(#arrow)"/>
+
+        <!-- ===== spine nodes ===== -->
+        <a class="node n-entry" href="rhrs-prototype.html#dashboard">
+          <rect x="40" y="48" width="200" height="64" rx="15" fill="#7A1E2D"/>
+          <text class="n-title" x="140" y="76"  text-anchor="middle">Dashboard</text>
+          <text class="n-sub"   x="140" y="95"  text-anchor="middle">Entry · last open · stats</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#scripts">
+          <rect x="40" y="168" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="140" y="196" text-anchor="middle">All scripts</text>
+          <text class="n-sub"   x="140" y="215" text-anchor="middle">Every play you have</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#detail">
+          <rect x="40" y="288" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="140" y="316" text-anchor="middle">Script detail</text>
+          <text class="n-sub"   x="140" y="335" text-anchor="middle">Scenes · whole play</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#edit">
+          <rect x="40" y="408" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="140" y="436" text-anchor="middle">Edit play</text>
+          <text class="n-sub"   x="140" y="455" text-anchor="middle">Characters · scenes</text>
+        </a>
+
+        <!-- ===== planned ===== -->
+        <g class="node n-planned">
+          <rect x="294" y="20" width="190" height="40" rx="12" fill="none" stroke="#C9BFC1" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text class="n-title" x="389" y="45" text-anchor="middle">Self tape</text>
+        </g>
+        <g class="node n-planned">
+          <rect x="294" y="68" width="190" height="40" rx="12" fill="none" stroke="#C9BFC1" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text class="n-title" x="389" y="93" text-anchor="middle">My characters</text>
+        </g>
+        <g class="node n-planned">
+          <rect x="294" y="116" width="190" height="40" rx="12" fill="none" stroke="#C9BFC1" stroke-width="1.5" stroke-dasharray="5 5"/>
+          <text class="n-title" x="389" y="141" text-anchor="middle">Global settings</text>
+        </g>
+
+        <!-- ===== modes ===== -->
+        <a class="node" href="rhrs-prototype.html#read">
+          <rect x="300" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="388" y="268" text-anchor="middle">Read</text>
+          <text class="n-sub"   x="388" y="287" text-anchor="middle">Lines · notes · no audio</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#listen">
+          <rect x="524" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="612" y="268" text-anchor="middle">Listen</text>
+          <text class="n-sub"   x="612" y="287" text-anchor="middle">The scene reads itself</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#rehearse">
+          <rect x="748" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="836" y="268" text-anchor="middle">Rehearse</text>
+          <text class="n-sub"   x="836" y="287" text-anchor="middle">Cue plays · you speak</text>
+        </a>
+        <a class="node" href="rhrs-prototype.html#evaluation">
+          <rect x="748" y="364" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#C9AAB0" stroke-width="1.5"/>
+          <text class="n-title" x="836" y="392" text-anchor="middle">Evaluation</text>
+          <text class="n-sub"   x="836" y="411" text-anchor="middle">Transcript of your take</text>
+        </a>
+
+        <!-- ===== overlays ===== -->
+        <line x1="308" y1="470" x2="974" y2="470" stroke="#C9AAB0" stroke-dasharray="2 5"/>
+        <text class="g-label" x="308" y="462">Slides up over any mode</text>
+        <g class="node n-overlay">
+          <rect x="308" y="492" width="212" height="52" rx="14" fill="#FFFFFF" stroke="#F0A9A7" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="414" y="523" text-anchor="middle">Line menu</text>
+        </g>
+        <g class="node n-overlay">
+          <rect x="540" y="492" width="212" height="52" rx="14" fill="#FFFFFF" stroke="#F0A9A7" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="646" y="523" text-anchor="middle">Mode settings</text>
+        </g>
+        <g class="node n-overlay">
+          <rect x="772" y="492" width="202" height="52" rx="14" fill="#FFFFFF" stroke="#F0A9A7" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="873" y="523" text-anchor="middle">Note editor</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="sw sw-entry"></i>Entry point</span>
+      <span><i class="sw sw-built"></i>Drawn — click to open</span>
+      <span><i class="sw sw-overlay"></i>Bottom sheet</span>
+      <span><i class="sw sw-planned"></i>Still to design</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Screen by screen</div>
+    <h2>What each one is for</h2>
+    <p class="note-line">
+      The same list as the map, in reading order, with a note on what the screen has to do.
+    </p>
+
+    <div class="rows">
+      <div class="row">
+        <span class="r-name">Dashboard</span>
+        <span class="r-what">Landing screen. Last opened scripts, shortcuts, and the week's stats. The only screen on a wine background.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">All scripts</span>
+        <span class="r-what">Every play, with scene counts and whether you have a part in it.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Script detail</span>
+        <span class="r-what">The scenes of one play, plus a whole-play entry. Leads to Edit play.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Edit play</span>
+        <span class="r-what">Characters and their line counts, and reorder, edit or delete scenes.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Read</span>
+        <span class="r-what">Plain reading. Lines separated by rules, private notes and stage directions, no playback.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Listen</span>
+        <span class="r-what">The scene plays itself. Lines become cards, the one being read is outlined, and the transport takes the colour of whoever is speaking.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Rehearse</span>
+        <span class="r-what">Cue and answer. Someone else's line plays as audio in wine; your own line records in coral with the text hidden.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Evaluation</span>
+        <span class="r-what">What the app heard you say, against the line as written. Opens from Rehearse, closes back to it.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Line menu</span>
+        <span class="r-what">Per-line actions: start here in Listen or Rehearse, edit the line, add a private note, record audio.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Mode settings</span>
+        <span class="r-what">Settings for the mode you are in — text size, which lines show, note defaults, playback speed.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Note editor</span>
+        <span class="r-what">Writing a private note or a stage direction on a line. Reachable from the line menu, not yet drawn.</span>
+        <span class="r-state st-todo">To design</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Self tape</span>
+        <span class="r-what">Recording an audition to camera. Shortcut exists on the dashboard, screen not yet drawn.</span>
+        <span class="r-state st-todo">To design</span>
+      </div>
+      <div class="row">
+        <span class="r-name">My characters</span>
+        <span class="r-what">The roles you play across all scripts. Shortcut exists on the dashboard, screen not yet drawn.</span>
+        <span class="r-state st-todo">To design</span>
+      </div>
+      <div class="row">
+        <span class="r-name">Global settings</span>
+        <span class="r-what">Account, voices, rehearsal defaults, notifications, storage, appearance, subscription.</span>
+        <span class="r-state st-todo">To design</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="shell">
+  <a href="index.html">rhrs design</a> · <a href="rhrs-prototype.html">Prototype</a> · <a href="style-kit.html">Style kit</a>
+</footer>
+
+</body>
+</html>

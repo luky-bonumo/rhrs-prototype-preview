@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rhrs — style kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<style>
+  /* ---- shared shell for the rhrs design pages (kept inline: no build step) ---- */
+  :root {
+    --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
+    --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
+    --coral-tint:#FDECEB; --coral-border:#F0A9A7;
+    --wine-tint:#F3E7E9;  --wine-border:#C9AAB0;
+    --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
+    --font-display:'Platypi', Georgia, serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+    --page:#F2EDEE; --shell:1120px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body); background: var(--page); color: var(--text-body);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--wine); }
+  :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+
+  .top { background: var(--wine); color: var(--mist); padding: 26px 0 34px; }
+  .shell { max-width: var(--shell); margin: 0 auto; padding: 0 28px; }
+  .top .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(245,245,245,0.8); text-decoration: none;
+    font-size: 14px; font-weight: 600; margin-bottom: 22px;
+  }
+  .top .back:hover { color: var(--mist); }
+  .top h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
+    text-wrap: balance; max-width: 20ch;
+  }
+  .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
+  .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
+
+  main { padding: 40px 0 70px; }
+  section + section { margin-top: 52px; }
+  .sec-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 12px;
+  }
+  h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 25px;
+    color: var(--noir); margin-bottom: 6px; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    color: var(--noir); margin-bottom: 12px;
+  }
+  .note-line { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin-bottom: 22px; }
+  .card {
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 18px; padding: 24px;
+  }
+  footer {
+    border-top: 1px solid var(--divider); padding: 26px 0 60px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  footer a { font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  /* ---- colour ---- */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 16px; }
+  .sw {
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 16px; overflow: hidden;
+  }
+  .sw .chip { height: 92px; }
+  .sw .meta { padding: 13px 15px 15px; }
+  .sw .nm { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--noir); }
+  .sw .hx { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  .sw .ro { font-size: 12.5px; color: var(--text-muted); margin-top: 7px; line-height: 1.4; }
+
+  .rule { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+  .rule > div { border-radius: 16px; padding: 20px 22px; }
+  .rule .r-coral { background: var(--coral-tint); border: 1.5px dashed var(--coral-border); }
+  .rule .r-wine  { background: var(--wine-tint);  border: 1.5px dashed var(--wine-border); }
+  .rule .r-word { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin-bottom: 5px; }
+  .rule .r-coral .r-word { color: var(--coral); }
+  .rule .r-wine  .r-word { color: var(--wine); }
+  .rule p { font-size: 14.5px; color: var(--text-body); }
+  @media (max-width: 620px) { .rule { grid-template-columns: 1fr; } }
+
+  /* ---- type ---- */
+  .faces { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .faces { grid-template-columns: 1fr; } }
+  .face .sample { font-size: 54px; line-height: 1.05; color: var(--noir); margin-bottom: 10px; }
+  .face .sample.display { font-family: var(--font-display); font-weight: 700; }
+  .face .sample.bodyf   { font-family: var(--font-body); font-weight: 500; }
+  .face .fname { font-family: var(--font-mono); font-size: 13px; color: var(--wine); }
+  .face .frole { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+  .scale { margin-top: 18px; display: grid; gap: 2px; }
+  .scale .st {
+    display: grid; grid-template-columns: 1fr 210px; gap: 20px; align-items: baseline;
+    padding: 13px 0; border-bottom: 1px solid var(--divider);
+  }
+  .scale .st:last-child { border-bottom: none; }
+  .scale .spec { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); text-align: right; }
+  @media (max-width: 620px) {
+    .scale .st { grid-template-columns: 1fr; gap: 4px; }
+    .scale .spec { text-align: left; }
+  }
+
+  /* ---- icons ---- */
+  .igroup + .igroup { margin-top: 26px; }
+  .igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .ibtn {
+    background: var(--white); border: 1px solid var(--divider); border-radius: 14px;
+    padding: 18px 12px 14px; cursor: pointer; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    font-family: var(--font-body); transition: border-color .15s ease, transform .12s ease;
+  }
+  .ibtn:hover { border-color: var(--wine-border); transform: translateY(-2px); }
+  .ibtn:active { transform: none; }
+  .ibtn .gl { font-size: 28px; color: var(--wine); line-height: 1; }
+  .ibtn.is-coral .gl { color: var(--coral); }
+  .ibtn .cls { font-family: var(--font-mono); font-size: 11.5px; color: var(--noir); word-break: break-all; }
+  .ibtn .use { font-size: 11.5px; color: var(--text-muted); line-height: 1.35; }
+  .ibtn .var {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+    color: var(--text-muted); border: 1px solid var(--divider); border-radius: 999px; padding: 1px 7px;
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(14px);
+    background: var(--noir); color: var(--white); font-size: 14px; font-weight: 500;
+    padding: 11px 20px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease; z-index: 40;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---- components ---- */
+  .comps { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+  .demo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+  .k-note { border-radius: 12px; padding: 12px 14px; }
+  .k-note.private { border: 1.5px dashed var(--coral-border); }
+  .k-note.stage   { border: 1.5px dashed var(--wine-border); }
+  .k-note + .k-note { margin-top: 10px; }
+  .k-note .nh { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+  .k-flag {
+    width: 18px; height: 18px; border-radius: 5px; color: var(--white);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 13px;
+  }
+  .k-flag.private { background: var(--coral); }
+  .k-flag.stage   { background: var(--wine); }
+  .k-note .nl { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+  .k-note.private .nl, .k-note.private .nb { color: var(--coral); }
+  .k-note.stage   .nl, .k-note.stage   .nb { color: var(--wine); }
+  .k-note .nb { font-style: italic; font-size: 15px; }
+
+  .k-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .3px; color: var(--coral);
+    border: 1.5px solid var(--coral); border-radius: 999px; padding: 2px 10px;
+  }
+  .k-name { font-family: var(--font-display); font-weight: 700; font-size: 21px; }
+  .k-name.mine { color: var(--coral); }
+  .k-name.other { color: var(--wine); }
+
+  .k-pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--mist); border: 1.5px solid var(--stone); border-radius: 999px;
+    padding: 11px 18px; font-size: 12px; font-weight: 700; letter-spacing: .6px;
+    text-transform: uppercase; color: var(--noir);
+  }
+  .k-pill.accent { color: var(--coral); }
+  .k-round {
+    width: 46px; height: 46px; border-radius: 50%; background: var(--white);
+    border: 1px solid var(--divider); color: var(--wine); font-size: 21px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .k-big {
+    width: 64px; height: 64px; border-radius: 50%; color: var(--white); font-size: 26px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .k-big.coral { background: var(--coral); box-shadow: 0 5px 18px rgba(239,83,80,.28); }
+  .k-big.wine  { background: var(--wine);  box-shadow: 0 5px 18px rgba(122,30,45,.28); }
+  .k-big.rec   { background: var(--coral); box-shadow: 0 0 0 10px rgba(239,83,80,.34), 0 0 0 22px rgba(239,83,80,.16); }
+  .k-toggle {
+    width: 50px; height: 30px; border-radius: 999px; background: var(--coral);
+    position: relative; display: inline-block;
+  }
+  .k-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 23px; width: 24px; height: 24px;
+    border-radius: 50%; background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .k-toggle.off { background: var(--stone); }
+  .k-toggle.off::after { left: 3px; }
+  .cap { font-size: 12.5px; color: var(--text-muted); margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="shell">
+    <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
+    <h1>Colour, type<br>and every <em>icon</em>.</h1>
+    <p class="lede">
+      What the prototype is built from. Six named colours, two typefaces, and the Phosphor
+      icons actually in use — tap any icon to copy its class. This is the reference for the
+      Flutter build and for anything else that has to look like rhrs.
+    </p>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- ================= COLOUR ================= -->
+  <section>
+    <div class="sec-label">Colour</div>
+    <h2>Six named colours</h2>
+    <p class="note-line">
+      Defined as CSS custom properties in <code>:root</code>. Everything else in the prototype
+      is derived from these — tints, borders and muted text all sit on the same wine axis
+      rather than on a neutral grey.
+    </p>
+
+    <div class="swatches">
+      <div class="sw">
+        <div class="chip" style="background:#1C0A10"></div>
+        <div class="meta">
+          <div class="nm">Noir</div><div class="hx">#1C0A10</div>
+          <div class="ro">Body text and dark elements.</div>
+        </div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#7A1E2D"></div>
+        <div class="meta">
+          <div class="nm">Wine</div><div class="hx">#7A1E2D</div>
+          <div class="ro">Other characters, shared elements, the main accent.</div>
+        </div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#EF5350"></div>
+        <div class="meta">
+          <div class="nm">Coral</div><div class="hx">#EF5350</div>
+          <div class="ro">You: your character, your notes, destructive actions.</div>
+        </div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#E0E0E0"></div>
+        <div class="meta">
+          <div class="nm">Stone</div><div class="hx">#E0E0E0</div>
+          <div class="ro">Neutral. Toggle off, empty track on a scrubber.</div>
+        </div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#F5F5F5"></div>
+        <div class="meta">
+          <div class="nm">Mist</div><div class="hx">#F5F5F5</div>
+          <div class="ro">Screen background, and text on wine.</div>
+        </div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#FFFFFF; box-shadow: inset 0 0 0 1px #E7E0E1"></div>
+        <div class="meta">
+          <div class="nm">White</div><div class="hx">#FFFFFF</div>
+          <div class="ro">Cards and raised surfaces.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">The one rule that carries the app</h3>
+    <div class="rule">
+      <div class="r-coral">
+        <div class="r-word">Coral is me</div>
+        <p>My character's name, my private notes, my recording, my line in a scene. If a control
+           acts on <em>me</em>, it is coral.</p>
+      </div>
+      <div class="r-wine">
+        <div class="r-word">Wine is everyone else</div>
+        <p>Other characters, stage directions, shared chrome, and any line the app reads to me.
+           If it belongs to the <em>scene</em>, it is wine.</p>
+      </div>
+    </div>
+    <p class="cap">
+      This is why the Listen and Rehearse transport changes colour mid-scene: it follows whoever
+      currently holds the line.
+    </p>
+  </section>
+
+  <!-- ================= TYPE ================= -->
+  <section>
+    <div class="sec-label">Typography</div>
+    <h2>Two typefaces</h2>
+    <p class="note-line">
+      A serif for anything that names something — headings, character names, titles — and a
+      humanist sans for everything you actually read. Times and playback speed use the system
+      monospace so digits do not shift as they count.
+    </p>
+
+    <div class="faces">
+      <div class="card face">
+        <div class="sample display">Platypi</div>
+        <div class="fname">'Platypi', Georgia, serif</div>
+        <div class="frole">Display. Headings, character names, card and scene titles, the mode bar. Weights 400–700.</div>
+      </div>
+      <div class="card face">
+        <div class="sample bodyf">DM Sans</div>
+        <div class="fname">'DM Sans', system-ui, sans-serif</div>
+        <div class="frole">Body. Line text, notes, labels, settings, everything read at length. Weights 400–700.</div>
+      </div>
+    </div>
+
+    <div class="card scale" style="margin-top:18px">
+      <div class="st"><span style="font-family:var(--font-display);font-weight:700;font-size:21px;color:var(--coral)">My character</span><span class="spec">Platypi 700 · 21px</span></div>
+      <div class="st"><span style="font-family:var(--font-display);font-weight:600;font-size:19px">Opening — the kitchen argument</span><span class="spec">Platypi 600 · 19px</span></div>
+      <div class="st"><span style="font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--wine)">Scene name tristique senectus</span><span class="spec">Platypi 600 · 18px</span></div>
+      <div class="st"><span style="font-size:20px">Aliquam at sollicitudin sem. Morbi faucibus.</span><span class="spec">DM Sans 400 · 20px · 16–28 adjustable</span></div>
+      <div class="st"><span style="font-style:italic;font-size:16px;color:var(--wine)">Id tristique nisi laoreet quis.</span><span class="spec">DM Sans italic 400 · 16px</span></div>
+      <div class="st"><span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text-muted)">Stage directions</span><span class="spec">DM Sans 700 · 11px · 0.6px tracking</span></div>
+      <div class="st"><span style="font-size:13px;color:var(--text-muted)">61 lines · 8 scenes</span><span class="spec">DM Sans 400 · 13px</span></div>
+      <div class="st"><span style="font-family:var(--font-mono);font-size:13px;color:var(--coral)">00:59 &nbsp; 1.0x &nbsp; 01:21</span><span class="spec">System mono · 13px</span></div>
+    </div>
+  </section>
+
+  <!-- ================= ICONS ================= -->
+  <section>
+    <div class="sec-label">Icons</div>
+    <h2>Every icon in the prototype</h2>
+    <p class="note-line">
+      All icons are <a href="https://phosphoricons.com">Phosphor</a>, loaded as a web font.
+      Markup is always <code>&lt;i class="ph ph-name ic-size"&gt;&lt;/i&gt;</code> — swapping an
+      icon means changing the <code>ph-*</code> class and nothing else, since colour and size come
+      from the surrounding CSS. <strong>Tap any tile to copy its class.</strong>
+      Only icons actually used are listed here; browse the full set on the Phosphor site.
+    </p>
+    <div id="icons"></div>
+  </section>
+
+  <!-- ================= COMPONENTS ================= -->
+  <section>
+    <div class="sec-label">Components</div>
+    <h2>Patterns that repeat</h2>
+    <p class="note-line">
+      The handful of pieces that appear across screens. Everything else is composed from these.
+    </p>
+
+    <div class="comps">
+      <div class="card">
+        <h3>Notes</h3>
+        <div class="k-note private">
+          <div class="nh">
+            <span class="k-flag private"><i class="ph-fill ph-note"></i></span>
+            <span class="nl">Your private note</span>
+          </div>
+          <div class="nb">Proin ut arcu sagittis, convallis magna et.</div>
+        </div>
+        <div class="k-note stage">
+          <div class="nh">
+            <span class="k-flag stage"><i class="ph-fill ph-note"></i></span>
+            <span class="nl">Stage directions</span>
+          </div>
+          <div class="nb">Id tristique nisi laoreet quis.</div>
+        </div>
+        <p class="cap">Dashed outline, no fill. Hidden notes collapse into the small flag beside the character name.</p>
+      </div>
+
+      <div class="card">
+        <h3>Character names and flags</h3>
+        <div class="demo">
+          <span class="k-name mine">My character</span>
+          <span class="k-flag private"><i class="ph-fill ph-note"></i></span>
+          <span class="k-flag stage"><i class="ph-fill ph-note"></i></span>
+        </div>
+        <div class="demo" style="margin-top:12px">
+          <span class="k-name other">Someone</span>
+          <span class="k-badge">Assigned</span>
+          <span class="k-badge">Me</span>
+        </div>
+        <p class="cap">The name alone tells you whose line it is. Badges are always coral outlines.</p>
+      </div>
+
+      <div class="card">
+        <h3>Transport</h3>
+        <div class="demo">
+          <span class="k-round"><i class="ph-bold ph-arrow-left"></i></span>
+          <span class="k-big wine"><i class="ph-fill ph-pause"></i></span>
+          <span class="k-round"><i class="ph-bold ph-arrow-right"></i></span>
+          <span class="k-big coral"><i class="ph-fill ph-play"></i></span>
+          <span class="k-big rec"><i class="ph-fill ph-microphone"></i></span>
+        </div>
+        <p class="cap">Plain buttons carry a soft drop shadow only. Rings are reserved for live recording, where they track the voice.</p>
+      </div>
+
+      <div class="card">
+        <h3>Buttons and switches</h3>
+        <div class="demo">
+          <span class="k-pill"><i class="ph ph-eye"></i>Show text</span>
+          <span class="k-pill accent"><i class="ph-fill ph-microphone"></i>Run this line</span>
+        </div>
+        <div class="demo" style="margin-top:14px">
+          <span class="k-toggle"></span>
+          <span class="k-toggle off"></span>
+          <span style="font-size:13px;color:var(--text-muted)">On / off</span>
+        </div>
+        <p class="cap">Pills are uppercase, 12px, 0.6px tracking. Coral marks the action that involves you.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="shell">
+  <a href="index.html">rhrs design</a> · <a href="rhrs-prototype.html">Prototype</a> · <a href="sitemap.html">Screen map</a>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* Every icon the prototype uses, in the order you meet them.
+     `v` is the Phosphor variant: '' regular, 'ph-fill', 'ph-bold'. */
+  const ICONS = [
+    ['Navigation and chrome', [
+      ['ph-caret-left',  '',        'Back'],
+      ['ph-caret-right', '',        'Onward chevron on cards and rows'],
+      ['ph-caret-up',    'ph-bold', 'Jump to the line playing above'],
+      ['ph-caret-down',  'ph-bold', 'Jump to the line playing below'],
+      ['ph-x',           'ph-bold', 'Close Evaluation'],
+      ['ph-gear-six',    '',        'Settings'],
+      ['ph-bell',        '',        'Notifications'],
+      ['ph-user',        '',        'Account'],
+      ['ph-funnel',      '',        'Sort and filter']
+    ]],
+    ['Dashboard', [
+      ['ph-video-camera', '', 'Self tape'],
+      ['ph-users',        '', 'My characters']
+    ]],
+    ['Editing', [
+      ['ph-pencil-simple', '', 'Edit — play, scene, character, line'],
+      ['ph-list-dashes',   '', 'Reorder scenes'],
+      ['ph-trash',         '', 'Delete scenes — destructive, coral'],
+      ['ph-plus',          '', 'Add. Held in reserve, not placed yet']
+    ]],
+    ['Modes', [
+      ['ph-book-open',  'ph-fill', 'Read — filled when active'],
+      ['ph-headphones', 'ph-fill', 'Listen — filled when active'],
+      ['ph-microphone', 'ph-fill', 'Rehearse — filled when active']
+    ]],
+    ['Notes', [
+      ['ph-note',      'ph-fill', 'Note flag beside a character name'],
+      ['ph-note',      '',        'Add or edit a note, in the line menu'],
+      ['ph-eye-slash', '',        'Hide a note'],
+      ['ph-eye',       '',        'Show the text of a hidden line']
+    ]],
+    ['Transport and rehearsal', [
+      ['ph-play',                    'ph-fill', 'Play a line or a take'],
+      ['ph-pause',                   'ph-fill', 'Pause'],
+      ['ph-arrow-left',              'ph-bold', 'Previous line'],
+      ['ph-arrow-right',             'ph-bold', 'Next line, and Skip'],
+      ['ph-arrow-counter-clockwise', 'ph-bold', 'Retake'],
+      ['ph-star-four',               'ph-fill', 'Evaluate'],
+      ['ph-check',                   'ph-bold', 'Line done — the success flash']
+    ]]
+  ];
+
+  const CORAL = new Set(['ph-trash', 'ph-star-four', 'ph-check', 'ph-microphone']);
+
+  document.getElementById('icons').innerHTML = ICONS.map(([group, items]) => `
+    <div class="igroup">
+      <h3>${group}</h3>
+      <div class="igrid">
+        ${items.map(([name, variant, use]) => {
+          const cls = `${variant || 'ph'} ${name}`;
+          const label = variant === 'ph-fill' ? 'Fill' : variant === 'ph-bold' ? 'Bold' : 'Regular';
+          return `<button class="ibtn ${CORAL.has(name) ? 'is-coral' : ''}" data-cls="${cls}">
+            <span class="gl"><i class="${cls}"></i></span>
+            <span class="cls">${name}</span>
+            <span class="var">${label}</span>
+            <span class="use">${use}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1700);
+  }
+
+  /* Clipboard access is blocked in some embedded viewers, so fall back to a
+     throwaway textarea rather than failing silently. */
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => toast('Copied  ' + text), legacy);
+    } else {
+      legacy();
+    }
+    function legacy() {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      ta.remove();
+      toast(ok ? 'Copied  ' + text : text);
+    }
+  }
+
+  document.getElementById('icons').addEventListener('click', e => {
+    const btn = e.target.closest('.ibtn');
+    if (btn) copy(btn.dataset.cls);
+  });
+</script>
+
+</body>
+</html>
