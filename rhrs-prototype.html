@@ -45,7 +45,7 @@
 
     --line-height:  1.55;
     --radius-card:  16px;
-    --radius-lcard: 20px;
+    --radius-lcard: 24px;
     --radius-note:  12px;
     --radius-pill:  999px;
 
@@ -282,16 +282,10 @@
 
   /* ---------- Listen / Rehearse: line cards ---------- */
   .lcard {
-    background: var(--card-bg);
-    border: 2px solid transparent;
     border-radius: var(--radius-lcard);
-    padding: 16px 18px 18px;
+    padding: 18px 20px 20px;
     margin-bottom: 14px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.035);
-    transition: border-color .18s ease;
   }
-  .lcard.active.mine   { border-color: var(--coral); }
-  .lcard.active.others { border-color: var(--wine); }
   .lcard .line-head { margin-bottom: 10px; }
   .lcard .line-head .spring { margin-left: auto; }
 
@@ -787,6 +781,71 @@
   .edit-row .er-label { flex: 1 1 auto; font-size: 16px; font-weight: 500; color: var(--noir); }
   .edit-row .er-chev { color: var(--text-muted); display: flex; }
   .edit-row.danger .er-ic, .edit-row.danger .er-label { color: var(--coral); }
+
+
+  /* ============ LIQUID GLASS ============
+     A translucent fill, a soft shadow dropped down-right, and a 1.5px rim that
+     catches light at the top-left and bottom-right and fades away through the
+     middle — the edge you get when a pane of glass sits just off the surface.
+
+     The rim is a masked gradient on ::before rather than the extra <span> the
+     original sketch used: it takes border-radius: inherit, so one rule covers
+     circles, pills and cards alike, and it needs no markup — which matters,
+     since most of these are rendered from JS. */
+  :root {
+    --glass-fill:   rgba(255, 255, 255, 0.5);
+    --glass-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
+    --glass-edge:   linear-gradient(135deg, #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+    --glass-rim:    1.5px;
+  }
+
+  .round-btn, .detail-header .back, .icon-btn,
+  .card, .lcard, .edit-card,
+  .mini, .skip-btn, .jump-btn,
+  .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
+  .eval-showtext, .speed-opt {
+    position: relative;
+    background: var(--glass-fill);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .round-btn::before, .detail-header .back::before, .icon-btn::before,
+  .card::before, .lcard::before, .edit-card::before,
+  .mini::before, .skip-btn::before, .jump-btn::before,
+  .settings-title .account-btn::before, .char-row .cr-edit::before,
+  .font-stepper button::before,
+  .eval-showtext::before, .speed-opt::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: var(--glass-rim);
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    transition: background .18s ease, padding .18s ease;
+  }
+
+  /* The line being played swaps the glass rim for a solid one in its own
+     colour. Same ring, different light — not a second border on top. */
+  .lcard.active::before        { --glass-rim: 2.5px; }
+  .lcard.active.mine::before   { background: var(--coral); }
+  .lcard.active.others::before { background: var(--wine); }
+
+  /* Surfaces that carry their own colour keep it and take only the rim. */
+  .card.featured, .speed-opt.on { background: inherit; }
+  .card.featured { background: var(--wine); }
+  .speed-row.mine   .speed-opt.on { background: var(--coral); }
+  .speed-row.others .speed-opt.on { background: var(--wine); }
+
+  /* Sheets sit over live content, so here the glass has something to bend. */
+  .sheet, .settings-sheet {
+    background: rgba(255, 255, 255, 0.82);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+            backdrop-filter: blur(20px) saturate(1.4);
+  }
 
   /* ============ PHOSPHOR ICON SIZING ============
      Phosphor web-font icons inherit color (currentColor) and size via font-size.
