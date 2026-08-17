@@ -25,6 +25,14 @@
   }
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; }
+
+  /* Optical centring for Platypi — see the style kit's Typography section. */
+  :root { --cap-shift: 0.092em; }
+  .cap-trim { text-box: trim-both cap alphabetic; }
+  @supports not (text-box: trim-both cap alphabetic) {
+    .cap-trim { display: inline-block; transform: translateY(calc(var(--cap-shift) * -1)); }
+  }
+
   body {
     font-family: var(--font-body); background: var(--page); color: var(--text-body);
     line-height: 1.55; -webkit-font-smoothing: antialiased;
@@ -268,72 +276,72 @@
 
     <div class="rows">
       <div class="row">
-        <span class="r-name">Dashboard</span>
+        <span class="r-name cap-trim">Dashboard</span>
         <span class="r-what">Landing screen. Last opened scripts, shortcuts, and the week's stats. The only screen on a wine background.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">All scripts</span>
+        <span class="r-name cap-trim">All scripts</span>
         <span class="r-what">Every play, with scene counts and whether you have a part in it.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Script detail</span>
+        <span class="r-name cap-trim">Script detail</span>
         <span class="r-what">The scenes of one play, plus a whole-play entry. Leads to Edit play.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Edit play</span>
+        <span class="r-name cap-trim">Edit play</span>
         <span class="r-what">Characters and their line counts, and reorder, edit or delete scenes.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Read</span>
+        <span class="r-name cap-trim">Read</span>
         <span class="r-what">Plain reading. Lines separated by rules, private notes and stage directions, no playback.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Listen</span>
+        <span class="r-name cap-trim">Listen</span>
         <span class="r-what">The scene plays itself. Lines become cards, the one being read is outlined, and the transport takes the colour of whoever is speaking.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Rehearse</span>
+        <span class="r-name cap-trim">Rehearse</span>
         <span class="r-what">Cue and answer. Someone else's line plays as audio in wine; your own line records in coral with the text hidden.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Evaluation</span>
+        <span class="r-name cap-trim">Evaluation</span>
         <span class="r-what">What the app heard you say, against the line as written. Opens from Rehearse, closes back to it.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name">Line menu</span>
+        <span class="r-name cap-trim">Line menu</span>
         <span class="r-what">Per-line actions: start here in Listen or Rehearse, edit the line, add a private note, record audio.</span>
         <span class="r-state st-overlay">Sheet</span>
       </div>
       <div class="row">
-        <span class="r-name">Mode settings</span>
+        <span class="r-name cap-trim">Mode settings</span>
         <span class="r-what">Settings for the mode you are in — text size, which lines show, note defaults, playback speed.</span>
         <span class="r-state st-overlay">Sheet</span>
       </div>
       <div class="row">
-        <span class="r-name">Note editor</span>
+        <span class="r-name cap-trim">Note editor</span>
         <span class="r-what">Writing a private note or a stage direction on a line. Reachable from the line menu, not yet drawn.</span>
         <span class="r-state st-todo">To design</span>
       </div>
       <div class="row">
-        <span class="r-name">Self tape</span>
+        <span class="r-name cap-trim">Self tape</span>
         <span class="r-what">Recording an audition to camera. Shortcut exists on the dashboard, screen not yet drawn.</span>
         <span class="r-state st-todo">To design</span>
       </div>
       <div class="row">
-        <span class="r-name">My characters</span>
+        <span class="r-name cap-trim">My characters</span>
         <span class="r-what">The roles you play across all scripts. Shortcut exists on the dashboard, screen not yet drawn.</span>
         <span class="r-state st-todo">To design</span>
       </div>
       <div class="row">
-        <span class="r-name">Global settings</span>
+        <span class="r-name cap-trim">Global settings</span>
         <span class="r-what">Account, voices, rehearsal defaults, notifications, storage, appearance, subscription.</span>
         <span class="r-state st-todo">To design</span>
       </div>

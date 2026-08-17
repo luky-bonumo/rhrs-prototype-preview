@@ -55,6 +55,25 @@
     --accent-rgb: 239, 83, 80;
   }
 
+  /* ---- Optical centring for Platypi ----
+     Platypi reserves 0.435em above its capitals but only 0.251em below the
+     baseline. Centring in a flex row centres that box, not the letters, so the
+     type rides 0.092em low beside an icon. (DM Sans is balanced at 0.009em and
+     needs none of this. Measured from the fonts themselves, not eyeballed.)
+
+     `text-box` trims the box to cap-height..baseline so centring lands on the
+     letters. Firefox has not shipped it yet, so the same amount is applied as a
+     transform there instead — one number, defined once.
+
+     Use only where Platypi is optically centred against something else. Running
+     text keeps the untrimmed box; that reserve is what gives paragraphs their
+     rhythm. */
+  :root { --cap-shift: 0.092em; }
+  .cap-trim { text-box: trim-both cap alphabetic; }
+  @supports not (text-box: trim-both cap alphabetic) {
+    .cap-trim { display: inline-block; transform: translateY(calc(var(--cap-shift) * -1)); }
+  }
+
   /* Pseudo-elements need border-box spelled out — `*` alone does not match them,
      which silently mis-centres anything sized with a border (e.g. the scrubber knob). */
   *, *::before, *::after { box-sizing: border-box; }
@@ -836,7 +855,7 @@
   <div class="screen" id="scriptsScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title" style="font-size:22px;font-weight:700;">All Scripts</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">All Scripts</span>
       <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
     </div>
     <div class="list" id="scriptsList"></div>
@@ -846,7 +865,7 @@
   <div class="screen" id="detailScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title" id="detailTitle">I love you, you're fine, but change…</span>
+      <span class="h-title cap-trim" id="detailTitle">I love you, you're fine, but change…</span>
       <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit play"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list" id="scenesList"></div>
@@ -856,7 +875,7 @@
   <div class="screen" id="editPlayScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title" style="font-size:22px;font-weight:700;">Edit play</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Edit play</span>
       <span class="spacer"></span>
     </div>
     <div class="list">
@@ -887,16 +906,16 @@
   <div class="screen" id="readScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <div class="header-title cap-trim js-scene-title">Scene name tristique senectus et netus et…</div>
       <button class="icon-btn" onclick="openSettings('read')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
     <div class="scroll" id="readScroll"></div>
 
     <div class="modebar">
-      <button class="mode active" onclick="switchMode('read')"><i class="ph-fill ph-book-open ic-24"></i>Read</button>
-      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i>Listen</button>
-      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i>Rehearse</button>
+      <button class="mode active" onclick="switchMode('read')"><i class="ph-fill ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
+      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
+      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -904,7 +923,7 @@
   <div class="screen" id="listenScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <div class="header-title cap-trim js-scene-title">Scene name tristique senectus et netus et…</div>
       <button class="icon-btn" onclick="openSettings('listen')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
@@ -944,9 +963,9 @@
     </div>
 
     <div class="modebar">
-      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i>Read</button>
-      <button class="mode active" onclick="switchMode('listen')"><i class="ph-fill ph-headphones ic-24"></i>Listen</button>
-      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i>Rehearse</button>
+      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
+      <button class="mode active" onclick="switchMode('listen')"><i class="ph-fill ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
+      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -954,7 +973,7 @@
   <div class="screen" id="rehearseScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title js-scene-title">Scene name tristique senectus et netus et…</div>
+      <div class="header-title cap-trim js-scene-title">Scene name tristique senectus et netus et…</div>
       <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
@@ -1017,9 +1036,9 @@
     </div>
 
     <div class="modebar">
-      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i>Read</button>
-      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i>Listen</button>
-      <button class="mode active" onclick="switchMode('rehearse')"><i class="ph-fill ph-microphone ic-24"></i>Rehearse</button>
+      <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
+      <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
+      <button class="mode active" onclick="switchMode('rehearse')"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -1027,13 +1046,13 @@
   <div class="screen" id="evaluationScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Close"><i class="ph-bold ph-x ic-22"></i></button>
-      <div class="header-title">Evaluation</div>
+      <div class="header-title cap-trim">Evaluation</div>
       <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
     <div class="eval-head mine">
       <div class="line-head">
-        <span class="char-name" id="evalName">My character</span>
+        <span class="char-name cap-trim" id="evalName">My character</span>
         <span class="note-flags">
           <span class="flag private"><i class="ph-fill ph-note ic-13"></i></span>
           <span class="flag stage"><i class="ph-fill ph-note ic-13"></i></span>
@@ -1084,7 +1103,7 @@
   <div class="settings-sheet" id="settingsSheet">
     <div class="sheet-grabber"></div>
     <div class="settings-title">
-      <span id="settingsTitle">Read Settings</span>
+      <span class="cap-trim" id="settingsTitle">Read Settings</span>
       <button class="account-btn" onclick="sheetAction('User account')" aria-label="User account">
         <i class="ph ph-user ic-22"></i>
       </button>
@@ -1346,7 +1365,7 @@
     document.getElementById('readScroll').innerHTML = LINES.map((line, idx) => `
       <div class="line ${line.mine ? 'mine' : 'others'}" data-idx="${idx}">
         <div class="line-head">
-          <span class="char-name">${line.name}</span>
+          <span class="char-name cap-trim">${line.name}</span>
           ${flagsFor(line, idx)}
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
@@ -1388,7 +1407,7 @@
 
       return `<div class="lcard ${line.mine ? 'mine' : 'others'} ${isActive ? 'active' : ''}" data-idx="${idx}">
         <div class="line-head">
-          <span class="char-name">${line.name}</span>
+          <span class="char-name cap-trim">${line.name}</span>
           ${flagsFor(line, idx)}
           <button class="lc-btn spring" onclick="cardControl('${mode}', ${idx})" aria-label="Play line">${ctrl}</button>
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
