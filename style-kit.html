@@ -17,8 +17,8 @@
   :root {
     --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
     --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
-    --coral-tint:#FDECEB; --coral-border:#F0A9A7;
-    --wine-tint:#F3E7E9;  --wine-border:#C9AAB0;
+    --coral-tint:#FDECEB; --coral-border:#F6CBCA;
+    --wine-tint:#F3E7E9;  --wine-border:#DFCCD0;
     --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
     --font-display:'Platypi', Georgia, serif;
     --font-body:'DM Sans', system-ui, sans-serif;
@@ -294,7 +294,7 @@
     position: relative;
     background: var(--glass-fill);
     box-shadow: var(--glass-shadow);
-    border-color: transparent;
+    border: none;
   }
   .card::before,
   .sw::before,
@@ -313,6 +313,65 @@
     -webkit-mask-composite: xor;
             mask-composite: exclude;
     pointer-events: none;
+  }
+
+  /* ---- control specimen (proposal, not yet in the app) ---- */
+  .ctl-row { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+  .ctl-demo { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .ctl-cap {
+    font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+    color: var(--noir); text-align: center; display: grid; gap: 3px;
+  }
+  .ctl-cap em {
+    font-style: normal; font-weight: 500; font-size: 11.5px;
+    letter-spacing: 0; text-transform: none; color: var(--text-muted);
+  }
+
+  .ctl {
+    position: relative; width: 64px; height: 64px; border-radius: 50%;
+    border: none; cursor: pointer; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 26px; color: var(--coral);
+    background: var(--glass-fill);
+    box-shadow: var(--glass-shadow);
+  }
+  .ctl::before, .bx::before {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit; padding: var(--glass-rim);
+    background: var(--glass-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+  /* one fill, softened: 14% toward white at the top-left, 10% toward black at the foot */
+  .ctl.coral, .ctl.wine, .bx.coral, .bx.wine {
+    color: #FFFFFF;
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--ctl-base) 86%, #FFFFFF) 0%,
+      var(--ctl-base) 54%,
+      color-mix(in srgb, var(--ctl-base) 90%, #000000) 100%);
+    box-shadow: 0 5px 16px color-mix(in srgb, var(--ctl-base) 32%, transparent);
+  }
+  .ctl.coral, .bx.coral { --ctl-base: var(--coral); }
+  .ctl.wine,  .bx.wine  { --ctl-base: var(--wine); }
+
+  /* the two faults, kept side by side so the fix is legible */
+  .ctl.bad-edge { border: 1.5px solid transparent; }
+  .ctl.loud {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--ctl-base) 62%, #FFFFFF) 0%,
+      var(--ctl-base) 52%,
+      color-mix(in srgb, var(--ctl-base) 70%, #000000) 100%);
+  }
+
+  .ctl-box { flex: 1 1 200px; }
+  .bx {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    height: 96px; border-radius: 24px;
+    background: var(--glass-fill); box-shadow: var(--glass-shadow);
+    font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--noir);
   }
 </style>
 </head>
@@ -520,6 +579,83 @@
       Only icons actually used are listed here; browse the full set on the Phosphor site.
     </p>
     <div id="icons"></div>
+  </section>
+
+  <!-- ================= CONTROLS ================= -->
+  <section>
+    <div class="sec-label">Controls · for review</div>
+    <h2>Round controls, three weights</h2>
+    <p class="note-line">
+      The plain one is what the prototype uses today. The two tinted ones are the proposal —
+      not applied to the app yet. All three are the same construction: a fill, a soft shadow,
+      and the glass rim. Only the fill changes.
+    </p>
+
+    <div class="card">
+      <div class="ctl-row">
+        <span class="ctl-demo">
+          <button class="ctl"><i class="ph-bold ph-arrow-left"></i></button>
+          <span class="ctl-cap">Plain<em>back, skip, settings</em></span>
+        </span>
+        <span class="ctl-demo">
+          <button class="ctl coral"><i class="ph-bold ph-arrow-left"></i></button>
+          <span class="ctl-cap">Mine<em>my line, my recording</em></span>
+        </span>
+        <span class="ctl-demo">
+          <button class="ctl wine"><i class="ph-bold ph-arrow-left"></i></button>
+          <span class="ctl-cap">Scene<em>a cue, someone else</em></span>
+        </span>
+      </div>
+
+      <h3 style="margin-top:30px">The same fills on a box</h3>
+      <div class="ctl-row">
+        <span class="ctl-box"><span class="bx">Plain</span></span>
+        <span class="ctl-box"><span class="bx coral">Mine</span></span>
+        <span class="ctl-box"><span class="bx wine">Scene</span></span>
+      </div>
+
+      <h3 style="margin-top:30px">Two things that were wrong</h3>
+      <div class="compare" style="margin-top:0">
+        <div>
+          <div class="clabel">Fill escaping the rim</div>
+          <div class="demo-row" style="justify-content:center;gap:26px">
+            <span class="ctl coral bad-edge"></span>
+            <span class="ctl coral"></span>
+          </div>
+          <p class="cap">
+            A border under a glass surface reserves width the rim never covers: <code>inset: 0</code>
+            resolves against the padding box, so the rim sits inside the border and the fill
+            shows as a ring outside it. Left has a 1.5px border, right has none.
+          </p>
+        </div>
+        <div>
+          <div class="clabel">Gradient strength</div>
+          <div class="demo-row" style="justify-content:center;gap:26px">
+            <span class="ctl coral loud"></span>
+            <span class="ctl coral"></span>
+          </div>
+          <p class="cap">
+            Left is the sketch's swing, right is softened: the fill travels 14% toward white at
+            the top-left and 10% toward black at the bottom-right, so the light reads as a
+            surface rather than a paint effect.
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:30px">Recipe</h3>
+      <pre><code>--ctl: var(--coral);            /* or var(--wine) */
+
+background: linear-gradient(135deg,
+  color-mix(in srgb, var(--ctl) 86%, #FFFFFF) 0%,
+  var(--ctl)                              54%,
+  color-mix(in srgb, var(--ctl) 90%, #000000) 100%);
+box-shadow: 0 5px 16px color-mix(in srgb, var(--ctl) 32%, transparent);
+border: none;                   /* any border pushes the rim inward */</code></pre>
+      <p class="cap">
+        The rim is unchanged from the plain control — same white gradient, same 1.5px. On a tinted
+        fill it reads as the lit edge of the glass rather than an outline.
+      </p>
+    </div>
   </section>
 
   <!-- ================= COMPONENTS ================= -->
