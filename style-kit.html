@@ -345,26 +345,17 @@
             mask-composite: exclude;
     pointer-events: none;
   }
-  /* one fill, softened: 14% toward white at the top-left, 10% toward black at the foot */
+  /* Colour takes a flat fill and a soft shadow. The rim is switched off — glass
+     is for the white surfaces, where there is something to read as glass. */
   .ctl.coral, .ctl.wine, .bx.coral, .bx.wine {
     color: #FFFFFF;
-    background: linear-gradient(135deg,
-      color-mix(in srgb, var(--ctl-base) 86%, #FFFFFF) 0%,
-      var(--ctl-base) 54%,
-      color-mix(in srgb, var(--ctl-base) 90%, #000000) 100%);
-    box-shadow: 0 5px 16px color-mix(in srgb, var(--ctl-base) 32%, transparent);
+    background: var(--ctl-base);
+    box-shadow: 0 5px 18px color-mix(in srgb, var(--ctl-base) 28%, transparent);
   }
+  .ctl.coral::before, .ctl.wine::before,
+  .bx.coral::before,  .bx.wine::before { content: none; }
   .ctl.coral, .bx.coral { --ctl-base: var(--coral); }
   .ctl.wine,  .bx.wine  { --ctl-base: var(--wine); }
-
-  /* the two faults, kept side by side so the fix is legible */
-  .ctl.bad-edge { border: 1.5px solid transparent; }
-  .ctl.loud {
-    background: linear-gradient(135deg,
-      color-mix(in srgb, var(--ctl-base) 62%, #FFFFFF) 0%,
-      var(--ctl-base) 52%,
-      color-mix(in srgb, var(--ctl-base) 70%, #000000) 100%);
-  }
 
   .ctl-box { flex: 1 1 200px; }
   .bx {
@@ -586,9 +577,9 @@
     <div class="sec-label">Controls · for review</div>
     <h2>Round controls, three weights</h2>
     <p class="note-line">
-      The plain one is what the prototype uses today. The two tinted ones are the proposal —
-      not applied to the app yet. All three are the same construction: a fill, a soft shadow,
-      and the glass rim. Only the fill changes.
+      Glass is for the white surfaces. Anything carrying coral or wine drops it and takes a
+      flat fill with a soft shadow in its own colour instead — the treatment the play/pause
+      button already had. A tinted pane has nothing to read as glass; the colour is the weight.
     </p>
 
     <div class="card">
@@ -614,46 +605,19 @@
         <span class="ctl-box"><span class="bx wine">Scene</span></span>
       </div>
 
-      <h3 style="margin-top:30px">Two things that were wrong</h3>
-      <div class="compare" style="margin-top:0">
-        <div>
-          <div class="clabel">Fill escaping the rim</div>
-          <div class="demo-row" style="justify-content:center;gap:26px">
-            <span class="ctl coral bad-edge"></span>
-            <span class="ctl coral"></span>
-          </div>
-          <p class="cap">
-            A border under a glass surface reserves width the rim never covers: <code>inset: 0</code>
-            resolves against the padding box, so the rim sits inside the border and the fill
-            shows as a ring outside it. Left has a 1.5px border, right has none.
-          </p>
-        </div>
-        <div>
-          <div class="clabel">Gradient strength</div>
-          <div class="demo-row" style="justify-content:center;gap:26px">
-            <span class="ctl coral loud"></span>
-            <span class="ctl coral"></span>
-          </div>
-          <p class="cap">
-            Left is the sketch's swing, right is softened: the fill travels 14% toward white at
-            the top-left and 10% toward black at the bottom-right, so the light reads as a
-            surface rather than a paint effect.
-          </p>
-        </div>
-      </div>
-
       <h3 style="margin-top:30px">Recipe</h3>
-      <pre><code>--ctl: var(--coral);            /* or var(--wine) */
+      <pre><code>/* white — glass */
+background: rgba(255, 255, 255, 0.5);
+box-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
+/* + the 1.5px rim on ::before */
 
-background: linear-gradient(135deg,
-  color-mix(in srgb, var(--ctl) 86%, #FFFFFF) 0%,
-  var(--ctl)                              54%,
-  color-mix(in srgb, var(--ctl) 90%, #000000) 100%);
-box-shadow: 0 5px 16px color-mix(in srgb, var(--ctl) 32%, transparent);
-border: none;                   /* any border pushes the rim inward */</code></pre>
+/* coral or wine — flat, no rim */
+background: var(--coral);
+box-shadow: 0 5px 18px rgba(239, 83, 80, 0.28);</code></pre>
       <p class="cap">
-        The rim is unchanged from the plain control — same white gradient, same 1.5px. On a tinted
-        fill it reads as the lit edge of the glass rather than an outline.
+        One more rule, learned the hard way: a glass surface must carry no border. <code>inset: 0</code>
+        resolves against the padding box, so under a border the rim sits inside it and the fill
+        paints as a ring outside — which is exactly the overlap that showed up on Script detail.
       </p>
     </div>
   </section>

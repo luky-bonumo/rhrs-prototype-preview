@@ -519,6 +519,14 @@
     color: var(--wine); padding: 6px 8px;
     transition: color .15s ease;
   }
+  /* Every Phosphor glyph is 24px wide, but the drawing inside is not: book-open
+     fills 21px, headphones 19.5px, the microphone only 15px. The gap is measured
+     from the box, so a narrow glyph reads as sitting further from its label.
+     These pull each icon back by its own slack, measured, normalised to
+     book-open. In em, so they survive a change of size. */
+  .mode .ph-headphones { margin-right: -0.031em; }
+  .mode .ph-microphone { margin-right: -0.125em; }
+
   .mode.active { color: var(--coral); }
   .mode:active { transform: scale(0.96); }
 
@@ -833,11 +841,20 @@
   .lcard.active.mine::before   { background: var(--coral); }
   .lcard.active.others::before { background: var(--wine); }
 
-  /* Surfaces that carry their own colour keep it and take only the rim. */
-  .card.featured, .speed-opt.on { background: inherit; }
-  .card.featured { background: var(--wine); }
-  .speed-row.mine   .speed-opt.on { background: var(--coral); }
-  .speed-row.others .speed-opt.on { background: var(--wine); }
+  /* Glass is for the white surfaces only. Anything carrying coral or wine gets a
+     flat fill and a soft shadow in its own colour — the treatment the play/pause
+     button already had. No rim, no gradient: the colour is weight enough. */
+  .card.featured::before, .speed-opt.on::before { content: none; }
+  .card.featured {
+    background: var(--wine);
+    box-shadow: 0 5px 18px rgba(122, 30, 45, 0.28);
+  }
+  .speed-row.mine .speed-opt.on {
+    background: var(--coral); box-shadow: 0 4px 12px rgba(239, 83, 80, 0.28);
+  }
+  .speed-row.others .speed-opt.on {
+    background: var(--wine); box-shadow: 0 4px 12px rgba(122, 30, 45, 0.28);
+  }
 
   /* The chevron is placed against the transport, so it keeps its own positioning —
      the rule above would otherwise drop it back into normal flow. */
