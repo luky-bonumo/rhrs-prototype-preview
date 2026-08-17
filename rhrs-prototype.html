@@ -1934,6 +1934,11 @@
   function updateTransport(mode) {
     const t = TRANSPORT[mode];
     if (!t) return;
+    /* In Rehearse the state machine owns the transport. Only while it is playing a
+       cue is there anything here to collapse — otherwise this would light the
+       audio controls on top of the microphone. */
+    if (mode === 'rehearse' && rehState !== 'audio') return;
+
     const scroll = document.getElementById(mode + 'Scroll');
     const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (!card) return;
@@ -1941,20 +1946,17 @@
     const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
     if (atLine) forcedOpen[mode] = false;
 
-    /* Rehearse only collapses while it is playing a cue. The mic states stay put —
-       there is nothing to scroll away from when you are the one talking. */
-    const collapsible = mode === 'listen' || rehState === 'audio';
-    const open = !collapsible || atLine || forcedOpen[mode];
+    const open = atLine || forcedOpen[mode];
 
     document.getElementById(t.expanded).classList.toggle('show', open);
-    document.getElementById(t.mini).classList.toggle('show', collapsible && !open);
+    document.getElementById(t.mini).classList.toggle('show', !open);
     scroll.closest('.screen').querySelector('.transport')
-      .classList.toggle('collapsed', collapsible && !open);
+      .classList.toggle('collapsed', !open);
 
     /* The chevron follows the line, not the player, so expanding by hand keeps
        your way back. */
     const jump = document.getElementById(t.jump);
-    jump.classList.toggle('show', collapsible && !atLine);
+    jump.classList.toggle('show', !atLine);
     document.getElementById(t.jumpIc).className =
       'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
   }
