@@ -1517,8 +1517,7 @@
                                         note and an optional stage direction of
                                         its own
      Everyone but you is wine; you are coral. Per-character colours may come
-     later, but the rule today is one colour for the scene and one for you.
-     Kept in sync by hand with scene.html, which is the specimen for it. */
+     later, but the rule today is one colour for the scene and one for you. */
   const SCRIPT = [
     { stage: "A kitchen, ten past two in the morning. The big light is off. MICHAEL is eating cereal standing up, over the sink, in the dark." },
 
@@ -1774,7 +1773,7 @@
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(item, idx)}
-        <div class="line-text">${item.text}</div>
+        ${lineBody(item)}
       </div>`;
     }).join('') + nextSceneCard();
     applyTextStyle();
@@ -1808,7 +1807,7 @@
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(line, idx)}
-        <div class="line-text">${line.text}</div>
+        ${lineBody(line)}
       </div>`;
     }).join('') + nextSceneCard();
     applyTextStyle();
@@ -2229,27 +2228,22 @@
     document.getElementById('fsDown').disabled = (fsIdx === 0);
     document.getElementById('fsUp').disabled = (fsIdx === FS_STEPS.length - 1);
   }
+  /* Re-render rather than reach into the DOM: what a line shows is state, and a
+     class poked onto the current screen is lost the moment anything re-renders. */
+  function rerenderCurrent() {
+    if (currentMode === 'read') { renderRead(); return; }
+    renderCards(currentMode);
+    updateTransport(currentMode);
+  }
   function toggleLines(btn) {
     btn.classList.toggle('on');
-    const on = btn.classList.contains('on');
-    const target = btn.dataset.target;
-    activeScreen().querySelectorAll('.' + target).forEach(row => {
-      row.classList.toggle('text-hidden', !on);
-      const txt = row.querySelector('.line-text');
-      if (!on && txt && !row.querySelector('.placeholder')) {
-        const ph = document.createElement('div');
-        ph.className = 'placeholder';
-        ph.textContent = '— text hidden —';
-        txt.after(ph);
-      }
-    });
+    showText[btn.dataset.target] = btn.classList.contains('on');
+    rerenderCurrent();
   }
   function toggleNoteDefault(btn) {
     btn.classList.toggle('on');
-    const on = btn.classList.contains('on');
-    defaults[btn.dataset.note] = on;
-    activeScreen().querySelectorAll('.note.' + btn.dataset.note).forEach(n => n.classList.toggle('hidden', !on));
-    SCRIPT.forEach((_, idx) => refreshFlags(idx));
+    defaults[btn.dataset.note] = btn.classList.contains('on');
+    rerenderCurrent();
   }
 
   /* ============================================================
