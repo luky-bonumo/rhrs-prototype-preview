@@ -307,8 +307,16 @@
   }
   .note.private { border: 1.5px dashed var(--coral-border); }
   .note.stage   { border: 1.5px dashed var(--wine-border); }
-  .note-head { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
-  .note-head .flag { width: 18px; height: 18px; }
+  .note-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  /* Inside a note the icon sits right beside its own label, so it carries no
+     chrome — just the glyph in the note's colour. The tappable flag next to a
+     character name keeps its filled square; there it has to read as a control. */
+  .note-head .flag {
+    width: auto; height: auto; border-radius: 0; background: none;
+  }
+  .note.private .note-head .flag { color: var(--coral); }
+  .note.stage   .note-head .flag { color: var(--wine); }
+  .note-head .flag i { font-size: 17px !important; }
   .note-label { font-weight: 700; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; }
   .note.private .note-label { color: var(--coral); }
   .note.stage   .note-label { color: var(--wine); }
@@ -1366,8 +1374,8 @@
         body = '';
       } else if (mode === 'listen' && isActive && line.mine) {
         body = `<div class="lc-actions">
-            <button class="lc-action" onclick="revealText(${idx})"><i class="ph ph-eye ic-18"></i>Show text</button>
-            <button class="lc-action accent" onclick="runThisLine(${idx})"><i class="ph-fill ph-microphone ic-18"></i>Run this line</button>
+            <button class="lc-action" onclick="revealText(${idx})"><i class="ph ph-eye ic-16"></i>Show text</button>
+            <button class="lc-action accent" onclick="runThisLine(${idx})"><i class="ph-fill ph-microphone ic-16"></i>Run this line</button>
           </div>`;
       } else {
         body = `<div class="line-text">${line.body}</div>`;

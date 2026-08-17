@@ -32,8 +32,10 @@
   a { color: var(--wine); }
   :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
 
-  .top { background: var(--wine); color: var(--mist); padding: 26px 0 34px; }
-  .shell { max-width: var(--shell); margin: 0 auto; padding: 0 28px; }
+  .top { background: var(--wine); color: var(--mist); padding-block: 26px 34px; }
+  /* padding-inline only: `main`/`footer` set padding-block, and mixing the
+     shorthand here would let this class win the cascade and flatten them. */
+  .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
   .top .back {
     display: inline-flex; align-items: center; gap: 8px;
     color: rgba(245,245,245,0.8); text-decoration: none;
@@ -48,7 +50,7 @@
   .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
   .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
 
-  main { padding: 40px 0 70px; }
+  main { padding-block: 46px 76px; }
   section + section { margin-top: 46px; }
   .sec-label {
     font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
@@ -60,7 +62,7 @@
   }
   .note-line { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin-bottom: 20px; }
   footer {
-    border-top: 1px solid var(--divider); padding: 26px 0 60px;
+    border-top: 1px solid var(--divider); padding-block: 30px 64px;
     color: var(--text-muted); font-size: 14px;
   }
   footer a { font-weight: 600; }

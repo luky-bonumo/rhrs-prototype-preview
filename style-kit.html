@@ -34,8 +34,10 @@
   a { color: var(--wine); }
   :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
 
-  .top { background: var(--wine); color: var(--mist); padding: 26px 0 34px; }
-  .shell { max-width: var(--shell); margin: 0 auto; padding: 0 28px; }
+  .top { background: var(--wine); color: var(--mist); padding-block: 26px 34px; }
+  /* padding-inline only: `main`/`footer` set padding-block, and mixing the
+     shorthand here would let this class win the cascade and flatten them. */
+  .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
   .top .back {
     display: inline-flex; align-items: center; gap: 8px;
     color: rgba(245,245,245,0.8); text-decoration: none;
@@ -50,7 +52,7 @@
   .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
   .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
 
-  main { padding: 40px 0 70px; }
+  main { padding-block: 46px 76px; }
   section + section { margin-top: 52px; }
   .sec-label {
     font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
@@ -70,7 +72,7 @@
     border-radius: 18px; padding: 24px;
   }
   footer {
-    border-top: 1px solid var(--divider); padding: 26px 0 60px;
+    border-top: 1px solid var(--divider); padding-block: 30px 64px;
     color: var(--text-muted); font-size: 14px;
   }
   footer a { font-weight: 600; }
@@ -157,13 +159,17 @@
   .k-note.private { border: 1.5px dashed var(--coral-border); }
   .k-note.stage   { border: 1.5px dashed var(--wine-border); }
   .k-note + .k-note { margin-top: 10px; }
-  .k-note .nh { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+  .k-note .nh { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .k-flag {
     width: 18px; height: 18px; border-radius: 5px; color: var(--white);
     display: inline-flex; align-items: center; justify-content: center; font-size: 13px;
   }
   .k-flag.private { background: var(--coral); }
   .k-flag.stage   { background: var(--wine); }
+  /* In a note the icon has its own label beside it, so it needs no chrome. */
+  .k-note .nh .k-flag { width: auto; height: auto; background: none; border-radius: 0; font-size: 17px; }
+  .k-note.private .nh .k-flag { color: var(--coral); }
+  .k-note.stage   .nh .k-flag { color: var(--wine); }
   .k-note .nl { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
   .k-note.private .nl, .k-note.private .nb { color: var(--coral); }
   .k-note.stage   .nl, .k-note.stage   .nb { color: var(--wine); }
@@ -184,6 +190,7 @@
     text-transform: uppercase; color: var(--noir);
   }
   .k-pill.accent { color: var(--coral); }
+  .k-pill i { font-size: 16px; }
   .k-round {
     width: 46px; height: 46px; border-radius: 50%; background: var(--white);
     border: 1px solid var(--divider); color: var(--wine); font-size: 21px;
