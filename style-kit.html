@@ -216,11 +216,12 @@
   .k-note + .k-note { margin-top: 10px; }
   .k-note .nh { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .k-flag {
-    width: 18px; height: 18px; border-radius: 5px; color: var(--white);
+    width: 18px; height: 18px; border-radius: 5px;
     display: inline-flex; align-items: center; justify-content: center; font-size: 13px;
   }
-  .k-flag.private { background: var(--coral); }
-  .k-flag.stage   { background: var(--wine); }
+  /* collapsed note: ground from the dashed rule, glyph from the note's colour */
+  .k-flag.private { background: var(--coral-border); color: var(--coral); }
+  .k-flag.stage   { background: var(--wine-border);  color: var(--wine); }
   /* In a note the icon has its own label beside it, so it needs no chrome. */
   .k-note .nh .k-flag { width: auto; height: auto; background: none; border-radius: 0; font-size: 17px; }
   .k-note.private .nh .k-flag { color: var(--coral); }
@@ -535,14 +536,13 @@
         <h3>Buttons and switches</h3>
         <div class="demo">
           <span class="k-pill"><i class="ph ph-eye"></i>Show text</span>
-          <span class="k-pill accent"><i class="ph-fill ph-microphone"></i>Run this line</span>
         </div>
         <div class="demo" style="margin-top:14px">
           <span class="k-toggle"></span>
           <span class="k-toggle off"></span>
           <span style="font-size:13px;color:var(--text-muted)">On / off</span>
         </div>
-        <p class="cap">Pills are uppercase, 12px, 0.6px tracking. Coral marks the action that involves you.</p>
+        <p class="cap">Pills are uppercase, 12px, 0.6px tracking, with a 16px icon. Used full-width on Evaluation.</p>
       </div>
     </div>
   </section>

@@ -243,14 +243,17 @@
   .others .char-name { color: var(--wine); }
 
   .note-flags { display: flex; gap: 6px; align-items: center; margin-left: 2px; }
+  /* A collapsed note. Takes its ground from the dashed rule of the expanded
+     note and its glyph from the note's own colour, so the closed state reads
+     as a miniature of the open one rather than a different object. */
   .flag {
     width: 20px; height: 20px; border-radius: 5px;
     display: flex; align-items: center; justify-content: center;
-    color: var(--white); border: none; padding: 0; cursor: pointer;
+    border: none; padding: 0; cursor: pointer;
   }
   button.flag:active { transform: scale(0.88); }
-  .flag.private { background: var(--coral); }
-  .flag.stage   { background: var(--wine); }
+  .flag.private { background: var(--coral-border); color: var(--coral); }
+  .flag.stage   { background: var(--wine-border);  color: var(--wine); }
   .flag i { font-size: 13px !important; }
 
   .line-menu-btn {
@@ -303,20 +306,6 @@
   .lcard.mine   .lc-btn { color: var(--coral); }
   .lcard.others .lc-btn { color: var(--wine); }
 
-  /* the two actions shown on your own line in Listen */
-  .lc-actions { display: flex; gap: 12px; margin-top: 2px; }
-  .lc-action {
-    flex: 1 1 0;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--mist); border: 1.5px solid var(--stone);
-    border-radius: var(--radius-pill);
-    padding: 12px 10px; cursor: pointer;
-    font-family: var(--font-body);
-    font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
-    color: var(--noir);
-  }
-  .lc-action:active { transform: scale(0.97); }
-  .lc-action.accent { color: var(--coral); }
 
   /* ---------- Notes ---------- */
   .note {
@@ -1404,20 +1393,9 @@
       else if (isActive && playing)       ctrl = ICON.pause;
       else                                ctrl = ICON.play;
 
-      /* Body of the card.
-         Rehearse hides the text of the line you are performing — you recite it from memory.
-         Listen hides your own line until you ask for it, and offers the two turn actions. */
-      let body;
-      if (isReh && isActive && line.mine) {
-        body = '';
-      } else if (mode === 'listen' && isActive && line.mine) {
-        body = `<div class="lc-actions">
-            <button class="lc-action" onclick="revealText(${idx})"><i class="ph ph-eye ic-16"></i>Show text</button>
-            <button class="lc-action accent" onclick="runThisLine(${idx})"><i class="ph-fill ph-microphone ic-16"></i>Run this line</button>
-          </div>`;
-      } else {
-        body = `<div class="line-text">${line.body}</div>`;
-      }
+      /* Being the active line changes the border and nothing else. The text and
+         the notes stay exactly as they were — what a line shows is the reader's
+         setting, not a side effect of where the playhead is. */
 
       return `<div class="lcard ${line.mine ? 'mine' : 'others'} ${isActive ? 'active' : ''}" data-idx="${idx}">
         <div class="line-head">
@@ -1426,8 +1404,8 @@
           <button class="lc-btn spring" onclick="cardControl('${mode}', ${idx})" aria-label="Play line">${ctrl}</button>
           <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
-        ${isActive ? notesFor(line, idx) : ''}
-        ${body}
+        ${notesFor(line, idx)}
+        <div class="line-text">${line.body}</div>
       </div>`;
     }).join('');
     applyFontSize();
@@ -1444,23 +1422,16 @@
     t.style.setProperty('--accent-rgb', own ? '239, 83, 80' : '122, 30, 45');
   }
 
+  /* Playing a line you can already see should not move the page under you —
+     no scroll here. The transport's next/previous do scroll, because there the
+     line you are moving to may well be off screen. */
   function cardControl(mode, idx) {
     if (idx === activeIdx) { togglePlay(mode); return; }
     activeIdx = idx;
     playing = true;
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
-    scrollToActive(mode);
-  }
-
-  function revealText(idx) {
-    const card = document.querySelector('#listenScroll .lcard[data-idx="' + idx + '"]');
-    card.querySelector('.lc-actions').outerHTML = `<div class="line-text">${LINES[idx].body}</div>`;
-    applyFontSize();
-  }
-  function runThisLine(idx) {
-    activeIdx = idx;
-    switchMode('rehearse');
+    updateTransport(mode);
   }
 
   /* ============================================================

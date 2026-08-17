@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rhrs — scene sample</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  /* ---- shared shell for the rhrs design pages (kept inline: no build step) ---- */
+  :root {
+    --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
+    --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
+    --coral-tint:#FDECEB; --coral-border:#F0A9A7;
+    --wine-tint:#F3E7E9;  --wine-border:#C9AAB0;
+    --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
+    --font-display:'Platypi', Georgia, serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+    --page:#F2EDEE; --shell:1120px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+
+  /* Optical centring for Platypi — see the style kit's Typography section. */
+  :root { --cap-shift: 0.092em; }
+  .cap-trim { text-box: trim-both cap alphabetic; }
+  @supports not (text-box: trim-both cap alphabetic) {
+    .cap-trim { display: inline-block; transform: translateY(calc(var(--cap-shift) * -1)); }
+  }
+
+  body {
+    font-family: var(--font-body); background: var(--page); color: var(--text-body);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--wine); }
+  :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+
+  .top { background: var(--wine); color: var(--mist); padding-block: 26px 34px; }
+  /* padding-inline only: `main`/`footer` set padding-block, and mixing the
+     shorthand here would let this class win the cascade and flatten them. */
+  .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
+  .top .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(245,245,245,0.8); text-decoration: none;
+    font-size: 14px; font-weight: 600; margin-bottom: 22px;
+  }
+  .top .back:hover { color: var(--mist); }
+  .top h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
+    text-wrap: balance; max-width: 20ch;
+  }
+  .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
+  .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
+
+  main { padding-block: 46px 76px; }
+  section + section { margin-top: 46px; }
+  .sec-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 12px;
+  }
+  h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 25px;
+    color: var(--noir); margin-bottom: 6px; text-wrap: balance;
+  }
+  h3 { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--noir); margin-bottom: 12px; }
+  .note-line { color: var(--text-muted); font-size: 15px; max-width: 68ch; margin-bottom: 20px; }
+  .card { background: var(--white); border: 1px solid var(--divider); border-radius: 18px; padding: 24px; }
+  footer {
+    border-top: 1px solid var(--divider); padding-block: 30px 64px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  footer a { font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  /* ---- layout: phone beside the notes ---- */
+  .stage-grid { display: grid; grid-template-columns: 393px 1fr; gap: 44px; align-items: start; }
+  @media (max-width: 900px) { .stage-grid { grid-template-columns: 1fr; justify-items: center; } }
+
+  /* ---- the phone, with no controls in it at all ---- */
+  .phone {
+    width: 393px; height: 780px;
+    background: var(--mist);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 20px 60px rgba(28,10,16,0.22), 0 0 0 10px #111, 0 0 0 11px #333;
+    display: flex; flex-direction: column;
+  }
+  .scene-head {
+    flex: 0 0 auto; padding: 26px 26px 16px; text-align: center;
+  }
+  .scene-head .play {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .scene-head .title {
+    font-family: var(--font-display); font-weight: 600; font-size: 19px;
+    color: var(--wine); line-height: 1.25;
+  }
+  .scene-scroll { flex: 1 1 auto; overflow-y: auto; padding: 4px 22px 28px; }
+  .scene-scroll::-webkit-scrollbar { width: 0; }
+
+  .line { padding: 18px 0 20px; border-bottom: 1px solid var(--divider); }
+  .line:last-child { border-bottom: none; }
+  .char-name {
+    font-family: var(--font-display); font-weight: 700; font-size: 21px;
+    letter-spacing: 0.1px; display: block; margin-bottom: 12px;
+  }
+  .line.mine   .char-name { color: var(--coral); }
+  .line.others .char-name { color: var(--wine); }
+  .line-text {
+    font-size: var(--line-size, 20px); line-height: 1.55;
+    color: var(--text-body); font-weight: 400;
+  }
+
+  .note { border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; background: transparent; }
+  .note.private { border: 1.5px dashed var(--coral-border); }
+  .note.stage   { border: 1.5px dashed var(--wine-border); }
+  .note-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .note-head i { font-size: 17px; }
+  .note-label { font-weight: 700; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; }
+  .note.private .note-label, .note.private .note-head i, .note.private .note-body { color: var(--coral); }
+  .note.stage   .note-label, .note.stage   .note-head i, .note.stage   .note-body { color: var(--wine); }
+  .note-body { font-style: italic; font-size: 16px; line-height: 1.45; }
+  .note.hidden { display: none; }
+
+  /* a stage direction that stands on its own, between lines */
+  .stage-only { padding: 16px 0 18px; border-bottom: 1px solid var(--divider); }
+
+  /* ---- page-level tools, deliberately outside the frame ---- */
+  .tools { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; align-items: center; }
+  .tools .grp {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 999px; padding: 5px;
+  }
+  .tools button {
+    border: none; background: none; cursor: pointer; border-radius: 999px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    color: var(--wine); padding: 7px 13px;
+  }
+  .tools button.on { background: var(--wine); color: var(--mist); }
+  .tools button:hover:not(.on) { background: var(--mist); }
+  .tools .val {
+    font-family: var(--font-mono); font-size: 13px; color: var(--noir);
+    min-width: 42px; text-align: center;
+  }
+  .tools .lbl { font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); }
+
+  /* ---- cast ---- */
+  .cast { display: grid; gap: 10px; }
+  .cast .who {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 14px; padding: 14px 18px;
+  }
+  .cast .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .cast .nm { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+  .cast .nm small {
+    font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: .4px;
+    border-radius: 999px; padding: 1px 8px; margin-left: 9px; vertical-align: middle;
+  }
+  .cast .cnt { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+
+  /* ---- length spread ---- */
+  .spread { display: grid; gap: 7px; margin-top: 4px; }
+  .spread .b { display: grid; grid-template-columns: 92px 1fr 58px; gap: 12px; align-items: center; }
+  .spread .k { font-size: 12.5px; color: var(--text-muted); }
+  .spread .track { height: 12px; background: var(--mist); border-radius: 999px; overflow: hidden; }
+  .spread .fill { height: 100%; border-radius: 999px; background: var(--wine); }
+  .spread .n { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); text-align: right; }
+
+  .ask { margin-top: 18px; border-radius: 16px; padding: 20px 22px;
+         background: var(--coral-tint); border: 1.5px dashed var(--coral-border); }
+  .ask .r-word { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--coral); margin-bottom: 5px; }
+  .ask p { font-size: 14.5px; }
+  .ask p + p { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="shell">
+    <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
+    <h1>One scene,<br>three <em>voices</em>.</h1>
+    <p class="lede">
+      A type sample: real dialogue at the real width, with nothing to tap. Lines run from two
+      words to seventy, so we can see how the page holds when an actor gets a speech and when
+      they get a grunt. Nothing here is wired into the prototype yet.
+    </p>
+  </div>
+</header>
+
+<main class="shell">
+
+  <section>
+    <div class="stage-grid">
+
+      <div>
+        <div class="phone">
+          <div class="scene-head">
+            <div class="play">I love you, you're fine, but change quickly</div>
+            <div class="title cap-trim">Act I, Scene 1 — the kitchen argument</div>
+          </div>
+          <div class="scene-scroll" id="scene"></div>
+        </div>
+
+        <div class="tools">
+          <span class="lbl">Text</span>
+          <span class="grp">
+            <button onclick="stepSize(-1)" aria-label="Smaller">A</button>
+            <span class="val" id="sizeVal">20px</span>
+            <button onclick="stepSize(1)" style="font-size:17px" aria-label="Larger">A</button>
+          </span>
+          <span class="grp">
+            <button class="on" id="stageBtn" onclick="toggleStage()">Stage directions</button>
+          </span>
+        </div>
+        <p class="note-line" style="margin-top:12px;font-size:13.5px">
+          These two sit outside the frame on purpose — they are for judging the sample, not part
+          of the screen.
+        </p>
+      </div>
+
+      <div>
+        <div class="sec-label">Cast</div>
+        <h2>Who is in the room</h2>
+        <p class="note-line">
+          Nina is the part you are playing, so she is coral. Michael and Anna both belong to the
+          scene, so both are wine.
+        </p>
+        <div class="cast" id="cast"></div>
+
+        <h3 style="margin-top:32px">Length spread</h3>
+        <div class="spread" id="spread"></div>
+        <p class="note-line" style="margin-top:14px;font-size:13.5px" id="spreadNote"></p>
+
+        <div class="ask">
+          <div class="r-word">One thing this sample raises</div>
+          <p>
+            With two other characters on screen, Michael and Anna are the same wine. The name
+            tells them apart, the colour does not. In a two-hander that never came up; in a
+            crowd scene it might.
+          </p>
+          <p>
+            I have deliberately left it alone rather than inventing a third colour, because
+            wine-means-everyone-else is the rule the whole app leans on. Worth a look on the
+            phone before we decide it needs solving.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="shell">
+  <a href="index.html">rhrs design</a> · <a href="rhrs-prototype.html">Prototype</a> ·
+  <a href="sitemap.html">Screen map</a> · <a href="style-kit.html">Style kit</a>
+</footer>
+
+<script>
+  /* One scene, written for this sample. Kept as data so it can be lifted
+     straight into the prototype once it is signed off.
+     mine: true  → the part the user is playing (coral)
+     stage / note → stage direction, private note attached to that line */
+  const CAST = [
+    { name: 'Nina',    mine: true  },
+    { name: 'Michael', mine: false },
+    { name: 'Anna',    mine: false }
+  ];
+
+  const SCENE = [
+    { stage: 'A kitchen, ten past two in the morning. The big light is off. MICHAEL is eating cereal standing up, over the sink, in the dark.' },
+
+    { who: 'Nina',    text: "You're eating." },
+    { who: 'Michael', text: "I'm eating." },
+    { who: 'Nina',    text: "It's ten past two." },
+    { who: 'Michael', text: "I'm aware. I looked at the clock on the way in. And I thought, well — if I'm going to be awake, I may as well be awake somewhere that has food in it." },
+    { who: 'Nina',    text: "Michael." },
+    { who: 'Michael', text: "What." },
+    { who: 'Nina',    text: "I'm not doing the thing tonight. Where I ask you what's wrong and you say nothing, and then at four you tell me anyway, in the dark, facing the wall, where I can't see your face and you don't have to watch mine. I'm too tired for the four o'clock version. Say it now. With the light on.",
+      note: "Not angry. She's exhausted. The anger in this scene is all his — if I play it too, we've nowhere to go by the end." },
+    { who: 'Michael', text: "It's not a light. It's the extractor fan." },
+    { who: 'Nina',    text: "Then say it with the extractor fan on." },
+
+    { stage: 'A pause. He puts the bowl down. He does not say it.' },
+
+    { who: 'Michael', text: "She's been on that sofa nine weeks." },
+    { who: 'Nina',    text: "I know how long she's been on the sofa. I change the sheets." },
+    { who: 'Michael', text: "I know you do. That's — I know. And I keep meaning to say something, and then she makes that face, the one where she's already apologising before you've opened your mouth, and I think, one more week won't kill anybody. And then it's nine weeks, and I'm standing in my own kitchen at two in the morning eating dry cereal so I don't have to lie next to you not saying it." },
+    { who: 'Nina',    text: "So say it to her." },
+    { who: 'Michael', text: "She's my sister." },
+    { who: 'Nina',    text: "She's my sofa." },
+
+    { stage: 'ANNA is in the doorway, wrapped in a duvet. Neither of them knows how long she has been there.' },
+
+    { who: 'Anna',    text: "Is there coffee?" },
+    { who: 'Nina',    text: "It's two in the morning." },
+    { who: 'Anna',    text: "That's not a no." },
+    { who: 'Anna',    text: "I heard my name. I'm not going to pretend I didn't, because then we all do the thing where we talk about the weather for nine minutes and I go back to the sofa and lie there working out exactly what you said. So say it again. To me this time.",
+      stageBefore: 'She comes in. She does not sit down.' },
+    { who: 'Michael', text: "Anna —" },
+    { who: 'Anna',    text: "To me, Michael." },
+    { who: 'Nina',    text: "He's been trying to ask you to leave since the third week. He is very bad at it. It is one of the things I love about him and it is, tonight, the single most annoying thing about him." },
+    { who: 'Anna',    text: "Oh." },
+    { who: 'Anna',    text: "Is that all?" },
+    { who: 'Anna',    text: "I thought one of you was ill." }
+  ];
+
+  const isMine = who => CAST.find(c => c.name === who)?.mine;
+
+  function noteBlock(kind, label, text) {
+    return `<div class="note ${kind}" data-kind="${kind}">
+      <div class="note-head">
+        <i class="ph-fill ph-note"></i>
+        <span class="note-label">${label}</span>
+      </div>
+      <div class="note-body">${text}</div>
+    </div>`;
+  }
+
+  function render() {
+    document.getElementById('scene').innerHTML = SCENE.map(item => {
+      if (item.stage) {
+        return `<div class="stage-only">${noteBlock('stage', 'Stage directions', item.stage)}</div>`;
+      }
+      const before = item.stageBefore ? noteBlock('stage', 'Stage directions', item.stageBefore) : '';
+      const note = item.note ? noteBlock('private', 'Your private note', item.note) : '';
+      return `<div class="line ${isMine(item.who) ? 'mine' : 'others'}">
+        <span class="char-name">${item.who}</span>
+        ${before}${note}
+        <div class="line-text">${item.text}</div>
+      </div>`;
+    }).join('');
+    applyStage();
+  }
+
+  /* ---- cast list + line counts ---- */
+  function renderCast() {
+    document.getElementById('cast').innerHTML = CAST.map(c => {
+      const n = SCENE.filter(s => s.who === c.name).length;
+      const colour = c.mine ? 'var(--coral)' : 'var(--wine)';
+      const tag = c.mine
+        ? `<small style="color:var(--coral);border:1.5px solid var(--coral)">Me</small>`
+        : '';
+      return `<div class="who">
+        <span class="dot" style="background:${colour}"></span>
+        <span class="nm" style="color:${colour}">${c.name}${tag}</span>
+        <span class="cnt">${n} ${n === 1 ? 'line' : 'lines'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---- how the lengths are distributed ---- */
+  const BUCKETS = [
+    ['1–4 words',   w => w <= 4],
+    ['5–12 words',  w => w > 4 && w <= 12],
+    ['13–30 words', w => w > 12 && w <= 30],
+    ['31+ words',   w => w > 30]
+  ];
+  function renderSpread() {
+    const lines = SCENE.filter(s => s.who);
+    const counts = lines.map(l => l.text.trim().split(/\s+/).length);
+    const rows = BUCKETS.map(([label, test]) => [label, counts.filter(test).length]);
+    const max = Math.max(...rows.map(r => r[1]));
+    document.getElementById('spread').innerHTML = rows.map(([label, n]) => `
+      <div class="b">
+        <span class="k">${label}</span>
+        <span class="track"><span class="fill" style="width:${max ? (n / max) * 100 : 0}%"></span></span>
+        <span class="n">${n}</span>
+      </div>`).join('');
+    document.getElementById('spreadNote').textContent =
+      `${lines.length} lines, ${SCENE.length - lines.length} stage directions. ` +
+      `Shortest ${Math.min(...counts)} words, longest ${Math.max(...counts)}.`;
+  }
+
+  /* ---- page tools ---- */
+  const SIZES = [16, 18, 20, 22, 25, 28];
+  let sizeIdx = 2;
+  function stepSize(dir) {
+    sizeIdx = Math.max(0, Math.min(SIZES.length - 1, sizeIdx + dir));
+    document.querySelector('.phone').style.setProperty('--line-size', SIZES[sizeIdx] + 'px');
+    document.getElementById('sizeVal').textContent = SIZES[sizeIdx] + 'px';
+  }
+
+  let stageOn = true;
+  function toggleStage() {
+    stageOn = !stageOn;
+    document.getElementById('stageBtn').classList.toggle('on', stageOn);
+    applyStage();
+  }
+  function applyStage() {
+    document.querySelectorAll('#scene .note.stage').forEach(n => n.classList.toggle('hidden', !stageOn));
+    document.querySelectorAll('#scene .stage-only').forEach(n => n.classList.toggle('hidden', !stageOn));
+  }
+
+  render();
+  renderCast();
+  renderSpread();
+</script>
+
+</body>
+</html>
