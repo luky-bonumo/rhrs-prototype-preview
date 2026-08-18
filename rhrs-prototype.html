@@ -137,9 +137,11 @@
   :root[data-theme="dark"] {
     color-scheme: dark;
     --noir-rgb:  247, 240, 242;
-    /* Coral is the same coral as in light, not a lightened one. It measures 5.6:1
-       on a card here against 3.3:1 there, so the dark ground does the lifting the
-       lighter tint was doing.
+    /* Coral is lifted one step off the light-mode value — 63% lightness to 66% —
+       so it sits closer to wine without giving up what makes it coral. It keeps
+       its full 83% saturation, so it still reads as the hot one of the pair, and
+       at 6.2:1 against wine's 7.5:1 wine stays the heavier by 1.22x. Going further
+       closes that gap, and the gap is the whole "mine / theirs" distinction.
 
        Wine then has to move, and further than it looks: wine is now mostly a
        ground (see --wine-surface), so as a mark it needs to be a different thing
@@ -151,7 +153,7 @@
        sits at 7.5:1, so wine stays the heavier of the two the way it is in light.
        (Light is 2.9x; matching that here would take a near-white.) */
     --wine-rgb:  223, 134, 167;
-    --coral-rgb: 239, 83, 80;
+    --coral-rgb: 240, 99, 96;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
     --white-rgb: 13, 4, 7;
@@ -464,10 +466,26 @@
     -webkit-overflow-scrolling: touch;
   }
   .scroll::-webkit-scrollbar { width: 0; }
-  /* Listen / Rehearse: content dissolves into the transport controls */
-  /* Listen and Rehearse fade much further at the foot, because what they fade
-     into is the transport rather than a bar. */
-  .scroll.fade-b { --fade-b: 96px; }
+  /* Listen and Rehearse fade into the transport rather than into a bar, so the
+     script runs on **behind** the controls and gives out level with the middle of
+     the round buttons — 72px past where the scroll would otherwise stop. Same
+     trick as the lift at the top: the region reaches further and pays it back as
+     padding, so nothing moves. The transport comes after this in the document, so
+     it paints over the top with no z-index needed. */
+  .scroll.fade-b {
+    --fade-over: 72px;
+    --fade-b: 96px;
+    margin-bottom: calc(var(--fade-over) * -1);
+    padding-bottom: calc(20px + var(--fade-over));
+  }
+  /* 72px is the reach of the open player. Collapsed there is only the mini bar to
+     hide behind, and the same overhang would push the script out the other side of
+     it and into the mode bar. The scroll cannot see its own sibling's state, so the
+     screen answers for it. */
+  .screen:has(.transport.collapsed) .scroll.fade-b {
+    --fade-over: 22px;
+    --fade-b: 52px;
+  }
 
   /* ============================================================
      LINE — shared bits between Read (dividers) and Listen/Rehearse (cards)
@@ -2471,7 +2489,11 @@
     const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (!card) return;
     const cr = card.getBoundingClientRect(), sr = scroll.getBoundingClientRect();
-    const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
+    /* The box now reaches under the transport so the script can fade behind it.
+       Read that overhang back rather than hard-coding it, or a card sitting behind
+       the controls would count as being in view. */
+    const over = -parseFloat(getComputedStyle(scroll).marginBottom) || 0;
+    const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60 - over;
 
     if (atLine) forcedOpen[mode] = false;
     else if (fromScroll && !forcedOpen[mode] && Date.now() > progScroll[mode]) {
