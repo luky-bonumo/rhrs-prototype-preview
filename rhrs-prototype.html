@@ -80,6 +80,7 @@
     --sheet-bg:  var(--white);
     --card-bg:   #FAFAFA;          /* line cards in Listen / Rehearse */
     --scrim:     rgba(var(--scrim-rgb), 0.42);
+    --sheet-glass: rgba(var(--white-rgb), 0.82);
     /* What a raised surface that carries a colour casts beneath it. On a light
        ground the colour itself is darker than the ground, so it reads as its own
        shadow; on a dark one it is brighter and the same declaration would paint a
@@ -201,11 +202,19 @@
     /* The rim catches light, so in the dark it is the rule colour — a step up from
        the near-black surface, where in light it was white against off-white. */
     --glass-edge-rgb: var(--stone-rgb);
-    /* Sinking the screen behind a sheet does nothing here — the sheet is already
-       near-black and a darker ground only closes on it (1.06:1, measured). The
-       scrim lifts instead, so the covered screen steps away from the sheet rather
-       than toward it. */
-    --scrim: rgba(var(--noir-rgb), 0.18);
+    /* Lifting the screen instead of sinking it did separate the two, but it read as
+       fog: the covered screen got paler and stayed legible through the veil, which
+       is the opposite of what a scrim is for. The scrim goes back to hiding — hard
+       enough that the screen behind it properly recedes — and the contrast comes
+       from the other side instead, with the sheet rising off the ground.
+
+       That is the one place this palette lifts rather than sinks. A card sits *in*
+       the page and may go darker than it; a sheet sits *over* the page and has to
+       read as nearer, which in the dark means lighter. Separation ends up at
+       1.40:1, where a card against its ground in light is 1.09:1. */
+    --scrim: rgba(0, 0, 0, 0.6);
+    --sheet-bg:    #382631;
+    --sheet-glass: rgba(56, 38, 49, 0.92);
 
     --card-bg:  #150A10;
     /* The desk the phone sits on is not part of the app and does not follow the
@@ -1401,9 +1410,12 @@
      the rule above would otherwise drop it back into normal flow. */
   .jump-btn { position: absolute; }
 
-  /* Sheets sit over live content, so here the glass has something to bend. */
+  /* A sheet is glass over live content, so it is the one surface that bends what
+     is behind it properly — 20px, against the 6px the small overlays take. This
+     is also what actually paints the sheet, so it is the fill to change, not
+     --sheet-bg, which it covers. */
   .sheet, .settings-sheet {
-    background: rgba(var(--white-rgb), 0.82);
+    background: var(--sheet-glass);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
             backdrop-filter: blur(20px) saturate(1.4);
   }

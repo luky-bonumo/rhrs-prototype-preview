@@ -769,10 +769,11 @@ mask: linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
 mask-composite: exclude;</code></pre>
         <p class="cap">
-          Blur belongs to the three pieces that lie over the moving script — the jump
-          chevron, the transport arrows and the mini bar — as one shared
-          <code>--overlay-blur: blur(6px) saturate(1.35)</code>. Nothing else takes it: a sheet
-          covers content that is standing still, so there is nothing there for a blur to say.
+          Two blurs, by how much there is to bend. A sheet covers the whole screen, so it
+          takes <code>blur(20px)</code>. The three pieces that lie over the moving script — the
+          jump chevron, the transport arrows and the mini bar — share the lighter
+          <code>--overlay-blur: blur(6px) saturate(1.35)</code>, enough that the type under them
+          stops fighting the type on them. Nothing else takes either.
         </p>
       </div>
 
