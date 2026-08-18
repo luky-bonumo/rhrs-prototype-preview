@@ -2520,7 +2520,11 @@
     const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (card) {
       progScroll[mode] = Date.now() + 700;
-      scroll.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: behavior || 'smooth' });
+      /* Land clear of the fade, not inside it. The old 8px put the card halfway up
+         the band and the line you had just moved to arrived half dissolved. Read
+         the band's own length rather than repeating the number here. */
+      const fade = parseFloat(getComputedStyle(scroll).getPropertyValue('--fade-t')) || 0;
+      scroll.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior: behavior || 'smooth' });
     }
     setTimeout(() => { progScroll[mode] = 0; updateTransport(mode); }, 450);
   }
