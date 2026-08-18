@@ -56,6 +56,14 @@
     --on-wine-fill:   rgba(var(--mist-rgb), 0.1);
     --featured-tint-rgb: 255, 217, 221;
     --featured-tint:  rgb(var(--featured-tint-rgb));
+    /* Text on a filled coral or wine mark. The mark is dark in light and light in
+       dark, so this has to turn over with it — which is what --white already does
+       in this palette. Kept separate from --on-wine-*, which is text on the wine
+       *ground* and stays near-white in both. */
+    --on-mark:      var(--on-wine-strong);
+    --on-mark-soft: var(--on-wine-soft);
+    --on-mark-tint: var(--featured-tint);
+    --on-mark-line: rgba(var(--featured-tint-rgb), 0.6);
     /* Wine as a ground rather than as a mark. They are the same colour in light;
        in dark they part company, because a full-bleed dashboard in the dark wine
        would be a floodlight. */
@@ -135,11 +143,12 @@
 
        Wine then has to move, and further than it looks: wine is now mostly a
        ground (see --wine-surface), so as a mark it needs to be a different thing
-       rather than a lighter version of the ground. This is a dusty rose — a cooler
-       hue than coral so the two never read as the same colour, and 1.6x coral's
-       contrast, which keeps wine the heavier of the two the way it is in light.
-       (Light is 2.9x; matching that here would take a near-white.) */
-    --wine-rgb:  217, 161, 172;
+       rather than a lighter version of the ground. This is a warm rose, held apart
+       from coral by weight rather than by hue: coral is hot and saturated at 83%
+       and sits at 5.6:1, this is soft at 62% and sits at 8.8:1, which keeps wine
+       the heavier of the two the way it is in light. (Light is 2.9x; matching that
+       here would take a near-white.) */
+    --wine-rgb:  231, 154, 160;
     --coral-rgb: 239, 83, 80;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
@@ -168,10 +177,15 @@
     --on-wine-soft:   rgba(var(--noir-rgb), 0.62);
     --on-wine-fill:   rgba(var(--noir-rgb), 0.08);
     --featured-tint-rgb: 255, 205, 210;
+    --on-mark:      rgba(var(--white-rgb), 0.95);
+    --on-mark-soft: rgba(var(--white-rgb), 0.68);
+    --on-mark-tint: rgba(var(--white-rgb), 0.9);
+    --on-mark-line: rgba(var(--white-rgb), 0.45);
 
-    /* Wine as a ground: a deep plum between the rule colour and the screen, so the
-       dashboard stays a dark room with a warm cast rather than a lit sign. */
-    --wine-surface: #3A1826;
+    /* In the dark there is no wine ground: the dashboard takes the same screen
+       colour as everywhere else, so moving between it and a script does not change
+       the room you are standing in. Light keeps its wine dashboard. */
+    --wine-surface: var(--mist);
 
     /* The rim catches light, so in the dark it is the rule colour — a step up from
        the near-black surface, where in light it was white against off-white. */
@@ -377,11 +391,13 @@
   }
   .card .chevron { color: var(--wine); flex: 0 0 auto; display: flex; }
 
-  .card.featured { background: var(--wine-surface); }
-  .card.featured .card-title { color: var(--on-wine-strong); }
-  .card.featured .meta-lines { color: var(--on-wine-soft); }
-  .card.featured .badge { color: var(--featured-tint); border-color: rgba(var(--featured-tint-rgb), 0.6); }
-  .card.featured .chevron { color: var(--on-wine-strong); }
+  /* The primary action, so it wears the colour itself rather than the ground that
+     colour makes — a mark, like a filled pill. */
+  .card.featured { background: var(--wine); }
+  .card.featured .card-title { color: var(--on-mark); }
+  .card.featured .meta-lines { color: var(--on-mark-soft); }
+  .card.featured .badge { color: var(--on-mark-tint); border-color: var(--on-mark-line); }
+  .card.featured .chevron { color: var(--on-mark); }
 
   /* Recording Wizard — the way into recording the lines that have no audio yet.
      It hangs off the Whole play card rather than standing beside it, so it is
@@ -772,6 +788,11 @@
   }
   .scrim.open { opacity: 1; pointer-events: auto; }
 
+  /* A sheet is a raised surface like any other, so it takes the same rim. In the
+     dark that rim is the whole of its top edge: the sheet is near-black and the
+     scrim over the screen behind it is near-black too, so without it the sheet had
+     no visible end. The shadow above it says nothing there and the rim says it
+     all. */
   .sheet, .settings-sheet {
     position: absolute; left: 0; right: 0; bottom: 0;
     background: var(--sheet-bg);
@@ -928,7 +949,7 @@
   .speed-title {
     font-family: var(--font-display); font-weight: 700; font-size: 22px;
     color: var(--noir); text-align: center;
-    padding: 8px 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
+    padding: 20px 24px 22px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
   }
   .speed-group { padding: 20px 20px 24px; }
   .speed-group + .speed-group { border-top: 1px solid var(--divider); }
@@ -1007,7 +1028,7 @@
   .dash-actions { display: flex; gap: 10px; }
   .dash-btn {
     width: 42px; height: 42px; border-radius: 50%;
-    background: rgba(var(--mist-rgb), 0.12); border: none;
+    background: none; border: none;
     display: flex; align-items: center; justify-content: center;
     color: var(--on-wine-strong); cursor: pointer; position: relative;
   }
@@ -1066,10 +1087,12 @@
     box-shadow: 0 4px 16px var(--lift-noir);
   }
   .dash-shortcut:active { transform: scale(0.98); }
+  /* The glyph carries it on its own — the tile under it was a second shape saying
+     the same thing. Bigger, to hold the corner without the box. */
   .dash-shortcut .sc-ic {
-    width: 40px; height: 40px; border-radius: 12px; background: var(--wine-tint);
-    display: flex; align-items: center; justify-content: center; color: var(--wine);
+    display: flex; align-items: center; color: var(--wine);
   }
+  .dash-shortcut .sc-ic i { font-size: 32px !important; }
   .dash-shortcut .sc-title {
     font-family: var(--font-display); font-weight: 600; font-size: 17px;
     color: var(--noir); line-height: 1.2; margin-bottom: 3px;
@@ -1259,6 +1282,7 @@
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-card::before, .dash-shortcut::before, .stat::before,
   .gs-group::before, .gs-theme button::before,
+  .sheet::before, .settings-sheet::before,
   .mini::before, .skip-btn::before, .jump-btn::before,
   .settings-title .account-btn::before, .char-row .cr-edit::before,
   .font-stepper button::before,
@@ -1288,7 +1312,7 @@
   .card.featured::before, .speed-opt.on::before,
   .gs-theme button.on::before { content: none; }
   .card.featured {
-    background: var(--wine-surface);
+    background: var(--wine);
     box-shadow: 0 5px 18px var(--lift-wine);
   }
   .speed-row.mine .speed-opt.on {
@@ -1520,7 +1544,7 @@
       <div class="t-fold" id="listenMiniFold">
       <div class="mini" id="listenMini" onclick="expandPlayer('listen')">
         <span class="t-time" id="listenMiniTime">00:59</span>
-        <div class="bar" onclick="event.stopPropagation(); seek(event)"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
+        <div class="bar mini-bar"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
         <button class="mini-toggle" onclick="event.stopPropagation(); togglePlay('listen')" aria-label="Play / pause">
           <i class="ph-fill ph-pause ic-28" id="listenMiniIc"></i>
         </button>
@@ -2922,6 +2946,10 @@
     }
     /* On a real phone the imitation iOS status bar is just a second, wrong clock. */
     .statusbar { display: none; }
+    /* The desk switch is a desktop affordance — it stands on the grey around the
+       mock, and there is no grey here. On a phone the app's own switch in
+       Settings is the way to change mode. */
+    .theme-switch { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
