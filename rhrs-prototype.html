@@ -232,11 +232,12 @@
      glass for a flat fill, like everything else that does. */
   .rec-wizard {
     display: flex; align-items: center; gap: 12px;
-    background: var(--coral-tint); border: none; width: 100%;
+    background: var(--coral-tint); width: 100%;
+    border: 1.5px solid var(--coral);
     border-radius: var(--radius-card); padding: 13px 16px; margin-top: 10px;
     cursor: pointer; text-align: left; color: var(--coral);
     font-family: var(--font-body);
-    box-shadow: 0 2px 8px rgba(239, 83, 80, 0.10);
+    box-shadow: none;
   }
   .rec-wizard:active { transform: scale(0.99); }
   /* A button may only hold phrasing content, so these are spans made block —
@@ -247,7 +248,10 @@
     font-family: var(--font-display); font-weight: 600; font-size: 15px;
     color: var(--coral); margin-bottom: 2px;
   }
-  .rec-wizard .rw-meta { display: block; font-size: 13px; font-weight: 500; color: #D98682; }
+  /* The count carries the neutral body colour, not a paler coral: coral on the
+     coral tint measured 2.4:1 and was the weakest text on the screen. Coral is
+     left to the title and the glyph, which is where it says "these are mine". */
+  .rec-wizard .rw-meta { display: block; font-size: 13px; font-weight: 500; color: var(--text-body); }
   .rec-wizard .chevron { display: flex; flex: 0 0 auto; color: var(--coral); }
 
   /* ---------- Scroll area (mode screens) ---------- */
@@ -765,7 +769,7 @@
      through faster. */
   .speed-title {
     font-family: var(--font-display); font-weight: 700; font-size: 22px;
-    color: var(--wine); text-align: center;
+    color: var(--noir); text-align: center;
     padding: 8px 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
   }
   .speed-group { padding: 20px 20px 24px; }
@@ -780,7 +784,7 @@
      two: the presets are the answer most of the time, the stepper is there when
      none of them is right. Reading down is coarse to fine. */
   .speed-custom {
-    display: flex; align-items: center; justify-content: center; gap: 18px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
     margin-bottom: 18px;
   }
   .speed-step {
@@ -798,10 +802,12 @@
   .speed-step:disabled:active { transform: none; }
   /* The one figure the whole sheet is about. Tabular so it does not shuffle
      sideways between 1.7x and 1.75x — no monospace anywhere in this app. */
+  /* Wide enough for the longest figure the range can produce (1.25x, 0.75x) and
+     not a pixel more — the min-width is what was holding the two buttons apart. */
   .speed-val {
     font-family: var(--font-body); font-size: 28px; font-weight: 500;
     font-variant-numeric: tabular-nums;
-    min-width: 104px; text-align: center;
+    min-width: 82px; text-align: center;
   }
   .speed-custom.mine   .speed-val { color: var(--coral); }
   .speed-custom.others .speed-val { color: var(--wine); }
@@ -990,7 +996,14 @@
   /* the note is the whole content of the block, so it carries no trailing margin —
      in every mode, or the space below it doubles */
   .stage-only .note { margin-bottom: 0; }
-  .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
+  /* Scoped to the two scrolls on purpose. The glass rim is declared further down
+     as `#listenScroll .stage-only::before`, and an id beats a plain class — an
+     unscoped `.stage-only.active::before` set the width but lost the colour, so
+     the playing direction wore the white glass rim instead of a wine one. It went
+     unseen while the playhead never stopped on a direction; now that it opens the
+     scene, it is the first thing you look at. */
+  #listenScroll .stage-only.active::before,
+  #rehearseScroll .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
   /* the narrator's play control sits with the label, before the menu */
   .stage-only .lc-btn { color: var(--wine); margin-left: auto; }
   .stage-only .lc-btn + .line-menu-btn { margin-left: 0; }
@@ -1519,7 +1532,14 @@
               <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
               <div class="set-sub">A narrator reads them between the lines</div>
             </div>
-            <button class="toggle on" onclick="toggleNarrate('listen', this)"></button>
+            <button class="toggle on" onclick="toggleNarrate('listen', 'stage', this)"></button>
+          </div>
+          <div class="set-row">
+            <div>
+              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic private"></i>Read private notes</div>
+              <div class="set-sub">Read with the line they belong to</div>
+            </div>
+            <button class="toggle" onclick="toggleNarrate('listen', 'note', this)"></button>
           </div>
           <div class="set-row">
             <div>
@@ -1555,7 +1575,14 @@
               <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
               <div class="set-sub">Off by default here — a narrator between cues throws your timing</div>
             </div>
-            <button class="toggle" onclick="toggleNarrate('rehearse', this)"></button>
+            <button class="toggle" onclick="toggleNarrate('rehearse', 'stage', this)"></button>
+          </div>
+          <div class="set-row">
+            <div>
+              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic private"></i>Read private notes</div>
+              <div class="set-sub">Read with the line they belong to</div>
+            </div>
+            <button class="toggle" onclick="toggleNarrate('rehearse', 'note', this)"></button>
           </div>
           <div class="set-row">
             <div>
@@ -1680,17 +1707,30 @@
   const isLine  = i => !!SCRIPT[i] && !!SCRIPT[i].who;
   const lineIdx = () => SCRIPT.map((it, i) => it.who ? i : -1).filter(i => i >= 0);
 
-  /* Whether the narrator reads the stage directions aloud. On in Listen, where you
-     are learning the play; off in Rehearse, where a voice between cues throws the
-     timing you are drilling. It decides what the playhead can stop on. */
-  const narrate = { listen: true, rehearse: false };
+  /* What the narrator reads aloud, per mode. Stage directions are on in Listen,
+     where you are learning the play, and off in Rehearse, where a voice between
+     cues throws the timing you are drilling. Private notes are off in both: a
+     note is a reminder you wrote to yourself, so hearing it is a deliberate ask.
+
+     Only `stage` reaches the playhead. A standalone stage direction is an item of
+     its own and can be stopped on like a line; a private note always hangs off a
+     line, so it is read as part of that line and never becomes a stop. */
+  const narrate = {
+    listen:   { stage: true,  note: false },
+    rehearse: { stage: false, note: false }
+  };
 
   function playableIdx(mode) {
     /* A direction that is switched off is not on screen, so it is not a place the
        playhead can stop either. */
     return SCRIPT.map((it, i) =>
-      (it.who || (narrate[mode] && defaults.stage && it.stage)) ? i : -1
+      (it.who || (narrate[mode].stage && defaults.stage && it.stage)) ? i : -1
     ).filter(i => i >= 0);
+  }
+  /* Entering a scene or a mode starts at the top of what that mode can play —
+     which may well be a standalone stage direction. */
+  function firstPlayable(mode) {
+    return playableIdx(mode)[0] ?? 0;
   }
   function stepIdx(from, dir, mode = 'listen') {
     const list = playableIdx(mode);
@@ -1802,7 +1842,10 @@
   function openScene(name) {
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
-    activeIdx = lineIdx()[0];   // index 0 may be a stage direction
+    /* The top of the scene, whatever it is. A leading stage direction used to be
+       skipped here, so Listen opened on the second item and never read the
+       direction that sets the scene. Each mode narrows this to what it can play. */
+    activeIdx = 0;
     playing = true;
     renderRead();
     renderSpeedSheet();
@@ -1819,6 +1862,12 @@
     const cur = navStack[navStack.length - 1];
     if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
     if (m === 'read')     renderRead();
+    /* Whatever the playhead sat on may not be playable here — a stage direction
+       this mode does not narrate, or the very top of the scene. Snap it forward. */
+    if (m !== 'read' && !playableIdx(m).includes(activeIdx)) {
+      activeIdx = stepIdx(activeIdx, 1, m);
+      if (!playableIdx(m).includes(activeIdx)) activeIdx = firstPlayable(m);
+    }
     if (m === 'listen')   renderCards('listen');
     if (m === 'rehearse') { openOnCueLine(); renderCards('rehearse'); }
     showScreen(MODE_SCREENS[m]);
@@ -1892,7 +1941,7 @@
   }
   function goNextScene() {
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = NEXT_SCENE);
-    activeIdx = lineIdx()[0];
+    activeIdx = 0;
     playing = true;
     if (currentMode === 'read') {
       renderRead();
@@ -1974,11 +2023,11 @@
   /* Playing a line you can already see should not move the page under you —
      no scroll here. The transport's next/previous do scroll, because there the
      line you are moving to may well be off screen. */
-  function toggleNarrate(mode, btn) {
+  function toggleNarrate(mode, kind, btn) {
     btn.classList.toggle('on');
-    narrate[mode] = btn.classList.contains('on');
+    narrate[mode][kind] = btn.classList.contains('on');
     /* If the playhead was parked on a direction we have just silenced, move it on. */
-    if (!narrate[mode] && !isLine(activeIdx)) activeIdx = stepIdx(activeIdx, 1, mode);
+    if (!narrate[mode].stage && !isLine(activeIdx)) activeIdx = stepIdx(activeIdx, 1, mode);
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
     updateTransport(mode);
@@ -2154,9 +2203,12 @@
   const REH_STATES = { audio:'rehAudio', talking:'rehTalking', paused:'rehPaused', success:'rehSuccess' };
 
   /* Entering the mode should land on a cue, not on your own line. */
+  /* A narrated stage direction is not yours to say either, so it opens the mode
+     just as well as a cue does — it has no `mine`, so it falls out of the same
+     filter. */
   function openOnCueLine() {
-    if (isLine(activeIdx) && !SCRIPT[activeIdx].mine) return;
-    const cues = lineIdx().filter(i => !SCRIPT[i].mine);
+    if (!SCRIPT[activeIdx].mine && playableIdx('rehearse').includes(activeIdx)) return;
+    const cues = playableIdx('rehearse').filter(i => !SCRIPT[i].mine);
     const cue = cues.find(i => i >= activeIdx) ?? cues[0];
     if (cue !== undefined) activeIdx = cue;
   }
