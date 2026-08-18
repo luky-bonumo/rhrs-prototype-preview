@@ -143,12 +143,14 @@
 
        Wine then has to move, and further than it looks: wine is now mostly a
        ground (see --wine-surface), so as a mark it needs to be a different thing
-       rather than a lighter version of the ground. This is a warm rose, held apart
-       from coral by weight rather than by hue: coral is hot and saturated at 83%
-       and sits at 5.6:1, this is soft at 62% and sits at 8.8:1, which keeps wine
-       the heavier of the two the way it is in light. (Light is 2.9x; matching that
-       here would take a near-white.) */
-    --wine-rgb:  231, 154, 160;
+       rather than a lighter version of the ground. A rose leaning to purple: far
+       enough round the wheel from coral (338 against 1) that the two never read as
+       one colour, and darker than coral rather than paler, which is the tone coral
+       itself has. It is held apart from coral by weight as much as by hue — coral
+       is hot and saturated at 83% and sits at 5.6:1, this is softer at 58% and
+       sits at 7.5:1, so wine stays the heavier of the two the way it is in light.
+       (Light is 2.9x; matching that here would take a near-white.) */
+    --wine-rgb:  223, 134, 167;
     --coral-rgb: 239, 83, 80;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
@@ -164,8 +166,8 @@
        it — mixed here rather than left to `color-mix`, so the value is legible. */
     --coral-tint:   #3A1D20;
     --coral-border: #7A3936;
-    --wine-tint:    #332229;
-    --wine-border:  #6E4A54;
+    --wine-tint:    #33212B;
+    --wine-border:  #6B4557;
     /* Body text steps back from the full noir; muted keeps roughly the same
        distance below it as it does in light. */
     --text-body:    #EFE4E7;
@@ -368,9 +370,16 @@
 
      Fade only where something is actually fixed over the content — a sheet ends
      at its own rim, not in a fade. */
+  /* The band is lifted into the bar above it rather than sitting wholly on the
+     content: the region starts --fade-lift higher and pays it back as padding, so
+     nothing moves but the fade now spends most of itself over the bar. Content
+     does run a little way up behind the title and the buttons, which is the point
+     — it is already dissolving by the time it gets there. */
   .fades {
+    --fade-lift: 16px;
     --fade-t: 18px;
     --fade-b: 22px;
+    margin-top: calc(var(--fade-lift) * -1);
     -webkit-mask-image: linear-gradient(to bottom,
       transparent 0, #000 var(--fade-t),
       #000 calc(100% - var(--fade-b)), transparent 100%);
@@ -379,7 +388,7 @@
       #000 calc(100% - var(--fade-b)), transparent 100%);
   }
 
-  .list { flex: 1 1 auto; overflow-y: auto; padding: 4px 20px 24px; }
+  .list { flex: 1 1 auto; overflow-y: auto; padding: 26px 20px 24px; }
   .list::-webkit-scrollbar { width: 0; }
   .list-sublabel {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
@@ -451,7 +460,7 @@
   .scroll {
     flex: 1 1 auto; overflow-y: auto;
     position: relative;               /* cards measure offsetTop against this */
-    padding: 4px 22px 20px;
+    padding: 20px 22px 20px;
     -webkit-overflow-scrolling: touch;
   }
   .scroll::-webkit-scrollbar { width: 0; }
@@ -619,6 +628,11 @@
      clear the padding of their state by 12, the big button's shadow by 7. More
      than that and the two folds visibly overlap while they cross. */
   .t-fold > * { min-height: 0; overflow: clip; overflow-clip-margin: 16px; }
+  /* Two states carry a halo far wider than that trim: the recording rings reach
+     28px past their button and the success tick throws a 24px shadow. Neither
+     state can be collapsed — rehSetState forces the player open for both — so
+     neither has a fold to bite on, and the trim only ever cut them square. */
+  #rehTalking, #rehSuccess { overflow: visible; }
   .t-fold.show {
     grid-template-rows: 1fr; opacity: 1; pointer-events: auto;
     transition: grid-template-rows var(--fold-ms) var(--fold-ease),
@@ -877,6 +891,7 @@
   .settings-scroll {
     overflow-y: auto;
     padding: 8px 0 44px;
+    --fade-lift: 0px;
     --fade-t: 10px;
     --fade-b: 30px;
   }
@@ -1041,7 +1056,7 @@
 
   /* ============ DASHBOARD ============ */
   #dashboardScreen { background: var(--wine-surface); }
-  .dash-scroll { flex: 1 1 auto; overflow-y: auto; padding: 4px 22px 30px; display: flex; flex-direction: column; }
+  .dash-scroll { flex: 1 1 auto; overflow-y: auto; padding: 20px 22px 30px; display: flex; flex-direction: column; }
   .dash-scroll::-webkit-scrollbar { width: 0; }
   .dash-top { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 22px 20px; }
   .dash-logo { color: var(--on-wine-strong); display: flex; align-items: center; }
@@ -1125,19 +1140,18 @@
     text-transform: uppercase; color: var(--on-wine-soft); margin-bottom: 12px;
   }
   .stats-grid { display: flex; gap: 12px; }
-  .stat {
-    position: relative;
-    flex: 1 1 0; background: var(--card-bg); border-radius: 16px; padding: 14px;
-    box-shadow: 0 4px 16px var(--lift-noir);
-  }
-  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--noir); line-height: 1; }
-  .stat .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  /* Not a card. The cards above are things you open; these are a read-out, so
+     they sink into the ground instead of standing on it — which is also what
+     keeps them from reading as a fourth row of the same object. */
+  .stat { flex: 1 1 0; background: var(--on-wine-fill); border-radius: 16px; padding: 14px; }
+  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--on-wine-strong); line-height: 1; }
+  .stat .stat-lbl { font-size: 12px; color: var(--on-wine-soft); margin-top: 6px; }
 
   /* ============ GLOBAL SETTINGS ============
      One real setting so far. The rest of the screen says so rather than
      pretending: a stub that lists sections it does not have would read as broken,
      a note that says what is coming reads as unfinished, which is the truth. */
-  .gs-list { flex: 1 1 auto; overflow-y: auto; padding: 0 22px 30px; }
+  .gs-list { flex: 1 1 auto; overflow-y: auto; padding: 16px 22px 30px; }
   .gs-list::-webkit-scrollbar { width: 0; }
   .gs-group {
     position: relative;
@@ -1301,7 +1315,7 @@
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
-  .dash-card::before, .dash-shortcut::before, .stat::before,
+  .dash-card::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
   .sheet::before, .settings-sheet::before,
   .mini::before, .skip-btn::before, .jump-btn::before,
