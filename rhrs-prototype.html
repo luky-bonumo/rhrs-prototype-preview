@@ -225,6 +225,31 @@
   .card.featured .badge { color: #ffd9dd; border-color: rgba(255,217,221,0.6); }
   .card.featured .chevron { color: rgba(255,255,255,0.85); }
 
+  /* Recording Wizard — the way into recording the lines that have no audio yet.
+     It hangs off the Whole play card rather than standing beside it, so it is
+     tinted rather than filled: a follow-on, not a rival to the primary action.
+     Coral because the lines it is missing are mine. Carrying coral, it drops the
+     glass for a flat fill, like everything else that does. */
+  .rec-wizard {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--coral-tint); border: none; width: 100%;
+    border-radius: var(--radius-card); padding: 13px 16px; margin-top: 10px;
+    cursor: pointer; text-align: left; color: var(--coral);
+    font-family: var(--font-body);
+    box-shadow: 0 2px 8px rgba(239, 83, 80, 0.10);
+  }
+  .rec-wizard:active { transform: scale(0.99); }
+  /* A button may only hold phrasing content, so these are spans made block —
+     as inline they ran the title and the count together on one line. */
+  .rec-wizard .rw-main { display: block; flex: 1 1 auto; min-width: 0; }
+  .rec-wizard .rw-title {
+    display: block;
+    font-family: var(--font-display); font-weight: 600; font-size: 15px;
+    color: var(--coral); margin-bottom: 2px;
+  }
+  .rec-wizard .rw-meta { display: block; font-size: 13px; font-weight: 500; color: #D98682; }
+  .rec-wizard .chevron { display: flex; flex: 0 0 auto; color: var(--coral); }
+
   /* ---------- Scroll area (mode screens) ---------- */
   .scroll {
     flex: 1 1 auto; overflow-y: auto;
@@ -751,6 +776,36 @@
   }
   .speed-label.mine   { color: var(--coral); }
   .speed-label.others { color: var(--wine); }
+  /* The custom control sits above the presets, because it is the finer of the
+     two: the presets are the answer most of the time, the stepper is there when
+     none of them is right. Reading down is coarse to fine. */
+  .speed-custom {
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    margin-bottom: 18px;
+  }
+  .speed-step {
+    width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .speed-custom.mine   .speed-step { color: var(--coral); }
+  .speed-custom.others .speed-step { color: var(--wine); }
+  .speed-step:active { transform: scale(0.92); }
+  /* At either end of the range the button has nothing left to do, and saying so
+     is better than letting it look live and do nothing. */
+  .speed-step:disabled { opacity: 0.3; cursor: default; box-shadow: none; }
+  .speed-step:disabled:active { transform: none; }
+  /* The one figure the whole sheet is about. Tabular so it does not shuffle
+     sideways between 1.7x and 1.75x — no monospace anywhere in this app. */
+  .speed-val {
+    font-family: var(--font-body); font-size: 28px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    min-width: 104px; text-align: center;
+  }
+  .speed-custom.mine   .speed-val { color: var(--coral); }
+  .speed-custom.others .speed-val { color: var(--wine); }
+
   .speed-row { display: flex; gap: 8px; }
   .speed-opt {
     flex: 1 1 0; border: none; cursor: pointer;
@@ -966,7 +1021,7 @@
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
-  .speed-opt {
+  .speed-step, .speed-opt {
     position: relative;
     background: var(--glass-fill);
     box-shadow: var(--glass-shadow);
@@ -978,7 +1033,7 @@
   .mini::before, .skip-btn::before, .jump-btn::before,
   .settings-title .account-btn::before, .char-row .cr-edit::before,
   .font-stepper button::before,
-  .speed-opt::before {
+  .speed-step::before, .speed-opt::before {
     content: '';
     position: absolute; inset: 0;
     border-radius: inherit;
@@ -1528,10 +1583,20 @@
     <div class="speed-title cap-trim">Playback speed</div>
     <div class="speed-group" id="speedMineGroup">
       <div class="speed-label mine cap-trim">My lines</div>
+      <div class="speed-custom mine">
+        <button class="speed-step" id="speedMineDown" onclick="stepSpeed('mine', -1)" aria-label="Slower"><i class="ph-bold ph-minus ic-20"></i></button>
+        <span class="speed-val" id="speedMineVal">1.0x</span>
+        <button class="speed-step" id="speedMineUp" onclick="stepSpeed('mine', 1)" aria-label="Faster"><i class="ph-bold ph-plus ic-20"></i></button>
+      </div>
       <div class="speed-row mine" id="speedMine"></div>
     </div>
     <div class="speed-group">
       <div class="speed-label others cap-trim">Others' lines</div>
+      <div class="speed-custom others">
+        <button class="speed-step" id="speedOthersDown" onclick="stepSpeed('others', -1)" aria-label="Slower"><i class="ph-bold ph-minus ic-20"></i></button>
+        <span class="speed-val" id="speedOthersVal">1.0x</span>
+        <button class="speed-step" id="speedOthersUp" onclick="stepSpeed('others', 1)" aria-label="Faster"><i class="ph-bold ph-plus ic-20"></i></button>
+      </div>
       <div class="speed-row others" id="speedOthers"></div>
     </div>
   </div>
@@ -1687,10 +1752,24 @@
   let activeIdx   = 0;             // the line currently being played / rehearsed
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
+  /* Play-level figure, same as the 320 lines on the Whole play card: this scene
+     is the only one with real text, so the wizard's count is simulated too. */
+  const UNRECORDED_LINES = 4;
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
   const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
-  const SPEEDS = ['0.5x', '1.0x', '1.25x', '1.5x', '2.0x'];
-  const speed = { mine: '1.0x', others: '1.0x' };
+  /* Speeds are numbers, not labels: the presets and the stepper are two ways at
+     the same scale, and a preset lights up only when the number happens to land
+     on it. Stored rounded to the step, so 0.05 arithmetic cannot drift. */
+  const SPEEDS     = [0.5, 1, 1.25, 1.5, 2];
+  const SPEED_MIN  = 0.25;
+  const SPEED_MAX  = 2;
+  const SPEED_STEP = 0.05;
+  const speed = { mine: 1, others: 1 };
+
+  /* One decimal at least, two only when the step needs it: 1.0x, 1.7x, 1.75x. */
+  function fmtSpeed(v) {
+    return v.toFixed(2).replace(/0$/, '') + 'x';
+  }
 
   /* ============================================================
      NAVIGATION
@@ -1725,9 +1804,8 @@
     currentMode = 'read';
     activeIdx = lineIdx()[0];   // index 0 may be a stage direction
     playing = true;
-    SCENES[0].lines = lineIdx().length;   // the one scene we actually have text for
-  renderRead();
-  renderSpeedSheet();
+    renderRead();
+    renderSpeedSheet();
     showScreen('readScreen');
   }
 
@@ -1944,22 +2022,33 @@
      whoever currently holds the line, which is the one its buttons would change. */
   function renderSpeedSheet() {
     for (const group of ['mine', 'others']) {
-      const box = document.getElementById(group === 'mine' ? 'speedMine' : 'speedOthers');
-      box.innerHTML = SPEEDS.map(v =>
-        `<button class="speed-opt ${speed[group] === v ? 'on' : ''}" onclick="setSpeed('${group}', '${v}')">${v}</button>`
+      const cap = group === 'mine' ? 'Mine' : 'Others';
+      const v = speed[group];
+      document.getElementById('speed' + cap).innerHTML = SPEEDS.map(p =>
+        `<button class="speed-opt ${v === p ? 'on' : ''}" onclick="setSpeed('${group}', ${p})">${fmtSpeed(p)}</button>`
       ).join('');
+      document.getElementById('speed' + cap + 'Val').textContent = fmtSpeed(v);
+      document.getElementById('speed' + cap + 'Down').disabled = v <= SPEED_MIN;
+      document.getElementById('speed' + cap + 'Up').disabled   = v >= SPEED_MAX;
     }
-    document.querySelectorAll('.js-speed-mine').forEach(el => el.textContent = speed.mine);
-    document.querySelectorAll('.js-speed-others').forEach(el => el.textContent = speed.others);
+    document.querySelectorAll('.js-speed-mine').forEach(el => el.textContent = fmtSpeed(speed.mine));
+    document.querySelectorAll('.js-speed-others').forEach(el => el.textContent = fmtSpeed(speed.others));
   }
   function setSpeed(group, value) {
     speed[group] = value;
     renderSpeedSheet();
     syncSpeedLabels();
   }
+  /* Nudge by one step and round to the step itself — floats would otherwise turn
+     1.7 into 1.7000000000000002 and no preset would ever match again. */
+  function stepSpeed(group, dir) {
+    const raw = speed[group] + dir * SPEED_STEP;
+    const v = Math.round(Math.min(SPEED_MAX, Math.max(SPEED_MIN, raw)) / SPEED_STEP) * SPEED_STEP;
+    setSpeed(group, Math.round(v * 100) / 100);
+  }
   function syncSpeedLabels() {
     const who = SCRIPT[activeIdx].mine ? 'mine' : 'others';
-    document.querySelectorAll('.speed').forEach(el => el.textContent = speed[who]);
+    document.querySelectorAll('.speed').forEach(el => el.textContent = fmtSpeed(speed[who]));
   }
   /* Swap sheets rather than stacking them — the speed sheet is the detail of
      this row, not something on top of it. */
@@ -2390,6 +2479,14 @@
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
+      <button class="rec-wizard" onclick="toast('Recording Wizard')">
+        <i class="ph-fill ph-microphone ic-22"></i>
+        <span class="rw-main">
+          <span class="rw-title">Recording Wizard</span>
+          <span class="rw-meta">${UNRECORDED_LINES} lines without audio</span>
+        </span>
+        <span class="chevron">${ICON.chevron}</span>
+      </button>
       <div class="list-sublabel">Scenes</div>`;
     html += SCENES.map(sc => `
       <div class="card" onclick="openScene('${sc.title}')">
@@ -2446,6 +2543,9 @@
   document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen', true));
   document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse', true));
 
+  /* The one scene we actually have text for. Derived here, not on the way into
+     the scene — Script detail is rendered first and used to say "0 lines". */
+  SCENES[0].lines = lineIdx().length;
   renderRecent();
   renderScripts();
   renderCharacters();
