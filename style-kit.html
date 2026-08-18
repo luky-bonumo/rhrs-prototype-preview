@@ -166,14 +166,15 @@
 
   /* ---- colour ---- */
   .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 16px; }
-  /* Opaque on purpose: a glass fill takes the colour of the page under it, and
-     these cards have to be a known ground for the discs to be judged against. */
-  .sw {
-    background: var(--card) !important; border: 1px solid var(--divider);
-    border-radius: 16px; padding: 16px 17px 17px;
+  /* Glass in light, where there is a light ground for it to sit against. In the
+     dark the fill would be a half-transparent near-black over a near-black page,
+     which is a wash rather than a surface, so there it goes opaque. */
+  .sw { border-radius: 16px; padding: 16px 17px 17px; }
+  :root[data-theme="dark"] .sw {
+    background: var(--card); border: 1px solid var(--divider);
     box-shadow: none;
   }
-  .sw::before { content: none; }
+  :root[data-theme="dark"] .sw::before { content: none; }
   .sw .nm { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--noir); }
   .sw .ro { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
   /* Both values at once, because in a two-mode palette the pair is the fact.
@@ -181,12 +182,23 @@
      six of them down a column is easier when they are all the same small shape. */
   .sw .vals { display: flex; gap: 18px; margin-top: 12px; }
   .sw .val { display: flex; align-items: center; gap: 8px; }
-  /* The ring is what makes mist and white visible at all — their fill is the
-     same colour as the card they sit on, so without it there is nothing to see.
-     It is a rule colour, not the swatch's own, or it would vanish with the fill. */
+  /* The ring is what makes mist and white visible at all — their fill is the same
+     colour as the card they sit on, so without it there is nothing to see. It sits
+     *inside* the disc and is made of the fill itself, shaded: a transparent black
+     laid over the edge, so every swatch gets a ring that is its own colour a step
+     darker, whatever that colour happens to be. */
   .sw .disc {
-    width: 30px; height: 30px; border-radius: 50%;
-    border: 1.5px solid var(--stone); flex: 0 0 auto;
+    width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto;
+    box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.25);
+  }
+  /* The inset ring shades the fill, which is what makes a pale swatch legible on a
+     pale card. On a dark card it cannot do the other half of the job: noir, mist
+     and white are all near-black there, and nothing darker will separate them from
+     the card. So the dark mode adds a hairline outside the disc — a different job,
+     hence a different ring, and only where it is needed. */
+  :root[data-theme="dark"] .sw .disc {
+    box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.25),
+                0 0 0 1px rgba(255,255,255,0.16);
   }
   .sw .vlabel { font-size: 10px; font-weight: 700; letter-spacing: .5px;
     text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 1px; }
