@@ -51,6 +51,11 @@
     --radius-note:  12px;
     --radius-pill:  999px;
 
+    /* Folding the player open and shut. One duration and one curve, so the
+       height, the fade and the padding that follows them all arrive together. */
+    --fold-ms:   260ms;
+    --fold-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
     /* Per-mode accent. Overridden per screen; every control reads from it. */
     --accent: var(--coral);
     --accent-rgb: 239, 83, 80;
@@ -347,6 +352,7 @@
   .transport {
     flex: 0 0 auto; position: relative;
     padding: 0 22px 10px;
+    transition: padding-bottom var(--fold-ms) var(--fold-ease);
   }
   /* Evaluation has no mode bar under it, so the transport carries the safe area. */
   .screen > .transport:last-child { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
@@ -368,12 +374,40 @@
   .jump-btn.show { display: flex; }
   .jump-btn:active { transform: scale(0.92); }
 
+  /* --- folding between the mini bar and the full player ---
+     Height is not animatable across a `display` switch, so each of the two
+     states sits in a fold whose single grid row runs 1fr → 0fr. The two folds
+     are in flow one after the other and cross on the same curve, so their sum —
+     the height of the transport — moves straight from one to the other with no
+     bump in the middle. `overflow: clip` is what the row height actually bites
+     on; the clip margin lets the button shadows and the recording rings paint
+     past the trim instead of being cut square. */
+  /* The two fades are staggered rather than run together: the one leaving is
+     gone before the one arriving starts, so they hand over instead of both
+     being half-drawn on top of each other in the middle. */
+  .t-fold {
+    display: grid; grid-template-rows: 0fr;
+    opacity: 0; pointer-events: none;
+    transition: grid-template-rows var(--fold-ms) var(--fold-ease),
+                opacity calc(var(--fold-ms) * 0.4) ease;
+  }
+  /* 16px is what the widest thing that leaves its box needs: the recording rings
+     clear the padding of their state by 12, the big button's shadow by 7. More
+     than that and the two folds visibly overlap while they cross. */
+  .t-fold > * { min-height: 0; overflow: clip; overflow-clip-margin: 16px; }
+  .t-fold.show {
+    grid-template-rows: 1fr; opacity: 1; pointer-events: auto;
+    transition: grid-template-rows var(--fold-ms) var(--fold-ease),
+                opacity calc(var(--fold-ms) * 0.55) ease calc(var(--fold-ms) * 0.45);
+  }
+
   /* --- collapsed mini player --- */
   /* The whole bar expands the player; its own controls opt out of that. */
   .mini {
-    display: none; align-items: center; gap: 14px;
+    display: flex; align-items: center; gap: 14px;
     background: var(--card-bg); border-radius: 18px;
     padding: 9px 16px; cursor: pointer;
+    transition: margin-bottom var(--fold-ms) var(--fold-ease);
   }
   /* Not a scrubber — seeking belongs to the full transport. It only says where
      you are, and it stays out of the way of the tap that opens the big player. */
@@ -381,7 +415,6 @@
   /* Collapsed, it should cost as little of the script as possible. */
   .transport.collapsed { padding-bottom: 0; }
   .transport.collapsed .mini { margin-bottom: -4px; }
-  .mini.show { display: flex; }
   .mini .t-time { font-size: 13px; font-weight: 500; color: var(--accent); flex: 0 0 auto; }
   .mini .bar { flex: 1 1 auto; }
   .mini .mini-toggle {
@@ -1167,6 +1200,7 @@
       </button>
 
       <!-- collapsed — tapping the bar itself opens the full transport back up -->
+      <div class="t-fold" id="listenMiniFold">
       <div class="mini" id="listenMini" onclick="expandPlayer('listen')">
         <span class="t-time" id="listenMiniTime">00:59</span>
         <div class="bar" onclick="event.stopPropagation(); seek(event)"><div class="fill" id="listenMiniFill" style="width:32%"></div></div>
@@ -1174,8 +1208,10 @@
           <i class="ph-fill ph-pause ic-28" id="listenMiniIc"></i>
         </button>
       </div>
+      </div>
 
       <!-- expanded -->
+      <div class="t-fold show" id="listenFullFold">
       <div class="expanded show" id="listenExpanded">
         <div class="t-main">
           <button class="skip-btn" onclick="stepLine('listen', -1)" aria-label="Previous line"><i class="ph-bold ph-arrow-left ic-26"></i></button>
@@ -1190,6 +1226,7 @@
           <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span id="listenTotal">01:21</span>
         </div>
+      </div>
       </div>
     </div>
 
@@ -1215,6 +1252,20 @@
         <i class="ph-bold ph-caret-up ic-24" id="rehearseJumpIc"></i>
       </button>
 
+      <!-- collapsed cue playback, same idea as Listen -->
+      <div class="t-fold" id="rehMiniFold">
+      <div class="mini" id="rehMini" onclick="expandPlayer('rehearse')">
+        <span class="t-time" id="rehMiniTime">00:59</span>
+        <div class="bar mini-bar"><div class="fill" style="width:32%"></div></div>
+        <button class="mini-toggle" onclick="event.stopPropagation(); togglePlay('rehearse')" aria-label="Play / pause">
+          <i class="ph-fill ph-pause ic-24" id="rehMiniIc"></i>
+        </button>
+      </div>
+      </div>
+
+      <!-- the four states of the full player; the state machine picks one -->
+      <div class="t-fold show" id="rehFullFold">
+
       <!-- state: audio — someone else is speaking, you just listen. Next moves on to your line. -->
       <div class="expanded show" id="rehAudio">
         <div class="t-main">
@@ -1230,15 +1281,6 @@
           <button class="speed" onclick="openSpeedSheet()">1.0x</button>
           <span>01:21</span>
         </div>
-      </div>
-
-      <!-- collapsed cue playback, same idea as Listen -->
-      <div class="mini" id="rehMini" onclick="expandPlayer('rehearse')">
-        <span class="t-time" id="rehMiniTime">00:59</span>
-        <div class="bar mini-bar"><div class="fill" style="width:32%"></div></div>
-        <button class="mini-toggle" onclick="event.stopPropagation(); togglePlay('rehearse')" aria-label="Play / pause">
-          <i class="ph-fill ph-pause ic-24" id="rehMiniIc"></i>
-        </button>
       </div>
 
       <!-- state: talking (recording your line) -->
@@ -1276,6 +1318,8 @@
       <!-- state: success flash -->
       <div class="reh-success" id="rehSuccess">
         <span class="tick"><i class="ph-bold ph-check ic-38"></i></span>
+      </div>
+
       </div>
     </div>
 
@@ -1691,6 +1735,8 @@
      so Back always returns to the scene list. */
   function switchMode(m) {
     currentMode = m;
+    /* Arriving in a mode is arriving at a line, so both modes' players open. */
+    playerOpen.listen = playerOpen.rehearse = true;
     forcedOpen.listen = forcedOpen.rehearse = false;
     const cur = navStack[navStack.length - 1];
     if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
@@ -1699,7 +1745,8 @@
     if (m === 'rehearse') { openOnCueLine(); renderCards('rehearse'); }
     showScreen(MODE_SCREENS[m]);
     if (m === 'rehearse') syncRehearse();
-    if (m !== 'read') requestAnimationFrame(() => { scrollToActive(m, 'auto'); });
+    /* Jumped, not scrolled, so the player can be squared up straight after. */
+    if (m !== 'read') requestAnimationFrame(() => { scrollToActive(m, 'auto'); refocusPlayer(m); });
   }
 
   /* ============================================================
@@ -1777,7 +1824,7 @@
       renderCards(currentMode);
       document.getElementById(currentMode + 'Scroll').scrollTop = 0;
       if (currentMode === 'rehearse') syncRehearse();
-      updateTransport(currentMode);
+      refocusPlayer(currentMode);
     }
   }
 
@@ -1865,7 +1912,7 @@
     playing = true;
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
-    updateTransport(mode);
+    refocusPlayer(mode);
   }
 
   /* ============================================================
@@ -1885,6 +1932,7 @@
     playing = true;
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
+    refocusPlayer(mode);
     scrollToActive(mode);
   }
   function seek(e) {
@@ -1929,22 +1977,43 @@
     document.getElementById('speedSheet').classList.add('open');
   }
 
-  /* The player collapses to a mini bar whenever the line being played is
-     scrolled out of view. Tapping the bar overrides that and opens it back up;
-     the override lasts until you are back at the line, which is the point at
-     which it stops meaning anything. */
+  /* Scrolling only ever folds the player down: leave the line that is playing
+     and the transport shrinks to the mini bar. Scrolling back does *not* open it
+     again — reading somewhere else is a state of its own, and having the player
+     grow and shrink under the thumb on the way past the line was the flicker.
+     It opens on a tap on the mini bar, or on its own when the active line
+     changes, since a new line is a new thing to control: the transport arrows,
+     play on a card, or switching mode.
+
+     Two flags, because they answer two questions. `playerOpen` is what is on
+     screen. `forcedOpen` remembers that you asked for it by hand while away from
+     the line, so a further scroll does not immediately take it back; that claim
+     expires once you are at the line again, which is where it stops meaning
+     anything. */
+  const playerOpen = { listen: true,  rehearse: true  };
   const forcedOpen = { listen: false, rehearse: false };
+  /* A programmatic scroll passes over everything between here and the line, so
+     for its duration the scroll handler must not read anything into that. */
+  const progScroll = { listen: 0, rehearse: 0 };
+
   const TRANSPORT = {
-    listen:   { expanded: 'listenExpanded', mini: 'listenMini', jump: 'listenJump',   jumpIc: 'listenJumpIc' },
-    rehearse: { expanded: 'rehAudio',       mini: 'rehMini',    jump: 'rehearseJump', jumpIc: 'rehearseJumpIc' }
+    listen:   { full: 'listenFullFold', mini: 'listenMiniFold', jump: 'listenJump',   jumpIc: 'listenJumpIc' },
+    rehearse: { full: 'rehFullFold',    mini: 'rehMiniFold',    jump: 'rehearseJump', jumpIc: 'rehearseJumpIc' }
   };
 
+  /* by hand, from the mini bar */
   function expandPlayer(mode) {
-    forcedOpen[mode] = true;
+    playerOpen[mode] = forcedOpen[mode] = true;
+    updateTransport(mode);
+  }
+  /* the active line changed — the full player comes back on its own */
+  function refocusPlayer(mode) {
+    playerOpen[mode] = true;
+    forcedOpen[mode] = false;
     updateTransport(mode);
   }
 
-  function updateTransport(mode) {
+  function updateTransport(mode, fromScroll) {
     const t = TRANSPORT[mode];
     if (!t) return;
     /* In Rehearse the state machine owns the transport. Only while it is playing a
@@ -1957,11 +2026,14 @@
     if (!card) return;
     const cr = card.getBoundingClientRect(), sr = scroll.getBoundingClientRect();
     const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60;
+
     if (atLine) forcedOpen[mode] = false;
+    else if (fromScroll && !forcedOpen[mode] && Date.now() > progScroll[mode]) {
+      playerOpen[mode] = false;
+    }
+    const open = playerOpen[mode];
 
-    const open = atLine || forcedOpen[mode];
-
-    document.getElementById(t.expanded).classList.toggle('show', open);
+    document.getElementById(t.full).classList.toggle('show', open);
     document.getElementById(t.mini).classList.toggle('show', !open);
     scroll.closest('.screen').querySelector('.transport')
       .classList.toggle('collapsed', !open);
@@ -1979,9 +2051,10 @@
     const scroll = document.getElementById(mode + 'Scroll');
     const card = scroll.querySelector('.lcard.active, .stage-only.active');
     if (card) {
+      progScroll[mode] = Date.now() + 700;
       scroll.scrollTo({ top: Math.max(0, card.offsetTop - 8), behavior: behavior || 'smooth' });
     }
-    setTimeout(() => updateTransport(mode), 400);
+    setTimeout(() => { progScroll[mode] = 0; updateTransport(mode); }, 450);
   }
 
   /* ============================================================
@@ -2005,8 +2078,13 @@
     rehState = state;
     Object.entries(REH_STATES).forEach(([key, id]) =>
       document.getElementById(id).classList.toggle('show', key === state));
+    /* Nothing but a cue can be folded away: the microphone and the take are the
+       screen's whole business while they last, so the full player comes back. */
     if (state !== 'audio') {
-      document.getElementById('rehMini').classList.remove('show');
+      playerOpen.rehearse = true;
+      forcedOpen.rehearse = false;
+      document.getElementById('rehFullFold').classList.add('show');
+      document.getElementById('rehMiniFold').classList.remove('show');
       document.getElementById('rehearseJump').classList.remove('show');
       document.querySelector('#rehearseScreen .transport').classList.remove('collapsed');
     }
@@ -2047,6 +2125,7 @@
       activeIdx = stepIdx(activeIdx, 1, 'rehearse');
       renderCards('rehearse');
       syncRehearse();
+      refocusPlayer('rehearse');
       scrollToActive('rehearse');
     }, SUCCESS_MS);
   }
@@ -2364,8 +2443,8 @@
   /* ============================================================
      INIT
      ============================================================ */
-  document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen'));
-  document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse'));
+  document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen', true));
+  document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse', true));
 
   renderRecent();
   renderScripts();
