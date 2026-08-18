@@ -77,7 +77,10 @@
     --divider:      var(--stone);
 
     --screen-bg: var(--mist);
-    --sheet-bg:  var(--white);
+    /* A sheet is the same ground every screen stands on, in both modes. What
+       separates it from the screen it covers is the scrim under it — darkened and
+       blurred — not a colour of its own. */
+    --sheet-bg:  var(--mist);
     --card-bg:   #FAFAFA;          /* line cards in Listen / Rehearse */
     --scrim:     rgba(var(--scrim-rgb), 0.42);
     /* What a raised surface that carries a colour casts beneath it. On a light
@@ -211,12 +214,9 @@
        the page and may go darker than it; a sheet sits *over* the page and has to
        read as nearer, which in the dark means lighter. Separation ends up at
        1.40:1, where a card against its ground in light is 1.09:1. */
-    /* The sheet is mist, the same ground every screen stands on. It is the scrim
-       that has to make the difference, so it is thrown hard and blurred — the two
-       surfaces are the same colour and only the depth between them separates
-       them. */
+    /* Both surfaces are the same colour, so the scrim has to make the whole
+       difference — thrown hard, and blurred. */
     --scrim: rgba(0, 0, 0, 0.62);
-    --sheet-bg: var(--mist);
 
     --card-bg:  #150A10;
     /* The desk the phone sits on is not part of the app and does not follow the
