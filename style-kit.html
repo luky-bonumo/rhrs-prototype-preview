@@ -14,19 +14,95 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <style>
   /* ---- shared shell for the rhrs design pages (kept inline: no build step) ---- */
+  /* Same construction as the prototype: every colour is an rgb triplet first and
+     the named token is built from it, so a shadow or a translucent fill can reach
+     the channels without spelling them out. Dark is then one block of triplets.
+
+     These values are a copy of the prototype's — a style kit that opens straight
+     from disk cannot import them. `tools/build-preview.py` compares the two on
+     every build and refuses to build if they have drifted apart. */
   :root {
-    --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
-    --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
+    --noir-rgb:28,10,16;   --wine-rgb:122,30,45;  --coral-rgb:239,83,80;
+    --stone-rgb:224,224,224; --mist-rgb:245,245,245; --white-rgb:255,255,255;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+
+    --noir:rgb(var(--noir-rgb));   --wine:rgb(var(--wine-rgb));
+    --coral:rgb(var(--coral-rgb)); --stone:rgb(var(--stone-rgb));
+    --mist:rgb(var(--mist-rgb));   --white:rgb(var(--white-rgb));
+    --grey:rgb(var(--grey-rgb));
+
     --coral-tint:#FDECEB; --coral-border:#F6CBCA;
     --wine-tint:#F3E7E9;  --wine-border:#DFCCD0;
     --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
+
+    /* wine as a ground rather than as a mark — see the prototype */
+    --wine-surface: var(--wine);
+    --on-wine-strong: rgba(var(--mist-rgb),0.9);
+    --on-wine-soft:   rgba(var(--mist-rgb),0.78);
+    --on-mark: var(--on-wine-strong);
+    --card: var(--white);
+    --glass-edge-rgb: var(--white-rgb);
+    --glass-shadow: 2px 2px 8px rgba(var(--stone-rgb),0.5);
+    --glass-fill: rgba(var(--white-rgb), 0.5);
+
     --font-display:'Platypi', Georgia, serif;
     --font-body:'DM Sans', system-ui, sans-serif;
     --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+    --lift-coral: rgba(var(--coral-rgb),0.28);
+    --lift-wine:  rgba(var(--wine-rgb),0.28);
+    /* A coloured control casts in its own colour on a light ground, where the
+       colour is darker than the ground. In the dark it is brighter, so the same
+       thing paints a glow — same trap the prototype hit. */
+    --lift-ctl:   color-mix(in srgb, var(--ctl-base) 28%, transparent);
     --page:#F2EDEE; --shell:1120px;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --noir-rgb:247,240,242;  --wine-rgb:223,134,167; --coral-rgb:239,117,113;
+    --stone-rgb:82,40,60;    --mist-rgb:38,21,32;    --white-rgb:13,4,7;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+
+    --coral-tint:#3A1D20; --coral-border:#7A3936;
+    --wine-tint:#33212B;  --wine-border:#6B4557;
+    --text-body:#EFE4E7;  --text-muted:#9B858C;  --divider:#3A2A33;
+
+    --wine-surface: #2E1A23;
+    --on-wine-strong: rgba(var(--noir-rgb),0.92);
+    --on-wine-soft:   rgba(var(--noir-rgb),0.7);
+    --on-mark: rgba(var(--white-rgb),0.95);
+    --card: #150A10;
+    --glass-edge-rgb: var(--stone-rgb);
+    --glass-shadow: 2px 3px 12px rgba(0,0,0,0.6);
+
+    --lift-coral: rgba(0,0,0,0.55);
+    --lift-wine:  rgba(0,0,0,0.55);
+    --lift-ctl:   rgba(0,0,0,0.55);
+    --page:#1B0F16;
   }
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; }
+
+  /* Same switch as the prototype, so the project has one way of doing this and
+     not two. The attribute is always written and seeded from the system, which
+     keeps the dark tokens in a single block instead of a duplicated media query. */
+  .theme-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: rgba(var(--noir-rgb), 0.10);
+    border-radius: 999px;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .theme-switch button {
+    border: none; background: none; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--noir); opacity: 0.45;
+  }
+  .theme-switch button.on {
+    background: var(--card); opacity: 1;
+    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
+  }
 
   /* Optical centring for Platypi — see the Typography section for the why. */
   :root { --cap-shift: 0.092em; }
@@ -41,23 +117,23 @@
   a { color: var(--wine); }
   :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
 
-  .top { background: var(--wine); color: var(--mist); padding-block: 26px 34px; }
+  .top { background: var(--wine-surface); color: var(--on-wine-strong); padding-block: 26px 34px; }
   /* padding-inline only: `main`/`footer` set padding-block, and mixing the
      shorthand here would let this class win the cascade and flatten them. */
   .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
   .top .back {
     display: inline-flex; align-items: center; gap: 8px;
-    color: rgba(245,245,245,0.8); text-decoration: none;
+    color: var(--on-wine-soft); text-decoration: none;
     font-size: 14px; font-weight: 600; margin-bottom: 22px;
   }
-  .top .back:hover { color: var(--mist); }
+  .top .back:hover { color: var(--on-wine-strong); }
   .top h1 {
     font-family: var(--font-display); font-weight: 400;
     font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
     text-wrap: balance; max-width: 20ch;
   }
   .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
-  .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
+  .top .lede { margin-top: 14px; max-width: 62ch; color: var(--on-wine-soft); font-size: 16px; }
 
   main { padding-block: 46px 76px; }
   section + section { margin-top: 52px; }
@@ -89,16 +165,32 @@
   }
 
   /* ---- colour ---- */
-  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 16px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 16px; }
+  /* Opaque on purpose: a glass fill takes the colour of the page under it, and
+     these cards have to be a known ground for the discs to be judged against. */
   .sw {
-    background: var(--white); border: 1px solid var(--divider);
-    border-radius: 16px; overflow: hidden;
+    background: var(--card) !important; border: 1px solid var(--divider);
+    border-radius: 16px; padding: 16px 17px 17px;
+    box-shadow: none;
   }
-  .sw .chip { height: 92px; }
-  .sw .meta { padding: 13px 15px 15px; }
+  .sw::before { content: none; }
   .sw .nm { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--noir); }
-  .sw .hx { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
-  .sw .ro { font-size: 12.5px; color: var(--text-muted); margin-top: 7px; line-height: 1.4; }
+  .sw .ro { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+  /* Both values at once, because in a two-mode palette the pair is the fact.
+     A disc rather than a block: a colour is a value, not an area, and reading
+     six of them down a column is easier when they are all the same small shape. */
+  .sw .vals { display: flex; gap: 18px; margin-top: 12px; }
+  .sw .val { display: flex; align-items: center; gap: 8px; }
+  /* The ring is what makes mist and white visible at all — their fill is the
+     same colour as the card they sit on, so without it there is nothing to see.
+     It is a rule colour, not the swatch's own, or it would vanish with the fill. */
+  .sw .disc {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1.5px solid var(--stone); flex: 0 0 auto;
+  }
+  .sw .vlabel { font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 1px; }
+  .sw .hx { font-family: var(--font-mono); font-size: 12px; color: var(--text-body); }
 
   .rule { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
   .rule > div { border-radius: 16px; padding: 20px 22px; }
@@ -257,16 +349,16 @@
     width: 64px; height: 64px; border-radius: 50%; color: var(--white); font-size: 26px;
     display: inline-flex; align-items: center; justify-content: center;
   }
-  .k-big.coral { background: var(--coral); box-shadow: 0 5px 18px rgba(239,83,80,.28); }
-  .k-big.wine  { background: var(--wine);  box-shadow: 0 5px 18px rgba(122,30,45,.28); }
-  .k-big.rec   { background: var(--coral); box-shadow: 0 0 0 10px rgba(239,83,80,.34), 0 0 0 22px rgba(239,83,80,.16); }
+  .k-big.coral { background: var(--coral); box-shadow: 0 5px 18px var(--lift-coral); }
+  .k-big.wine  { background: var(--wine);  box-shadow: 0 5px 18px var(--lift-wine); }
+  .k-big.rec   { background: var(--coral); box-shadow: 0 0 0 10px rgba(var(--coral-rgb),.34), 0 0 0 22px rgba(var(--coral-rgb),.16); }
   .k-toggle {
     width: 50px; height: 30px; border-radius: 999px; background: var(--coral);
     position: relative; display: inline-block;
   }
   .k-toggle::after {
     content: ''; position: absolute; top: 3px; left: 23px; width: 24px; height: 24px;
-    border-radius: 50%; background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    border-radius: 50%; background: var(--white); box-shadow: 0 1px 3px rgba(var(--shadow-rgb),.2);
   }
   .k-toggle.off { background: var(--stone); }
   .k-toggle.off::after { left: 3px; }
@@ -278,9 +370,9 @@
      rim is a masked gradient on ::before, so border-radius: inherit makes one
      rule cover circles, pills and cards alike with no extra markup. */
   :root {
-    --glass-fill:   rgba(255, 255, 255, 0.5);
-    --glass-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
-    --glass-edge:   linear-gradient(135deg, #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+    --glass-fill:   rgba(var(--white-rgb), 0.5);
+    --glass-edge:   linear-gradient(135deg, rgba(var(--glass-edge-rgb),1) 20%,
+                    rgba(var(--glass-edge-rgb),0) 50%, rgba(var(--glass-edge-rgb),1) 81%);
     --glass-rim:    1.5px;
   }
 
@@ -348,9 +440,9 @@
   /* Colour takes a flat fill and a soft shadow. The rim is switched off — glass
      is for the white surfaces, where there is something to read as glass. */
   .ctl.coral, .ctl.wine, .bx.coral, .bx.wine {
-    color: #FFFFFF;
+    color: var(--on-mark);
     background: var(--ctl-base);
-    box-shadow: 0 5px 18px color-mix(in srgb, var(--ctl-base) 28%, transparent);
+    box-shadow: 0 5px 18px var(--lift-ctl);
   }
   .ctl.coral::before, .ctl.wine::before,
   .bx.coral::before,  .bx.wine::before { content: none; }
@@ -367,6 +459,11 @@
 </style>
 </head>
 <body>
+
+<div class="theme-switch" role="group" aria-label="Theme">
+  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph-bold ph-sun"></i></button>
+  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph-bold ph-moon"></i></button>
+</div>
 
 <header class="top">
   <div class="shell">
@@ -394,45 +491,63 @@
 
     <div class="swatches">
       <div class="sw">
-        <div class="chip" style="background:#1C0A10"></div>
-        <div class="meta">
-          <div class="nm">Noir</div><div class="hx">#1C0A10</div>
-          <div class="ro">Body text and dark elements.</div>
+        <div class="nm">Noir</div>
+        <div class="ro">Body text and dark elements. Turns over in the dark: it is the light one there.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#1C0A10"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#1C0A10</span></span></span>
+          <span class="val"><span class="disc" style="background:#F7F0F2"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#F7F0F2</span></span></span>
         </div>
       </div>
       <div class="sw">
-        <div class="chip" style="background:#7A1E2D"></div>
-        <div class="meta">
-          <div class="nm">Wine</div><div class="hx">#7A1E2D</div>
-          <div class="ro">Other characters, shared elements, the main accent.</div>
+        <div class="nm">Wine</div>
+        <div class="ro">Other characters, shared elements, the main accent.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#7A1E2D"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#7A1E2D</span></span></span>
+          <span class="val"><span class="disc" style="background:#DF86A7"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#DF86A7</span></span></span>
         </div>
       </div>
       <div class="sw">
-        <div class="chip" style="background:#EF5350"></div>
-        <div class="meta">
-          <div class="nm">Coral</div><div class="hx">#EF5350</div>
-          <div class="ro">You: your character, your notes, destructive actions.</div>
+        <div class="nm">Coral</div>
+        <div class="ro">You: your character, your notes, destructive actions.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#EF5350"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#EF5350</span></span></span>
+          <span class="val"><span class="disc" style="background:#EF7571"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#EF7571</span></span></span>
         </div>
       </div>
       <div class="sw">
-        <div class="chip" style="background:#E0E0E0"></div>
-        <div class="meta">
-          <div class="nm">Stone</div><div class="hx">#E0E0E0</div>
-          <div class="ro">Neutral. Toggle off, empty track on a scrubber.</div>
+        <div class="nm">Stone</div>
+        <div class="ro">Neutral. Rules, toggle off, the empty track on a scrubber.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#E0E0E0"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#E0E0E0</span></span></span>
+          <span class="val"><span class="disc" style="background:#52283C"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#52283C</span></span></span>
         </div>
       </div>
       <div class="sw">
-        <div class="chip" style="background:#F5F5F5"></div>
-        <div class="meta">
-          <div class="nm">Mist</div><div class="hx">#F5F5F5</div>
-          <div class="ro">Screen background, and text on wine.</div>
+        <div class="nm">Mist</div>
+        <div class="ro">Screen background.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#F5F5F5"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#F5F5F5</span></span></span>
+          <span class="val"><span class="disc" style="background:#261520"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#261520</span></span></span>
         </div>
       </div>
       <div class="sw">
-        <div class="chip" style="background:#FFFFFF; box-shadow: inset 0 0 0 1px #E7E0E1"></div>
-        <div class="meta">
-          <div class="nm">White</div><div class="hx">#FFFFFF</div>
-          <div class="ro">Cards and raised surfaces.</div>
+        <div class="nm">White</div>
+        <div class="ro">Cards and raised surfaces. Darker than mist in the dark, so surfaces sink into the ground rather than lift off it.</div>
+        <div class="vals">
+          <span class="val"><span class="disc" style="background:#FFFFFF"></span>
+            <span><span class="vlabel">Light</span><span class="hx">#FFFFFF</span></span></span>
+          <span class="val"><span class="disc" style="background:#0D0407"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#0D0407</span></span></span>
         </div>
       </div>
     </div>
@@ -607,13 +722,13 @@
 
       <h3 style="margin-top:30px">Recipe</h3>
       <pre><code>/* white — glass */
-background: rgba(255, 255, 255, 0.5);
-box-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
+background: var(--glass-fill);      /* rgba(var(--white-rgb), 0.5) */
+box-shadow: var(--glass-shadow);
 /* + the 1.5px rim on ::before */
 
 /* coral or wine — flat, no rim */
 background: var(--coral);
-box-shadow: 0 5px 18px rgba(239, 83, 80, 0.28);</code></pre>
+box-shadow: 0 5px 18px var(--lift-coral);</code></pre>
       <p class="cap">
         One more rule, learned the hard way: a glass surface must carry no border. <code>inset: 0</code>
         resolves against the padding box, so under a border the rim sits inside it and the fill
@@ -640,20 +755,24 @@ box-shadow: 0 5px 18px rgba(239, 83, 80, 0.28);</code></pre>
           middle. Nothing in the app is a flat white box. Coral and wine surfaces stay out of it
           entirely — see Controls above.
         </p>
-        <pre style="background:var(--mist);border-radius:12px;padding:16px 18px;overflow-x:auto"><code>background: rgba(255, 255, 255, 0.5);
-box-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
+        <pre style="background:var(--mist);border-radius:12px;padding:16px 18px;overflow-x:auto"><code>background: var(--glass-fill);
+box-shadow: var(--glass-shadow);
 
 /* the rim, as a masked gradient on ::before */
 border-radius: inherit;
 padding: 1.5px;
 background: linear-gradient(135deg,
-  #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+  rgba(var(--glass-edge-rgb),1) 20%,
+  rgba(var(--glass-edge-rgb),0) 50%,
+  rgba(var(--glass-edge-rgb),1) 81%);
 mask: linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
 mask-composite: exclude;</code></pre>
         <p class="cap">
-          Sheets sit over live content, so they add <code>backdrop-filter: blur(20px)</code> —
-          the one place the glass has something behind it to bend.
+          Blur belongs to the three pieces that lie over the moving script — the jump
+          chevron, the transport arrows and the mini bar — as one shared
+          <code>--overlay-blur: blur(6px) saturate(1.35)</code>. Nothing else takes it: a sheet
+          covers content that is standing still, so there is nothing there for a blur to say.
         </p>
       </div>
 
@@ -727,6 +846,13 @@ mask-composite: exclude;</code></pre>
 <div class="toast" id="toast"></div>
 
 <script>
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
+    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+  }
+  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
   /* Every icon the prototype uses, in the order you meet them.
      `v` is the Phosphor variant: '' regular, 'ph-fill', 'ph-bold'. */
   const ICONS = [
