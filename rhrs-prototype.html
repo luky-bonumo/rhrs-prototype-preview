@@ -129,8 +129,18 @@
   :root[data-theme="dark"] {
     color-scheme: dark;
     --noir-rgb:  247, 240, 242;
-    --wine-rgb:  212, 77, 101;
-    --coral-rgb: 255, 138, 128;
+    /* Coral is the same coral as in light, not a lightened one. It measures 5.6:1
+       on a card here against 3.3:1 there, so the dark ground does the lifting the
+       lighter tint was doing.
+
+       Wine then has to move, and further than it looks: wine is now mostly a
+       ground (see --wine-surface), so as a mark it needs to be a different thing
+       rather than a lighter version of the ground. This is a dusty rose — a cooler
+       hue than coral so the two never read as the same colour, and 1.6x coral's
+       contrast, which keeps wine the heavier of the two the way it is in light.
+       (Light is 2.9x; matching that here would take a near-white.) */
+    --wine-rgb:  217, 161, 172;
+    --coral-rgb: 239, 83, 80;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
     --white-rgb: 13, 4, 7;
@@ -143,10 +153,10 @@
 
     /* Tints are the accent laid thinly over the ground rather than a pale wash of
        it — mixed here rather than left to `color-mix`, so the value is legible. */
-    --coral-tint:   #3B2028;
-    --coral-border: #6E3B3B;
-    --wine-tint:    #331B24;
-    --wine-border:  #5E2F3C;
+    --coral-tint:   #3A1D20;
+    --coral-border: #7A3936;
+    --wine-tint:    #332229;
+    --wine-border:  #6E4A54;
     /* Body text steps back from the full noir; muted keeps roughly the same
        distance below it as it does in light. */
     --text-body:    #EFE4E7;
@@ -972,7 +982,7 @@
   .speed-row.mine   .speed-opt { color: var(--coral); }
   .speed-row.others .speed-opt { color: var(--wine); }
   .speed-row.mine   .speed-opt.on { background: var(--coral); color: var(--white); }
-  .speed-row.others .speed-opt.on { background: var(--wine);  color: var(--on-wine-strong); }
+  .speed-row.others .speed-opt.on { background: var(--wine);  color: var(--white); }
 
   /* ---------- Toast ---------- */
   .toast {
@@ -1005,7 +1015,7 @@
   .dash-btn .dot {
     position: absolute; top: 9px; right: 10px;
     width: 8px; height: 8px; border-radius: 50%;
-    background: var(--coral); border: 2px solid var(--wine);
+    background: var(--coral); border: 2px solid var(--wine-surface);
   }
   .dash-hero {
     font-family: var(--font-display);
@@ -1013,10 +1023,15 @@
     color: var(--on-wine-strong); padding: 6px 4px 26px; flex: 0 0 auto; max-width: 100%;
   }
   .dash-hero .accent { color: var(--coral); font-weight: 700; }
-  /* On wine there is no light ground for glass to sit against, so the dashboard keeps
-     solid mist cards — just with the same shadow, so they share the same physics. */
+  /* The same object as a scene card or a line card, on a different ground. The
+     fill is opaque rather than the translucent glass one, because glass takes the
+     colour of what it sits on and 50% white over wine lands on a dusty pink —
+     `--card-bg` is exactly what that same glass resolves to over mist, so these
+     read as the card you already know. The shadow stays dark: the ground here is
+     a colour, and the light glass shadow would be a glow on it. */
   .dash-card {
-    background: var(--mist); border-radius: 22px; padding: 20px; margin-bottom: 14px;
+    position: relative;
+    background: var(--card-bg); border-radius: 22px; padding: 20px; margin-bottom: 14px;
     flex: 0 0 auto; box-shadow: 0 4px 16px var(--lift-noir);
   }
   .dash-card-label {
@@ -1044,7 +1059,8 @@
   }
   .dash-row2 { display: flex; gap: 14px; flex: 0 0 auto; }
   .dash-shortcut {
-    flex: 1 1 0; background: var(--mist); border-radius: 22px; padding: 20px 18px;
+    position: relative;
+    flex: 1 1 0; background: var(--card-bg); border-radius: 22px; padding: 20px 18px;
     cursor: pointer; display: flex; flex-direction: column; gap: 12px;
     min-height: 120px; justify-content: space-between;
     box-shadow: 0 4px 16px var(--lift-noir);
@@ -1065,9 +1081,59 @@
     text-transform: uppercase; color: var(--on-wine-soft); margin-bottom: 12px;
   }
   .stats-grid { display: flex; gap: 12px; }
-  .stat { flex: 1 1 0; background: var(--on-wine-fill); border-radius: 16px; padding: 14px; }
-  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--on-wine-strong); line-height: 1; }
-  .stat .stat-lbl { font-size: 12px; color: var(--on-wine-soft); margin-top: 6px; }
+  .stat {
+    position: relative;
+    flex: 1 1 0; background: var(--card-bg); border-radius: 16px; padding: 14px;
+    box-shadow: 0 4px 16px var(--lift-noir);
+  }
+  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--noir); line-height: 1; }
+  .stat .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ============ GLOBAL SETTINGS ============
+     One real setting so far. The rest of the screen says so rather than
+     pretending: a stub that lists sections it does not have would read as broken,
+     a note that says what is coming reads as unfinished, which is the truth. */
+  .gs-list { flex: 1 1 auto; overflow-y: auto; padding: 0 22px 30px; }
+  .gs-list::-webkit-scrollbar { width: 0; }
+  .gs-group {
+    position: relative;
+    background: var(--card-bg); border-radius: var(--radius-card);
+    padding: 6px 0; margin-bottom: 18px;
+    box-shadow: var(--glass-shadow);
+  }
+  .gs-group .set-row + .set-row { border-top: 1px solid var(--divider); }
+  .gs-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 6px 4px 8px;
+  }
+  /* Two states, shown as two, so the one you are in is a place and not a switch
+     you have to read the label of. */
+  .gs-theme { display: flex; gap: 8px; }
+  .gs-theme button {
+    position: relative;
+    flex: 1 1 0; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--card-bg); border-radius: var(--radius-pill); padding: 12px;
+    box-shadow: var(--glass-shadow);
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+    color: var(--wine);
+  }
+  .gs-theme button.on {
+    background: var(--wine); color: var(--white);
+    box-shadow: 0 4px 12px var(--lift-wine);
+  }
+  .gs-theme button:active { transform: scale(0.97); }
+  .gs-todo {
+    border: 1.5px dashed var(--wine-border); border-radius: var(--radius-note);
+    padding: 14px 16px; color: var(--wine);
+  }
+  .gs-todo .gs-todo-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; margin-bottom: 7px;
+  }
+  .gs-todo p { font-size: 14px; line-height: 1.5; font-style: italic; }
 
   /* ============ EDIT PLAY ============ */
   .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.04); }
@@ -1121,7 +1187,7 @@
   }
   .next-scene .ns-go {
     display: inline-flex; align-items: center; gap: 9px;
-    background: var(--wine); color: var(--on-wine-strong); border: none; cursor: pointer;
+    background: var(--wine); color: var(--white); border: none; cursor: pointer;
     border-radius: var(--radius-pill); padding: 13px 24px;
     font-family: var(--font-body); font-size: 13px; font-weight: 700;
     letter-spacing: 0.6px; text-transform: uppercase;
@@ -1191,6 +1257,8 @@
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
+  .dash-card::before, .dash-shortcut::before, .stat::before,
+  .gs-group::before, .gs-theme button::before,
   .mini::before, .skip-btn::before, .jump-btn::before,
   .settings-title .account-btn::before, .char-row .cr-edit::before,
   .font-stepper button::before,
@@ -1217,7 +1285,8 @@
   /* Glass is for the white surfaces only. Anything carrying coral or wine gets a
      flat fill and a soft shadow in its own colour — the treatment the play/pause
      button already had. No rim, no gradient: the colour is weight enough. */
-  .card.featured::before, .speed-opt.on::before { content: none; }
+  .card.featured::before, .speed-opt.on::before,
+  .gs-theme button.on::before { content: none; }
   .card.featured {
     background: var(--wine-surface);
     box-shadow: 0 5px 18px var(--lift-wine);
@@ -1289,7 +1358,7 @@
           <i class="ph ph-bell ic-20"></i>
           <span class="dot"></span>
         </button>
-        <button class="dash-btn" onclick="toast('Settings')" aria-label="Settings">
+        <button class="dash-btn" onclick="showScreen('globalSettingsScreen')" aria-label="Settings">
           <i class="ph ph-gear-six ic-20"></i>
         </button>
         <button class="dash-btn" onclick="toast('User account')" aria-label="Account">
@@ -1356,6 +1425,31 @@
       <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit play"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list" id="scenesList"></div>
+  </div>
+
+  <!-- ============ SCREEN: GLOBAL SETTINGS ============ -->
+  <div class="screen" id="globalSettingsScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Settings</span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="gs-list">
+      <div class="gs-label">Appearance</div>
+      <div class="gs-theme">
+        <button id="gsLight" onclick="setTheme('light')"><i class="ph-bold ph-sun ic-20"></i>Light</button>
+        <button id="gsDark"  onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
+      </div>
+
+      <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
+      <div class="gs-todo">
+        <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
+        <p>Account, Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
+           Notifications, Recording &amp; storage, Subscription, About. Not drawn yet —
+           the theme switch is here first so the prototype can be looked at on a
+           phone in either mode.</p>
+      </div>
+    </div>
   </div>
 
   <!-- ============ SCREEN: EDIT PLAY ============ -->
@@ -2756,8 +2850,11 @@
      which mode it is in. */
   function setTheme(mode) {
     document.documentElement.dataset.theme = mode;
-    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
-    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+    /* Two ways in: the tool on the desk and the app's own screen. Whichever you
+       use, both have to end up saying the same thing. */
+    [['themeLight', 'light'], ['themeDark', 'dark'],
+     ['gsLight', 'light'], ['gsDark', 'dark']].forEach(([id, m]) =>
+      document.getElementById(id).classList.toggle('on', mode === m));
   }
   setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
@@ -2775,6 +2872,7 @@
   const DEEP_LINKS = {
     dashboard:  () => showScreen('dashboardScreen'),
     scripts:    () => showScreen('scriptsScreen'),
+    settings:   () => showScreen('globalSettingsScreen'),
     detail:     () => openScript('s1'),
     edit:       () => { openScript('s1'); showScreen('editPlayScreen'); },
     read:       () => openScene(DEMO_SCENE),
@@ -2838,6 +2936,7 @@
 
     var NAMES = {
       dashboardScreen: 'Dashboard',  scriptsScreen: 'All scripts',
+      globalSettingsScreen: 'Settings',
       detailScreen: 'Script detail', editPlayScreen: 'Edit play',
       readScreen: 'Read',            listenScreen: 'Listen',
       rehearseScreen: 'Rehearse',    evaluationScreen: 'Evaluation'
