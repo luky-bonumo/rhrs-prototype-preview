@@ -111,6 +111,12 @@
     --fold-ms:   260ms;
     --fold-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* The script runs on behind the transport now, so the controls sitting over it
+       all take the same blur — one value, because they are one surface seen in
+       three places. Kept light on purpose: enough to keep the type under it from
+       fighting the type on it, not enough to turn the script into soup. */
+    --overlay-blur: blur(6px) saturate(1.35);
+
     /* Per-mode accent. Overridden per screen; every control reads from it. */
     --accent: var(--coral);
     --accent-rgb: 239, 83, 80;
@@ -137,11 +143,12 @@
   :root[data-theme="dark"] {
     color-scheme: dark;
     --noir-rgb:  247, 240, 242;
-    /* Coral is lifted one step off the light-mode value — 63% lightness to 66% —
-       so it sits closer to wine without giving up what makes it coral. It keeps
-       its full 83% saturation, so it still reads as the hot one of the pair, and
-       at 6.2:1 against wine's 7.5:1 wine stays the heavier by 1.22x. Going further
-       closes that gap, and the gap is the whole "mine / theirs" distinction.
+    /* Coral is lifted off the light-mode value — 63% lightness to 69% — so it sits
+       close to wine without giving up what makes it coral. It keeps 80% saturation
+       against wine's 58%, so it still reads as the hot one of the pair, and at
+       6.9:1 against wine's 7.5:1 wine stays the heavier, though only just. That
+       remaining gap is the whole "mine / theirs" distinction, so it is the thing
+       to watch if this ever goes lighter again.
 
        Wine then has to move, and further than it looks: wine is now mostly a
        ground (see --wine-surface), so as a mark it needs to be a different thing
@@ -153,7 +160,7 @@
        sits at 7.5:1, so wine stays the heavier of the two the way it is in light.
        (Light is 2.9x; matching that here would take a near-white.) */
     --wine-rgb:  223, 134, 167;
-    --coral-rgb: 240, 99, 96;
+    --coral-rgb: 239, 117, 113;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
     --white-rgb: 13, 4, 7;
@@ -194,8 +201,11 @@
     /* The rim catches light, so in the dark it is the rule colour — a step up from
        the near-black surface, where in light it was white against off-white. */
     --glass-edge-rgb: var(--stone-rgb);
-    /* Noir is nearly white here, so the scrim cannot be made of it. */
-    --scrim-rgb: 0, 0, 0;
+    /* Sinking the screen behind a sheet does nothing here — the sheet is already
+       near-black and a darker ground only closes on it (1.06:1, measured). The
+       scrim lifts instead, so the covered screen steps away from the sheet rather
+       than toward it. */
+    --scrim: rgba(var(--noir-rgb), 0.18);
 
     --card-bg:  #150A10;
     /* The desk the phone sits on is not part of the app and does not follow the
@@ -610,13 +620,10 @@
   .jump-btn {
     position: absolute; bottom: calc(100% + 16px); right: 24px;
     width: 52px; height: 52px; border-radius: 50%;
-    /* The one control that floats over moving content, so the one that earns a
-       blur. The fill is what you see through, not the blur — at 0.72 it was a
-       solid disc with a blur behind it doing nothing. Less fill and less blur, so
-       the script stays legible underneath and the button still reads as glass. */
+    /* The fill is what you see through, not the blur. */
     background: rgba(var(--white-rgb), 0.55); border: none; cursor: pointer;
-    -webkit-backdrop-filter: blur(9px) saturate(1.5);
-            backdrop-filter: blur(9px) saturate(1.5);
+    -webkit-backdrop-filter: var(--overlay-blur);
+            backdrop-filter: var(--overlay-blur);
     display: none; align-items: center; justify-content: center;
     color: var(--accent);
     box-shadow: 0 3px 14px rgba(var(--shadow-rgb),0.10);
@@ -645,7 +652,15 @@
   /* 16px is what the widest thing that leaves its box needs: the recording rings
      clear the padding of their state by 12, the big button's shadow by 7. More
      than that and the two folds visibly overlap while they cross. */
-  .t-fold > * { min-height: 0; overflow: clip; overflow-clip-margin: 16px; }
+  .t-fold > * {
+    min-height: 0; overflow: clip; overflow-clip-margin: 16px;
+    transition: padding-block var(--fold-ms) var(--fold-ease);
+  }
+  /* A folded row still stood 18px tall: with border-box a box cannot be shorter
+     than its own padding, and the mini bar carries 9px of it top and bottom. The
+     padding has to fold with the row, or the collapsed player leaves a phantom
+     band above the open one and holds the whole transport that much higher. */
+  .t-fold:not(.show) > * { padding-block: 0; }
   /* Two states carry a halo far wider than that trim: the recording rings reach
      28px past their button and the success tick throws a 24px shadow. Neither
      state can be collapsed — rehSetState forces the player open for both — so
@@ -663,6 +678,8 @@
     display: flex; align-items: center; gap: 14px;
     background: var(--card-bg); border-radius: 18px;
     padding: 9px 16px; cursor: pointer;
+    -webkit-backdrop-filter: var(--overlay-blur);
+            backdrop-filter: var(--overlay-blur);
     transition: margin-bottom var(--fold-ms) var(--fold-ease);
   }
   /* Not a scrubber — seeking belongs to the full transport. It only says where
@@ -680,7 +697,10 @@
   .mini .mini-toggle:active { transform: scale(0.9); }
 
   /* --- expanded player --- */
-  .expanded { display: none; flex-direction: column; gap: 14px; padding-top: 6px; }
+  /* Tight on purpose. Every pixel taken out of the player is a pixel the script
+     gets, and it lands as the controls sitting lower rather than as the block
+     looking cramped — the big button still owns the middle of it. */
+  .expanded { display: none; flex-direction: column; gap: 11px; padding-top: 0; }
   .expanded.show { display: flex; }
 
   /* The primary control is the anchor. Equal 1fr tracks either side put it on the
@@ -701,6 +721,8 @@
   .skip-btn {
     width: 58px; height: 58px; border-radius: 50%;
     background: var(--white); border: none; cursor: pointer;
+    -webkit-backdrop-filter: var(--overlay-blur);
+            backdrop-filter: var(--overlay-blur);
     display: flex; align-items: center; justify-content: center;
     color: var(--accent); box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.07);
     flex: 0 0 auto;
@@ -1077,7 +1099,7 @@
   .dash-scroll { flex: 1 1 auto; overflow-y: auto; padding: 20px 22px 30px; display: flex; flex-direction: column; }
   .dash-scroll::-webkit-scrollbar { width: 0; }
   .dash-top { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 22px 20px; }
-  .dash-logo { color: var(--on-wine-strong); display: flex; align-items: center; }
+  .dash-logo { color: var(--coral); display: flex; align-items: center; }
   .dash-logo svg { height: 20px; width: auto; }
   .dash-actions { display: flex; gap: 10px; }
   .dash-btn {
@@ -1899,9 +1921,9 @@
           <div class="set-row">
             <div>
               <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
-              <div class="set-sub">Off by default here — a narrator between cues throws your timing</div>
+              <div class="set-sub">A narrator reads them between the cues</div>
             </div>
-            <button class="toggle" onclick="toggleNarrate('rehearse', 'stage', this)"></button>
+            <button class="toggle on" onclick="toggleNarrate('rehearse', 'stage', this)"></button>
           </div>
           <div class="set-row">
             <div>
@@ -2043,7 +2065,7 @@
      line, so it is read as part of that line and never becomes a stop. */
   const narrate = {
     listen:   { stage: true,  note: false },
-    rehearse: { stage: false, note: false }
+    rehearse: { stage: true,  note: false }
   };
 
   function playableIdx(mode) {
