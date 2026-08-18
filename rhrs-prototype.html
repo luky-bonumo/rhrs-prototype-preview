@@ -17,15 +17,31 @@
   /* ============================================================
      TOKENS
      ============================================================ */
+  /* Every colour is declared as an rgb triplet first and the named token is built
+     from it. Nothing in the sheet may write a colour literal: a shadow, a scrim or
+     a translucent fill needs the channels, and if it spells them out it stops
+     following the palette. That is what made "just swap the palette" untrue — it
+     was 42 literals deep. Dark mode is then one block of triplets at the bottom. */
   :root {
     /* Wine palette — light mode */
-    --noir:  #1C0A10;
-    --wine:  #7A1E2D;
-    --coral: #EF5350;
-    --stone: #E0E0E0;
-    --mist:  #F5F5F5;
-    --white: #FFFFFF;
-    --grey:  #BEBEBE;
+    --noir-rgb:  28, 10, 16;
+    --wine-rgb:  122, 30, 45;
+    --coral-rgb: 239, 83, 80;
+    --stone-rgb: 224, 224, 224;
+    --mist-rgb:  245, 245, 245;
+    --white-rgb: 255, 255, 255;
+    --grey-rgb:  190, 190, 190;
+    /* What a shadow is cast in. Black on a light ground; on a dark one the ground
+       is already near-black, so elevation leans on the surface instead. */
+    --shadow-rgb: 0, 0, 0;
+
+    --noir:  rgb(var(--noir-rgb));
+    --wine:  rgb(var(--wine-rgb));
+    --coral: rgb(var(--coral-rgb));
+    --stone: rgb(var(--stone-rgb));
+    --mist:  rgb(var(--mist-rgb));
+    --white: rgb(var(--white-rgb));
+    --grey:  rgb(var(--grey-rgb));
 
     /* Derived */
     --coral-tint:   #FDECEB;
@@ -34,6 +50,20 @@
     --wine-border:  #DFCCD0;
     --text-body:    #241318;
     --text-muted:   #9A9A9A;
+    /* On the wine dashboard, where the ground is a colour rather than a surface. */
+    --on-wine-strong: rgba(var(--mist-rgb), 0.9);
+    --on-wine-soft:   rgba(var(--mist-rgb), 0.6);
+    --on-wine-fill:   rgba(var(--mist-rgb), 0.1);
+    --featured-tint-rgb: 255, 217, 221;
+    --featured-tint:  rgb(var(--featured-tint-rgb));
+    /* Wine as a ground rather than as a mark. They are the same colour in light;
+       in dark they part company, because a full-bleed dashboard in the dark wine
+       would be a floodlight. */
+    --wine-surface: var(--wine);
+    /* The rim of a glass surface: whatever sits a step above that surface in the
+       light of the given mode. */
+    --glass-edge-rgb: var(--white-rgb);
+    --scrim-rgb: var(--noir-rgb);
     /* Rules sit on mist and on translucent glass, not on white — stone is what
        still reads at that contrast. */
     --divider:      var(--stone);
@@ -41,6 +71,8 @@
     --screen-bg: var(--mist);
     --sheet-bg:  var(--white);
     --card-bg:   #FAFAFA;          /* line cards in Listen / Rehearse */
+    --scrim:     rgba(var(--scrim-rgb), 0.42);
+    --page-bg:   #c9c9c9;          /* the desk the phone sits on — not part of the app */
 
     --font-display: 'Platypi', Georgia, serif;
     --font-body:    'DM Sans', system-ui, sans-serif;
@@ -59,6 +91,71 @@
     /* Per-mode accent. Overridden per screen; every control reads from it. */
     --accent: var(--coral);
     --accent-rgb: 239, 83, 80;
+  }
+
+  /* ============================================================
+     DARK MODE
+     ============================================================
+     A palette swap and nothing else — no rule below this point knows which mode
+     it is in. The switch writes `data-theme` on the root and sets it from the
+     system preference on load, so one attribute decides and this block never has
+     to be written twice.
+
+     The named seven are Lukas's. Everything under them is derived here and is
+     open for discussion — read the notes, they say what each one is trying to do.
+
+     Two things worth looking at first, both flagged in todo.md:
+     · The palette makes `white` (0D0407) DARKER than `mist` (261520), so surfaces
+       recede into the ground instead of lifting out of it. Faithful to the
+       drawing, and it does mean the glass fill keeps working unchanged.
+     · Coral and wine swap weight. In light, wine is the heavy one (9.4:1 on the
+       ground) and coral the quiet one (3.2:1); in dark it is coral 7.6 and wine
+       4.2. Your own lines get louder than everyone else's. */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --noir-rgb:  247, 240, 242;
+    --wine-rgb:  212, 77, 101;
+    --coral-rgb: 255, 138, 128;
+    --stone-rgb: 82, 40, 60;
+    --mist-rgb:  38, 21, 32;
+    --white-rgb: 13, 4, 7;
+    --grey-rgb:  190, 190, 190;
+
+    /* The ground is already near-black, so a black shadow says nothing. Elevation
+       is carried by the rim and the surface instead, and the shadow only deepens
+       the seam underneath. */
+    --shadow-rgb: 0, 0, 0;
+
+    /* Tints are the accent laid thinly over the ground rather than a pale wash of
+       it — mixed here rather than left to `color-mix`, so the value is legible. */
+    --coral-tint:   #3B2028;
+    --coral-border: #6E3B3B;
+    --wine-tint:    #331B24;
+    --wine-border:  #5E2F3C;
+    /* Body text steps back from the full noir; muted keeps roughly the same
+       distance below it as it does in light. */
+    --text-body:    #EFE4E7;
+    --text-muted:   #9B858C;
+
+    /* Grey on this ground measures 9.3:1, so on the wine dashboard it can afford
+       to be quieter than the near-white it is in light. */
+    --on-wine-strong: rgba(var(--noir-rgb), 0.92);
+    --on-wine-soft:   rgba(var(--noir-rgb), 0.62);
+    --on-wine-fill:   rgba(var(--noir-rgb), 0.08);
+    --featured-tint-rgb: 255, 205, 210;
+
+    /* Wine as a ground: a deep plum between the rule colour and the screen, so the
+       dashboard stays a dark room with a warm cast rather than a lit sign. */
+    --wine-surface: #3A1826;
+
+    /* The rim catches light, so in the dark it is the rule colour — a step up from
+       the near-black surface, where in light it was white against off-white. */
+    --glass-edge-rgb: var(--stone-rgb);
+    /* Noir is nearly white here, so the scrim cannot be made of it. */
+    --scrim-rgb: 0, 0, 0;
+
+    --card-bg:  #150A10;
+    --page-bg:  #120A0F;
   }
 
   /* ---- Optical centring for Platypi ----
@@ -87,7 +184,7 @@
   html, body { height: 100%; }
   body {
     font-family: var(--font-body);
-    background: #c9c9c9;
+    background: var(--page-bg);
     display: flex; justify-content: center; align-items: center;
     min-height: 100vh; color: var(--text-body);
   }
@@ -97,8 +194,31 @@
     width: 393px; height: 852px;
     background: var(--screen-bg);
     border-radius: 44px; overflow: hidden; position: relative;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.35), 0 0 0 10px #111, 0 0 0 11px #333;
+    box-shadow: 0 30px 80px rgba(var(--shadow-rgb),0.35), 0 0 0 10px #111, 0 0 0 11px #333;
     display: flex; flex-direction: column;
+  }
+
+  /* ---------- Theme switch ----------
+     Deliberately outside the phone. It is a tool for looking at the prototype,
+     not a control of the app — the app's own switch belongs in Global Settings,
+     which is not drawn yet. Built from the page tokens rather than the app ones
+     so it stays legible on whichever desk it ends up on. */
+  .theme-switch {
+    position: fixed; top: 20px; right: 20px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: rgba(var(--noir-rgb), 0.10);
+    border-radius: var(--radius-pill);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .theme-switch button {
+    border: none; background: none; cursor: pointer;
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--noir); opacity: 0.45;
+  }
+  .theme-switch button.on {
+    background: var(--mist); opacity: 1;
+    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
   }
 
   /* ---------- Status bar ---------- */
@@ -110,7 +230,7 @@
     background: var(--mist);
     transition: background .2s ease, color .2s ease;
   }
-  .statusbar.on-wine { background: var(--wine); color: var(--mist); }
+  .statusbar.on-wine { background: var(--wine-surface); color: var(--on-wine-strong); }
   .statusbar .right { display: flex; gap: 6px; align-items: center; }
   .statusbar svg { display: block; }
 
@@ -131,7 +251,7 @@
     background: var(--white); border: none;
     display: flex; align-items: center; justify-content: center;
     color: var(--wine); cursor: pointer; position: relative;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(var(--shadow-rgb),0.05);
   }
   .round-btn:active { transform: scale(0.93); }
   .round-btn .dot {
@@ -150,7 +270,7 @@
     background: var(--white); border: none;
     display: flex; align-items: center; justify-content: center;
     color: var(--wine); cursor: pointer; flex: 0 0 auto;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(var(--shadow-rgb),0.06);
   }
   .detail-header .back:active { transform: scale(0.93); }
   .detail-header .h-title {
@@ -172,7 +292,7 @@
     width: 46px; height: 46px; border-radius: 50%;
     background: var(--white); border: none;
     display: flex; align-items: center; justify-content: center;
-    color: var(--wine); box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    color: var(--wine); box-shadow: 0 2px 10px rgba(var(--shadow-rgb),0.06);
     cursor: pointer; flex: 0 0 auto;
     transition: transform .12s ease;
   }
@@ -203,7 +323,7 @@
     transition: transform .12s ease;
     border: none;
   }
-  .card:active { transform: scale(0.985); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .card:active { transform: scale(0.985); box-shadow: 0 1px 6px rgba(var(--shadow-rgb),0.06); }
   .card .card-main { flex: 1 1 auto; min-width: 0; }
   .card .card-title {
     font-family: var(--font-display);
@@ -219,11 +339,11 @@
   }
   .card .chevron { color: var(--wine); flex: 0 0 auto; display: flex; }
 
-  .card.featured { background: var(--wine); }
-  .card.featured .card-title { color: var(--white); }
-  .card.featured .meta-lines { color: rgba(255,255,255,0.7); }
-  .card.featured .badge { color: #ffd9dd; border-color: rgba(255,217,221,0.6); }
-  .card.featured .chevron { color: rgba(255,255,255,0.85); }
+  .card.featured { background: var(--wine-surface); }
+  .card.featured .card-title { color: var(--on-wine-strong); }
+  .card.featured .meta-lines { color: var(--on-wine-soft); }
+  .card.featured .badge { color: var(--featured-tint); border-color: rgba(var(--featured-tint-rgb), 0.6); }
+  .card.featured .chevron { color: var(--on-wine-strong); }
 
   /* Recording Wizard — the way into recording the lines that have no audio yet.
      It hangs off the Whole play card rather than standing beside it, so it is
@@ -299,7 +419,7 @@
   .line-menu-btn .dots span { width: 6px; height: 6px; border-radius: 50%; }
   .mine   .line-menu-btn .dots span { background: var(--coral); }
   .others .line-menu-btn .dots span { background: var(--wine); }
-  .line-menu-btn:active { background: rgba(0,0,0,0.04); }
+  .line-menu-btn:active { background: rgba(var(--shadow-rgb),0.04); }
 
   .line-text { font-size: 16px; line-height: var(--line-height); color: var(--text-body); font-weight: 400; }
 
@@ -392,12 +512,12 @@
     position: absolute; bottom: calc(100% + 16px); right: 24px;
     width: 52px; height: 52px; border-radius: 50%;
     /* the one control that floats over moving content, so the one that earns a blur */
-    background: rgba(255, 255, 255, 0.72); border: none; cursor: pointer;
+    background: rgba(var(--white-rgb), 0.72); border: none; cursor: pointer;
     -webkit-backdrop-filter: blur(14px) saturate(1.6);
             backdrop-filter: blur(14px) saturate(1.6);
     display: none; align-items: center; justify-content: center;
     color: var(--accent);
-    box-shadow: 0 3px 14px rgba(0,0,0,0.10);
+    box-shadow: 0 3px 14px rgba(var(--shadow-rgb),0.10);
     z-index: 3;
   }
   .jump-btn.show { display: flex; }
@@ -475,7 +595,7 @@
     width: 58px; height: 58px; border-radius: 50%;
     background: var(--white); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    color: var(--accent); box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.07);
     flex: 0 0 auto;
   }
   .skip-btn:active { transform: scale(0.92); }
@@ -608,7 +728,7 @@
   /* ---------- Bottom sheet ---------- */
   .scrim {
     position: absolute; inset: 0;
-    background: rgba(28,10,16,0.42);
+    background: var(--scrim);
     opacity: 0; pointer-events: none;
     transition: opacity .25s ease; z-index: 20;
   }
@@ -620,7 +740,7 @@
     border-radius: 26px 26px 0 0; z-index: 21;
     transform: translateY(110%);
     transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1);
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 -8px 40px rgba(var(--shadow-rgb),0.2);
     display: flex; flex-direction: column;
   }
   .sheet { padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 82%; }
@@ -699,7 +819,7 @@
     transition: background .15s ease, color .15s ease;
   }
   .align-opt:active { transform: scale(0.94); }
-  .align-opt.on { background: var(--coral); color: var(--white); box-shadow: 0 3px 10px rgba(239, 83, 80, 0.28); }
+  .align-opt.on { background: var(--coral); color: var(--white); box-shadow: 0 3px 10px rgba(var(--coral-rgb), 0.28); }
 
 
   /* A row that states its current value and opens the detail for it. Ten speed
@@ -710,7 +830,7 @@
     padding: 13px 24px; text-align: left;
     font-family: var(--font-body);
   }
-  .set-link:active { background: rgba(0,0,0,0.03); }
+  .set-link:active { background: rgba(var(--shadow-rgb),0.03); }
   .set-link .link-left { display: grid; gap: 2px; }
   .set-link .link-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
   .set-link .set-value {
@@ -743,7 +863,7 @@
   .toggle::after {
     content: ''; position: absolute; top: 3px; left: 3px;
     width: 24px; height: 24px; border-radius: 50%;
-    background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    background: var(--white); box-shadow: 0 1px 3px rgba(var(--shadow-rgb),0.2);
     transition: transform .2s ease;
   }
   .toggle.on { background: var(--coral); }
@@ -755,7 +875,7 @@
     background: var(--white); color: var(--wine);
     font-family: var(--font-body); font-weight: 700; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb),0.08);
   }
   .font-stepper button:active { transform: scale(0.92); }
   .font-stepper button:disabled { opacity: 0.35; cursor: default; }
@@ -791,7 +911,7 @@
     width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
     background: var(--white);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(var(--shadow-rgb),0.07);
   }
   .speed-custom.mine   .speed-step { color: var(--coral); }
   .speed-custom.others .speed-step { color: var(--wine); }
@@ -824,7 +944,7 @@
   .speed-row.mine   .speed-opt { color: var(--coral); }
   .speed-row.others .speed-opt { color: var(--wine); }
   .speed-row.mine   .speed-opt.on { background: var(--coral); color: var(--white); }
-  .speed-row.others .speed-opt.on { background: var(--wine);  color: var(--mist); }
+  .speed-row.others .speed-opt.on { background: var(--wine);  color: var(--on-wine-strong); }
 
   /* ---------- Toast ---------- */
   .toast {
@@ -840,18 +960,18 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ============ DASHBOARD ============ */
-  #dashboardScreen { background: var(--wine); }
+  #dashboardScreen { background: var(--wine-surface); }
   .dash-scroll { flex: 1 1 auto; overflow-y: auto; padding: 4px 22px 30px; display: flex; flex-direction: column; }
   .dash-scroll::-webkit-scrollbar { width: 0; }
   .dash-top { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 22px 20px; }
-  .dash-logo { color: var(--mist); display: flex; align-items: center; }
+  .dash-logo { color: var(--on-wine-strong); display: flex; align-items: center; }
   .dash-logo svg { height: 20px; width: auto; }
   .dash-actions { display: flex; gap: 10px; }
   .dash-btn {
     width: 42px; height: 42px; border-radius: 50%;
-    background: rgba(245,245,245,0.12); border: none;
+    background: rgba(var(--mist-rgb), 0.12); border: none;
     display: flex; align-items: center; justify-content: center;
-    color: var(--mist); cursor: pointer; position: relative;
+    color: var(--on-wine-strong); cursor: pointer; position: relative;
   }
   .dash-btn:active { transform: scale(0.93); }
   .dash-btn .dot {
@@ -862,14 +982,14 @@
   .dash-hero {
     font-family: var(--font-display);
     font-weight: 400; font-size: 29px; line-height: 1.2;
-    color: var(--mist); padding: 6px 4px 26px; flex: 0 0 auto; max-width: 100%;
+    color: var(--on-wine-strong); padding: 6px 4px 26px; flex: 0 0 auto; max-width: 100%;
   }
   .dash-hero .accent { color: var(--coral); font-weight: 700; }
   /* On wine there is no light ground for glass to sit against, so the dashboard keeps
      solid mist cards — just with the same shadow, so they share the same physics. */
   .dash-card {
     background: var(--mist); border-radius: 22px; padding: 20px; margin-bottom: 14px;
-    flex: 0 0 auto; box-shadow: 0 4px 16px rgba(28, 10, 16, 0.18);
+    flex: 0 0 auto; box-shadow: 0 4px 16px rgba(var(--noir-rgb), 0.18);
   }
   .dash-card-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
@@ -899,7 +1019,7 @@
     flex: 1 1 0; background: var(--mist); border-radius: 22px; padding: 20px 18px;
     cursor: pointer; display: flex; flex-direction: column; gap: 12px;
     min-height: 120px; justify-content: space-between;
-    box-shadow: 0 4px 16px rgba(28, 10, 16, 0.18);
+    box-shadow: 0 4px 16px rgba(var(--noir-rgb), 0.18);
   }
   .dash-shortcut:active { transform: scale(0.98); }
   .dash-shortcut .sc-ic {
@@ -914,15 +1034,15 @@
   .dash-stats { margin-top: 20px; flex: 0 0 auto; }
   .dash-stats .stats-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
-    text-transform: uppercase; color: rgba(245,245,245,0.6); margin-bottom: 12px;
+    text-transform: uppercase; color: var(--on-wine-soft); margin-bottom: 12px;
   }
   .stats-grid { display: flex; gap: 12px; }
-  .stat { flex: 1 1 0; background: rgba(245,245,245,0.1); border-radius: 16px; padding: 14px; }
-  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--mist); line-height: 1; }
-  .stat .stat-lbl { font-size: 12px; color: rgba(245,245,245,0.7); margin-top: 6px; }
+  .stat { flex: 1 1 0; background: var(--on-wine-fill); border-radius: 16px; padding: 14px; }
+  .stat .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--on-wine-strong); line-height: 1; }
+  .stat .stat-lbl { font-size: 12px; color: var(--on-wine-soft); margin-top: 6px; }
 
   /* ============ EDIT PLAY ============ */
-  .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.04); }
   .char-row { display: flex; align-items: center; gap: 14px; padding: 15px 18px; border-bottom: 1px solid var(--divider); }
   .char-row:last-child { border-bottom: none; }
   .char-row .cr-main { flex: 1 1 auto; min-width: 0; }
@@ -973,11 +1093,11 @@
   }
   .next-scene .ns-go {
     display: inline-flex; align-items: center; gap: 9px;
-    background: var(--wine); color: var(--mist); border: none; cursor: pointer;
+    background: var(--wine); color: var(--on-wine-strong); border: none; cursor: pointer;
     border-radius: var(--radius-pill); padding: 13px 24px;
     font-family: var(--font-body); font-size: 13px; font-weight: 700;
     letter-spacing: 0.6px; text-transform: uppercase;
-    box-shadow: 0 5px 18px rgba(122, 30, 45, 0.28);
+    box-shadow: 0 5px 18px rgba(var(--wine-rgb), 0.28);
   }
   .next-scene .ns-go:active { transform: scale(0.97); }
 
@@ -1023,9 +1143,9 @@
      circles, pills and cards alike, and it needs no markup — which matters,
      since most of these are rendered from JS. */
   :root {
-    --glass-fill:   rgba(255, 255, 255, 0.5);
-    --glass-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
-    --glass-edge:   linear-gradient(135deg, #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+    --glass-fill:   rgba(var(--white-rgb), 0.5);
+    --glass-shadow: 2px 2px 8px rgba(var(--stone-rgb), 0.5);
+    --glass-edge:   linear-gradient(135deg, rgba(var(--glass-edge-rgb),1) 20%, rgba(var(--glass-edge-rgb),0) 50%, rgba(var(--glass-edge-rgb),1) 81%);
     --glass-rim:    1.5px;
   }
 
@@ -1071,14 +1191,14 @@
      button already had. No rim, no gradient: the colour is weight enough. */
   .card.featured::before, .speed-opt.on::before { content: none; }
   .card.featured {
-    background: var(--wine);
-    box-shadow: 0 5px 18px rgba(122, 30, 45, 0.28);
+    background: var(--wine-surface);
+    box-shadow: 0 5px 18px rgba(var(--wine-rgb), 0.28);
   }
   .speed-row.mine .speed-opt.on {
-    background: var(--coral); box-shadow: 0 4px 12px rgba(239, 83, 80, 0.28);
+    background: var(--coral); box-shadow: 0 4px 12px rgba(var(--coral-rgb), 0.28);
   }
   .speed-row.others .speed-opt.on {
-    background: var(--wine); box-shadow: 0 4px 12px rgba(122, 30, 45, 0.28);
+    background: var(--wine); box-shadow: 0 4px 12px rgba(var(--wine-rgb), 0.28);
   }
 
   /* The chevron is placed against the transport, so it keeps its own positioning —
@@ -1087,7 +1207,7 @@
 
   /* Sheets sit over live content, so here the glass has something to bend. */
   .sheet, .settings-sheet {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(var(--white-rgb), 0.82);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
             backdrop-filter: blur(20px) saturate(1.4);
   }
@@ -1111,6 +1231,13 @@
 </style>
 </head>
 <body>
+
+<!-- Prototype tool, not part of the app. See Global Settings in todo.md. -->
+<div class="theme-switch" role="group" aria-label="Theme">
+  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph-bold ph-sun ic-18"></i></button>
+  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph-bold ph-moon ic-18"></i></button>
+</div>
+
 <div class="phone">
 
   <div class="statusbar on-wine" id="statusbar">
@@ -2016,7 +2143,7 @@
     const t = document.querySelector('#' + mode + 'Screen .transport');
     const own = SCRIPT[activeIdx].mine;
     t.style.setProperty('--accent', own ? 'var(--coral)' : 'var(--wine)');
-    t.style.setProperty('--accent-rgb', own ? '239, 83, 80' : '122, 30, 45');
+    t.style.setProperty('--accent-rgb', own ? 'var(--coral-rgb)' : 'var(--wine-rgb)');
     syncSpeedLabels();
   }
 
@@ -2594,6 +2721,17 @@
      ============================================================ */
   document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen', true));
   document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse', true));
+
+  /* ---- Theme ----
+     The attribute is always written, seeded from the system preference, so the
+     dark tokens live in one block instead of two. Nothing else in the sheet knows
+     which mode it is in. */
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
+    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+  }
+  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
   /* The one scene we actually have text for. Derived here, not on the way into
      the scene — Script detail is rendered first and used to say "0 lines". */

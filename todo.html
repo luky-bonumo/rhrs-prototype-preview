@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rhrs — To do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  :root {
+    --noir: #1C0A10; --wine: #7A1E2D; --coral: #EF5350;
+    --stone: #E0E0E0; --mist: #F5F5F5; --white: #FFFFFF;
+    --text-body: #241318; --text-muted: #8A7C7F; --divider: #E7E0E1;
+    --coral-tint: #FDECEB; --coral-border: #F6CBCA;
+    --font-display: 'Platypi', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --page: #F2EDEE;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body); background: var(--page); color: var(--text-body);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    padding: 48px 24px 96px;
+  }
+  .shell { max-width: 760px; margin: 0 auto; }
+  .back {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px;
+    font-size: 13px; font-weight: 600; color: var(--wine);
+    text-decoration: none; opacity: .65;
+  }
+  .back:hover { opacity: 1; }
+  .built {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 32px;
+    padding-bottom: 20px; border-bottom: 1px solid var(--divider);
+  }
+  .doc h1 {
+    font-family: var(--font-display); font-weight: 700; font-size: 34px;
+    color: var(--wine); line-height: 1.2; margin-bottom: 14px;
+  }
+  .doc h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    color: var(--noir); margin: 40px 0 14px;
+    padding-top: 22px; border-top: 1px solid var(--divider);
+  }
+  .doc h3 {
+    font-family: var(--font-display); font-weight: 600; font-size: 18px;
+    color: var(--noir); margin: 26px 0 10px;
+  }
+  .doc p { margin-bottom: 14px; }
+  .doc hr { border: none; height: 0; margin: 0; }
+  .doc ul { list-style: none; margin-bottom: 18px; }
+  .doc li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+  .doc li:not(.task)::before {
+    content: ''; position: absolute; left: 4px; top: 11px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--stone);
+  }
+  /* A task reads as a box you could tick, because that is what it is. Open ones
+     carry the coral of work that is still yours to do. */
+  .doc li.task { padding-left: 30px; }
+  .doc li.task .box {
+    position: absolute; left: 0; top: 3px;
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--coral-border); background: var(--coral-tint);
+  }
+  .doc li.task.done { color: var(--text-muted); }
+  .doc li.task.done .box {
+    border-color: var(--stone); background: var(--stone);
+  }
+  .doc code {
+    font-family: var(--font-body); font-weight: 600; font-size: 0.92em;
+    background: var(--white); border: 1px solid var(--divider);
+    border-radius: 5px; padding: 1px 5px;
+  }
+  .doc strong { font-weight: 700; color: var(--noir); }
+  .doc em { color: var(--text-muted); font-style: italic; }
+  .doc a { color: var(--wine); text-decoration: underline; text-underline-offset: 2px; }
+</style>
+</head>
+<body>
+<main class="shell">
+  <a class="back" href="index.html"><i class="ph ph-arrow-left"></i>Design hub</a>
+  <div class="doc">
+<h1>todo — otevřené úkoly a nerozhodnuté věci</h1>
+<p>Živý stav projektu. Co je hotové, odsud <strong>mizí</strong> — historii drží git a popis hotového stavu drží <code>prototype/prototype v1/README.md</code>. Zdroj většiny položek jsou zápisy v <a href="meetings.md">meetings.md</a>; odkaz <code>↳ 2026-08-18</code> říká, ze kterého zápisu položka pochází.</p>
+<p>Priorita se řídí jednou větou z posledního meetingu: <strong>vývojář teď potřebuje Read, Listen a Rehearse.</strong> Všechno ostatní čeká.</p>
+<hr>
+<h2>Rozhodnout (nikdo to zatím nerozhodl)</h2>
+<p>Obě otázky kolem selhání evaluace jsou <strong>odložené</strong> — 2026-08-18 padlo, že se teď řešit nebudou.</p>
+<ul><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Co se děje se zvukem, když evaluace selže.</strong> ↳ 2026-08-18</li><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Jak se uživateli komunikuje, že se neúspěšná nahrávka někam ukládá.</strong> Nejspíš přes onboarding, ale není potvrzeno. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Jak se Václavovi hlásí změny v designu</strong> — buď poznámka na Telegram, nebo routine v Claude Code, která diffne design repo a udělá mu briefing. Na meetingu padly obě varianty, vybraná není. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Dashboard — čeká na Lukášův nový návrh.</strong> Původní záměr nebyl nikde zapsaný a nikdo si ho nevybavuje. Lukáš dělá nový vzhled; do té doby se dashboard nechává být — současný stav je v pořádku, jen ještě není „sexy".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — chybí detail průchodu.</strong> V zápisu je u něj prázdná odrážka; vstupní bod („separate screen under notifications") je jasný, samotný krok po kroku ne.</li></ul>
+<h2>Lukas — úkoly z posledního meetingu</h2>
+<p>Pořadí podle toho, co potřebuje vývojář: nejdřív věci uvnitř Read / Listen / Rehearse, pak zbytek.</p>
+<ul><li class="task open"><span class="box"></span><strong>Přepínač light / dark do Global Settings.</strong> V prototypu je zatím <strong>mimo rám telefonu</strong>, jako nástroj na prohlížení, ne jako ovládání aplikace — Global Settings ještě nejsou nakreslené. Až budou, přepínač patří do nich a ten venku může zůstat jen jako zkratka pro prohlížení.</li><li class="task open"><span class="box"></span><strong>Projít dark mode a doladit odvozené barvy.</strong> Sedm pojmenovaných je od Lukáše, zbytek odhadl Claude. Dvě věci k rozhodnutí jsou popsané v komentáři u <code>:root[data-theme="dark"]</code>: že <code>white</code> je tmavší než <code>mist</code> (plochy zapadají do podkladu místo aby z něj vystupovaly), a že si coral a wine vymění váhu (moje repliky jsou v dark hlasitější než cizí).</li><li class="task open"><span class="box"></span><strong>Doladit dark mode na designových stránkách.</strong> <code>index</code>, <code>sitemap</code>, <code>style-kit</code> a <code>todo</code> jsou zatím jen světlé. Dark je jen výměna palety, dělá se až po dotažení light. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Recording Wizard — obrazovka.</strong> Uživatel je obsazený, ale nemá nahrané všechny repliky; wizard ukáže nenahrané a nahrává se replika po replice. Odkaz na Script detailu pod „Whole play" <strong>už je</strong> — vede na toast. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Navigační menu v prototypu</strong> pro snazší přepínání mezi obrazovkami. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Projít Figmu a doplnit sem zbylé tasky.</strong> (Lukáš, ručně.)</li></ul>
+<h2>Václav</h2>
+<p>Pozvánka do design repa odeslaná 2026-08-18.</p>
+<ul><li class="task open"><span class="box"></span>Založit Claude Code session ve Flutter repu s přístupem do design repa a začít vývoj. ↳ 2026-08-18</li></ul>
+<h2>Odloženo (rozhodnutím, ne opomenutím)</h2>
+<p>Rozhodnutí z 2026-08-18: <strong>žádné nové obrazovky, dokud nezačne vývoj.</strong> Postupuje se přírůstkově.</p>
+<ul><li>Global settings — návrh sekcí existuje v poznámkách, nezakresleno</li><li>Note editor — vede na něj line menu, obrazovka není</li><li>Self tape, My characters — zkratky na dashboardu vedou na toast</li><li>Dark mode — až po dotažení light, pak jen výměna palety</li></ul>
+<h2>Platná rozhodnutí</h2>
+<p>Sem se píše jen to, co mění zadání do budoucna. Zdroj je vždycky zápis.</p>
+<ul><li>Dark mode = pouze výměna palety, až po dotažení light. ↳ 2026-08-18</li><li>Rychlost přehrávání: rozsah 0,25–2, krok 0,05. ↳ 2026-08-18</li><li>Předčítání stage directions i private notes narátorem je volitelné. ↳ 2026-08-18</li><li>Design repo je pro Václava <strong>read-only</strong> zdroj pravdy; edituje ho Lukas, nebo se to domluví. ↳ 2026-08-18</li><li>Žádné nové obrazovky před začátkem vývoje. ↳ 2026-08-18</li><li>Claude ve Flutter repu staví obrazovky <strong>primárně z existujících Flutter komponent</strong>; co nezná, označí a projde se to společně (balast vs. nová komponenta). ↳ 2026-08-18</li></ul>
+  </div>
+  <p class="built" style="margin: 40px 0 0; padding: 20px 0 0; border-top: 1px solid var(--divider); border-bottom: none;">
+    Generated from <code>todo.md</code> by <code>tools/build-preview.py</code>. Edit the
+    Markdown, not this page.
+  </p>
+</main>
+</body>
+</html>
