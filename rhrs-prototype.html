@@ -80,7 +80,6 @@
     --sheet-bg:  var(--white);
     --card-bg:   #FAFAFA;          /* line cards in Listen / Rehearse */
     --scrim:     rgba(var(--scrim-rgb), 0.42);
-    --sheet-glass: rgba(var(--white-rgb), 0.82);
     /* What a raised surface that carries a colour casts beneath it. On a light
        ground the colour itself is darker than the ground, so it reads as its own
        shadow; on a dark one it is brighter and the same declaration would paint a
@@ -212,9 +211,12 @@
        the page and may go darker than it; a sheet sits *over* the page and has to
        read as nearer, which in the dark means lighter. Separation ends up at
        1.40:1, where a card against its ground in light is 1.09:1. */
-    --scrim: rgba(0, 0, 0, 0.6);
-    --sheet-bg:    #382631;
-    --sheet-glass: rgba(56, 38, 49, 0.92);
+    /* The sheet is mist, the same ground every screen stands on. It is the scrim
+       that has to make the difference, so it is thrown hard and blurred — the two
+       surfaces are the same colour and only the depth between them separates
+       them. */
+    --scrim: rgba(0, 0, 0, 0.62);
+    --sheet-bg: var(--mist);
 
     --card-bg:  #150A10;
     /* The desk the phone sits on is not part of the app and does not follow the
@@ -864,9 +866,14 @@
   .mode:active { transform: scale(0.96); }
 
   /* ---------- Bottom sheet ---------- */
+  /* The scrim is the one thing here with live content behind it, so it is the one
+     that blurs — the sheet on top of it is opaque and has nothing to bend. Gentle:
+     the screen behind should read as put away, not as frosted glass. */
   .scrim {
     position: absolute; inset: 0;
     background: var(--scrim);
+    -webkit-backdrop-filter: blur(5px) saturate(0.9);
+            backdrop-filter: blur(5px) saturate(0.9);
     opacity: 0; pointer-events: none;
     transition: opacity .25s ease; z-index: 20;
   }
@@ -1410,15 +1417,11 @@
      the rule above would otherwise drop it back into normal flow. */
   .jump-btn { position: absolute; }
 
-  /* A sheet is glass over live content, so it is the one surface that bends what
-     is behind it properly — 20px, against the 6px the small overlays take. This
-     is also what actually paints the sheet, so it is the fill to change, not
-     --sheet-bg, which it covers. */
-  .sheet, .settings-sheet {
-    background: var(--sheet-glass);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            backdrop-filter: blur(20px) saturate(1.4);
-  }
+  /* A sheet is opaque. It used to be translucent glass with a 20px blur of its
+     own, which put two blurs on top of each other and made the sheet take a tint
+     from whatever it happened to cover. The blur belongs to the scrim underneath;
+     the sheet is just a surface, in the same colours as everywhere else. */
+  .sheet, .settings-sheet { background: var(--sheet-bg); }
 
   /* ============ PHOSPHOR ICON SIZING ============
      Phosphor web-font icons inherit color (currentColor) and size via font-size.
