@@ -30,7 +30,6 @@
     --stone-rgb: 224, 224, 224;
     --mist-rgb:  245, 245, 245;
     --white-rgb: 255, 255, 255;
-    --grey-rgb:  190, 190, 190;
     /* What a shadow is cast in. Black on a light ground; on a dark one the ground
        is already near-black, so elevation leans on the surface instead. */
     --shadow-rgb: 0, 0, 0;
@@ -41,7 +40,6 @@
     --stone: rgb(var(--stone-rgb));
     --mist:  rgb(var(--mist-rgb));
     --white: rgb(var(--white-rgb));
-    --grey:  rgb(var(--grey-rgb));
 
     /* Derived */
     --coral-tint:   #FDECEB;
@@ -49,7 +47,10 @@
     --wine-tint:    #F3E7E9;
     --wine-border:  #DFCCD0;
     --text-body:    #241318;
-    --text-muted:   #9A9A9A;
+    /* Pulled onto the wine axis like every other derived colour, rather than
+       sitting off it as a flat neutral grey — the one token that was. It reads
+       better for it too: 3.7:1 on mist against the 2.6:1 the grey managed. */
+    --text-muted:   #8A7C7F;
     /* On the wine dashboard, where the ground is a colour rather than a surface. */
     --on-wine-strong: rgba(var(--mist-rgb), 0.9);
     --on-wine-soft:   rgba(var(--mist-rgb), 0.6);
@@ -161,13 +162,15 @@
        itself has. It is held apart from coral by weight as much as by hue — coral
        is hot and saturated at 83% and sits at 5.6:1, this is softer at 58% and
        sits at 7.5:1, so wine stays the heavier of the two the way it is in light.
-       (Light is 2.9x; matching that here would take a near-white.) */
-    --wine-rgb:  223, 134, 167;
+       (Light is 2.9x; matching that here would take a near-white.) Matched to
+       coral's contrast on purpose — at 7.5:1 against coral's 6.9 it was reading as
+       the louder of the two, which is backwards for the colour that means "not
+       you". Same weight now, different hue. */
+    --wine-rgb:  226, 121, 159;
     --coral-rgb: 239, 117, 113;
     --stone-rgb: 82, 40, 60;
     --mist-rgb:  38, 21, 32;
     --white-rgb: 13, 4, 7;
-    --grey-rgb:  190, 190, 190;
 
     /* The ground is already near-black, so a black shadow says nothing. Elevation
        is carried by the rim and the surface instead, and the shadow only deepens
@@ -283,19 +286,22 @@
   .theme-switch {
     position: fixed; top: 20px; right: 20px; z-index: 50;
     display: flex; gap: 2px; padding: 3px;
-    background: rgba(0, 0, 0, 0.10);
+    /* A raised control standing on the desk, not a tint of it. At 10% black on
+       grey it was there and nobody found it. */
+    background: rgba(255, 255, 255, 0.55);
     border-radius: var(--radius-pill);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
   .theme-switch button {
     border: none; background: none; cursor: pointer;
     width: 34px; height: 34px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: var(--tool-ink); opacity: 0.45;
+    color: var(--tool-ink); opacity: 0.55;
   }
   .theme-switch button.on {
     background: var(--tool-chip); opacity: 1;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);
   }
 
   /* ---------- Status bar ---------- */

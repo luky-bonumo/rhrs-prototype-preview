@@ -24,12 +24,11 @@
   :root {
     --noir-rgb:28,10,16;   --wine-rgb:122,30,45;  --coral-rgb:239,83,80;
     --stone-rgb:224,224,224; --mist-rgb:245,245,245; --white-rgb:255,255,255;
-    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+    --shadow-rgb:0,0,0;
 
     --noir:rgb(var(--noir-rgb));   --wine:rgb(var(--wine-rgb));
     --coral:rgb(var(--coral-rgb)); --stone:rgb(var(--stone-rgb));
     --mist:rgb(var(--mist-rgb));   --white:rgb(var(--white-rgb));
-    --grey:rgb(var(--grey-rgb));
 
     --coral-tint:#FDECEB; --coral-border:#F6CBCA;
     --wine-tint:#F3E7E9;  --wine-border:#DFCCD0;
@@ -59,9 +58,9 @@
 
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --noir-rgb:247,240,242;  --wine-rgb:223,134,167; --coral-rgb:239,117,113;
+    --noir-rgb:247,240,242;  --wine-rgb:226,121,159; --coral-rgb:239,117,113;
     --stone-rgb:82,40,60;    --mist-rgb:38,21,32;    --white-rgb:13,4,7;
-    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+    --shadow-rgb:0,0,0;
 
     --coral-tint:#3A1D20; --coral-border:#7A3936;
     --wine-tint:#33212B;  --wine-border:#6B4557;
@@ -166,15 +165,7 @@
 
   /* ---- colour ---- */
   .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 16px; }
-  /* Glass in light, where there is a light ground for it to sit against. In the
-     dark the fill would be a half-transparent near-black over a near-black page,
-     which is a wash rather than a surface, so there it goes opaque. */
   .sw { border-radius: 16px; padding: 16px 17px 17px; }
-  :root[data-theme="dark"] .sw {
-    background: var(--card); border: 1px solid var(--divider);
-    box-shadow: none;
-  }
-  :root[data-theme="dark"] .sw::before { content: none; }
   .sw .nm { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--noir); }
   .sw .ro { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
   /* Both values at once, because in a two-mode palette the pair is the fact.
@@ -518,8 +509,8 @@
         <div class="vals">
           <span class="val"><span class="disc" style="background:#7A1E2D"></span>
             <span><span class="vlabel">Light</span><span class="hx">#7A1E2D</span></span></span>
-          <span class="val"><span class="disc" style="background:#DF86A7"></span>
-            <span><span class="vlabel">Dark</span><span class="hx">#DF86A7</span></span></span>
+          <span class="val"><span class="disc" style="background:#E2799F"></span>
+            <span><span class="vlabel">Dark</span><span class="hx">#E2799F</span></span></span>
         </div>
       </div>
       <div class="sw">
