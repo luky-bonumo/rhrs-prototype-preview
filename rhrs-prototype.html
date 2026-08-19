@@ -1560,7 +1560,7 @@
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" id="detailTitle">I love you, you're fine, but change…</span>
-      <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
+      <button class="back" onclick="showScreen('editScriptScreen')" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list fades" id="scenesList"></div>
   </div>
@@ -1591,7 +1591,7 @@
   </div>
 
   <!-- ============ SCREEN: EDIT PLAY ============ -->
-  <div class="screen" id="editPlayScreen">
+  <div class="screen" id="editScriptScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Edit script</span>
@@ -3020,7 +3020,7 @@
     scripts:    () => showScreen('scriptsScreen'),
     settings:   () => showScreen('globalSettingsScreen'),
     detail:     () => openScript('s1'),
-    edit:       () => { openScript('s1'); showScreen('editPlayScreen'); },
+    edit:       () => { openScript('s1'); showScreen('editScriptScreen'); },
     read:       () => openScene(DEMO_SCENE),
     listen:     () => { openScene(DEMO_SCENE); switchMode('listen'); },
     rehearse:   () => { openScene(DEMO_SCENE); switchMode('rehearse'); },
@@ -3087,7 +3087,7 @@
     var NAMES = {
       dashboardScreen: 'Dashboard',  scriptsScreen: 'All scripts',
       globalSettingsScreen: 'Settings',
-      detailScreen: 'Script detail', editPlayScreen: 'Edit play',
+      detailScreen: 'Script detail', editScriptScreen: 'Edit script',
       readScreen: 'Read',            listenScreen: 'Listen',
       rehearseScreen: 'Rehearse',    evaluationScreen: 'Evaluation'
     };
