@@ -457,7 +457,7 @@
   .card.featured .chevron { color: var(--on-mark); }
 
   /* Recording Wizard — the way into recording the lines that have no audio yet.
-     It hangs off the Whole play card rather than standing beside it, so it is
+     It hangs off the Whole script card rather than standing beside it, so it is
      tinted rather than filled: a follow-on, not a rival to the primary action.
      Coral because the lines it is missing are mine. Carrying coral, it drops the
      glass for a flat fill, like everything else that does. */
@@ -1142,40 +1142,60 @@
     color: var(--on-wine-strong); padding: 6px 4px 26px; flex: 0 0 auto; max-width: 100%;
   }
   .dash-hero .accent { color: var(--coral); font-weight: 700; }
-  /* The same object as a scene card or a line card, on a different ground. The
-     fill is opaque rather than the translucent glass one, because glass takes the
-     colour of what it sits on and 50% white over wine lands on a dusty pink —
-     `--card-bg` is exactly what that same glass resolves to over mist, so these
-     read as the card you already know. The shadow stays dark: the ground here is
-     a colour, and the light glass shadow would be a glow on it. */
-  .dash-card {
-    position: relative;
-    background: var(--card-bg); border-radius: 22px; padding: 20px; margin-bottom: 14px;
-    flex: 0 0 auto; box-shadow: 0 4px 16px var(--lift-noir);
-  }
-  .dash-card-label {
+  /* The heading no longer sits inside a card, so it stands on the wine and takes
+     the ground's own muted token — `--text-muted` is mixed against mist and goes
+     nearly invisible here. Same object as the Stats label further down. */
+  .dash-recent-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
-    text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+    text-transform: uppercase; color: var(--on-wine-soft);
+    margin-bottom: 12px; flex: 0 0 auto;
   }
-  .recent-row {
-    display: flex; align-items: center; gap: 12px; padding: 10px 0;
-    cursor: pointer; border-bottom: 1px solid var(--divider);
+  .dash-recent-list { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  /* One script, one box. The same object as a scene card or a line card, on a
+     different ground: the fill is opaque rather than the translucent glass one,
+     because glass takes the colour of what it sits on and 50% white over wine
+     lands on a dusty pink — `--card-bg` is exactly what that same glass resolves
+     to over mist, so these read as the card you already know. The shadow stays
+     dark: the ground here is a colour, and the light glass shadow would be a glow
+     on it. Smaller than the bubble it replaces — 18px radius because the shape is
+     now short, 15/18 padding because three of them at 20 stack too tall. */
+  .dash-recent {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; text-align: left; border: none; cursor: pointer;
+    font-family: var(--font-body);
+    background: var(--card-bg); border-radius: 18px; padding: 15px 18px;
+    box-shadow: 0 4px 16px var(--lift-noir);
   }
-  .recent-row:last-of-type { border-bottom: none; }
-  .recent-row:active { opacity: 0.6; }
-  .recent-row .r-main { flex: 1 1 auto; min-width: 0; }
-  .recent-row .r-title {
-    font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--noir);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .dash-recent:active { transform: scale(0.985); }
+  .dash-recent .r-main { flex: 1 1 auto; min-width: 0; }
+  /* Two lines, not an ellipsis. The box is its own object now and has the height
+     for it — a title clipped to "I love you, you're fine, but chang…" names
+     nothing. */
+  .dash-recent .r-title {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    line-height: 1.25; color: var(--noir);
   }
-  .recent-row .r-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-  .recent-row .r-chev { color: var(--wine); flex: 0 0 auto; display: flex; }
+  /* No "Last:" prefix. The heading above says it once for all three; repeating it
+     in every box was a habit from the shared bubble, where there was no heading
+     close enough to carry it. */
+  .dash-recent .r-sub {
+    display: block; font-size: 13px; color: var(--text-muted); margin-top: 3px;
+  }
+  .dash-recent .r-chev { color: var(--wine); flex: 0 0 auto; display: flex; }
+  /* Not a fourth script. Given the same white fill and shadow it would read as
+     one, so it does what the stat tiles do and sinks into the ground instead of
+     standing on it — plainly a control on the wine, not a card. */
   .dash-alllink {
-    margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; background: none; border: none; cursor: pointer;
+    margin: 14px 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; background: var(--on-wine-fill); border: none; cursor: pointer;
+    border-radius: 16px; padding: 14px; flex: 0 0 auto;
     font-family: var(--font-body); font-weight: 600; font-size: 15px;
-    color: var(--wine); padding: 6px;
+    color: var(--on-wine-strong);
   }
+  .dash-alllink:active { transform: scale(0.985); }
   .dash-row2 { display: flex; gap: 14px; flex: 0 0 auto; }
   .dash-shortcut {
     position: relative;
@@ -1377,7 +1397,7 @@
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
-  .dash-card::before, .dash-shortcut::before,
+  .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
   .sheet::before, .settings-sheet::before,
   .mini::before, .skip-btn::before, .jump-btn::before,
@@ -1490,14 +1510,12 @@
     <div class="dash-scroll fades">
       <div class="dash-hero">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
 
-      <div class="dash-card">
-        <div class="dash-card-label">Last open</div>
-        <div id="recentList"></div>
-        <button class="dash-alllink" onclick="showScreen('scriptsScreen')">
-          All scripts
-          <i class="ph ph-caret-right ic-18"></i>
-        </button>
-      </div>
+      <div class="dash-recent-label">Last open</div>
+      <div class="dash-recent-list" id="recentList"></div>
+      <button class="dash-alllink" onclick="showScreen('scriptsScreen')">
+        All scripts
+        <i class="ph ph-caret-right ic-18"></i>
+      </button>
 
       <div class="dash-row2">
         <div class="dash-shortcut" onclick="toast('Self tape')">
@@ -1542,7 +1560,7 @@
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" id="detailTitle">I love you, you're fine, but change…</span>
-      <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit play"><i class="ph ph-pencil-simple ic-21"></i></button>
+      <button class="back" onclick="showScreen('editPlayScreen')" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list fades" id="scenesList"></div>
   </div>
@@ -1576,7 +1594,7 @@
   <div class="screen" id="editPlayScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Edit play</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Edit script</span>
       <span class="spacer"></span>
     </div>
     <div class="list">
@@ -2077,7 +2095,7 @@
   const lineIdx = () => SCRIPT.map((it, i) => it.who ? i : -1).filter(i => i >= 0);
 
   /* What the narrator reads aloud, per mode. Stage directions are on in Listen,
-     where you are learning the play, and off in Rehearse, where a voice between
+     where you are learning the script, and off in Rehearse, where a voice between
      cues throws the timing you are drilling. Private notes are off in both: a
      note is a reminder you wrote to yourself, so hearing it is a deliberate ask.
 
@@ -2161,7 +2179,7 @@
   let activeIdx   = 0;             // the line currently being played / rehearsed
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
-  /* Play-level figure, same as the 320 lines on the Whole play card: this scene
+  /* Script-level figure, same as the 320 lines on the Whole script card: this scene
      is the only one with real text, so the wizard's count is simulated too. */
   const UNRECORDED_LINES = 4;
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
@@ -2898,9 +2916,9 @@
   }
   function renderScenes() {
     let html = `
-      <div class="card featured" onclick="openScene('Whole play')">
+      <div class="card featured" onclick="openScene('Whole script')">
         <div class="card-main">
-          <div class="card-title">Whole play</div>
+          <div class="card-title">Whole script</div>
           <div class="card-meta">
             <span class="meta-lines">320 lines · all scenes</span>
             <span class="badge">Assigned</span>
@@ -2933,13 +2951,13 @@
   function renderRecent() {
     const scenesByScript = { s1:'Opening — the kitchen argument', s2:'Act II — the arrival', s3:'Act I' };
     document.getElementById('recentList').innerHTML = SCRIPTS.slice(0, 3).map(s => `
-      <div class="recent-row" onclick="openScript('${s.id}')">
-        <div class="r-main">
-          <div class="r-title">${s.title}</div>
-          <div class="r-sub">Last: ${scenesByScript[s.id] || 'Scene 1'}</div>
-        </div>
+      <button class="dash-recent" onclick="openScript('${s.id}')">
+        <span class="r-main">
+          <span class="r-title">${s.title}</span>
+          <span class="r-sub">${scenesByScript[s.id] || 'Scene 1'}</span>
+        </span>
         <span class="r-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </div>`).join('');
+      </button>`).join('');
   }
   function renderCharacters() {
     document.getElementById('charactersList').innerHTML = CHARACTERS.map(c => `
