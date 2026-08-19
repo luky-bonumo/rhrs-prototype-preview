@@ -38,20 +38,18 @@
   }
   .theme-switch {
     position: fixed; top: 16px; right: 16px; z-index: 50;
-    display: flex; gap: 2px; padding: 3px;
-    background: rgba(var(--noir-rgb), 0.10); border-radius: 999px;
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    display: flex; gap: 3px; padding: 3px;
+    background: var(--card); border: 1px solid var(--divider);
+    border-radius: 999px;
+    box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.18);
   }
   .theme-switch button {
     border: none; background: none; cursor: pointer;
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: var(--noir); opacity: 0.45;
+    color: var(--noir); opacity: 0.5;
   }
-  .theme-switch button.on {
-    background: var(--card); opacity: 1;
-    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
-  }
+  .theme-switch button.on { background: var(--wine); color: var(--card); opacity: 1; }
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; }
   body {
@@ -126,12 +124,13 @@
 <p>Priorita se řídí jednou větou z posledního meetingu: <strong>vývojář teď potřebuje Read, Listen a Rehearse.</strong> Všechno ostatní čeká.</p>
 <hr>
 <h2>Rozhodnout (nikdo to zatím nerozhodl)</h2>
+<ul><li class="task open"><span class="box"></span><strong>Je barva postavy osobní, nebo sdílená celou skupinou?</strong> Když si každý vybere svou, uvidí ostatní tytéž barvy, nebo své vlastní? Osobní volba je pohodlnější (zvykneš si být coral), sdílená je jako figurka v deskové hře. Obojí má úskalí, nerozhodnuto. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Kolik barev má paleta pro postavy mít</strong>, když color picker odpadá. ↳ 2026-08-19</li></ul>
 <ul><li class="task open"><span class="box"></span><strong><code>--text-muted</code> je v aplikaci plochá šedá, na designových stránkách ne.</strong> Appka má <code>#9A9A9A</code>, stránky <code>#8A7C7F</code> (stažená k wine). Style kit přitom sám tvrdí, že „tints, borders and muted text all sit on the same wine axis rather than on a neutral grey" — což o stránkách platí a o aplikaci ne. Buď se srovná appka, nebo se opraví ta věta.</li><li class="task open"><span class="box"></span><strong><code>--grey</code> (<code>#BEBEBE</code>) aplikace nepoužívá ani jednou.</strong> Žije jen v sitemapě na čárkované obrysy „ještě nenakreslené". Do style kitu se proto nepřidal — paleta aplikace je opravdu šest barev. Otázka je, jestli má token zůstat v <code>:root</code> prototypu, kde ho nic nečte.</li></ul>
 <p>Obě otázky kolem selhání evaluace jsou <strong>odložené</strong> — 2026-08-18 padlo, že se teď řešit nebudou.</p>
 <ul><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Co se děje se zvukem, když evaluace selže.</strong> ↳ 2026-08-18</li><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Jak se uživateli komunikuje, že se neúspěšná nahrávka někam ukládá.</strong> Nejspíš přes onboarding, ale není potvrzeno. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Jak se Václavovi hlásí změny v designu</strong> — buď poznámka na Telegram, nebo routine v Claude Code, která diffne design repo a udělá mu briefing. Na meetingu padly obě varianty, vybraná není. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Dashboard — čeká na Lukášův nový návrh.</strong> Původní záměr nebyl nikde zapsaný a nikdo si ho nevybavuje. Lukáš dělá nový vzhled; do té doby se dashboard nechává být — současný stav je v pořádku, jen ještě není „sexy".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — chybí detail průchodu.</strong> V zápisu je u něj prázdná odrážka; vstupní bod („separate screen under notifications") je jasný, samotný krok po kroku ne.</li></ul>
 <h2>Lukas — úkoly z posledního meetingu</h2>
 <p>Pořadí podle toho, co potřebuje vývojář: nejdřív věci uvnitř Read / Listen / Rehearse, pak zbytek.</p>
-<ul><li class="task open"><span class="box"></span><strong>Projít dark mode a doladit odvozené barvy.</strong> Šest pojmenovaných je od Lukáše, zbytek odhadl Claude. V dark je coral <code>EF7571</code> (světlejší než ve světle, ale s plnou sytostí) a wine <code>DF86A7</code> — růžová do fialova, tmavší než coral. Wine drží 7,5 : 1 proti coralovým 6,9 : 1, takže zůstává tou těžší z dvojice, ale jen těsně; ten zbytek mezery <strong>je</strong> rozdíl „já / ostatní".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — obrazovka.</strong> Uživatel je obsazený, ale nemá nahrané všechny repliky; wizard ukáže nenahrané a nahrává se replika po replice. Odkaz na Script detailu pod „Whole play" <strong>už je</strong> — vede na toast. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Navigační menu v prototypu</strong> pro snazší přepínání mezi obrazovkami. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Projít Figmu a doplnit sem zbylé tasky.</strong> (Lukáš, ručně.)</li></ul>
+<ul><li class="task open"><span class="box"></span><strong>Projít dark mode a doladit odvozené barvy.</strong> (Růžová z 2026-08-19 už srovnaná — <code>E2799F</code> má teď stejný kontrast jako coral.) Šest pojmenovaných je od Lukáše, zbytek odhadl Claude. V dark je coral <code>EF7571</code> (světlejší než ve světle, ale s plnou sytostí) a wine <code>DF86A7</code> — růžová do fialova, tmavší než coral. Wine drží 7,5 : 1 proti coralovým 6,9 : 1, takže zůstává tou těžší z dvojice, ale jen těsně; ten zbytek mezery <strong>je</strong> rozdíl „já / ostatní".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — obrazovka.</strong> Uživatel je obsazený, ale nemá nahrané všechny repliky; wizard ukáže nenahrané a nahrává se replika po replice. Odkaz na Script detailu pod „Whole play" <strong>už je</strong> — vede na toast. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Navigační menu v prototypu</strong> pro snazší přepínání mezi obrazovkami. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Projet paletu barvoslepými filtry.</strong> Zatím neuděláno vůbec. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Předělat dashboard: tři samostatné bubliny místo jedné velké, která obsahuje tři.</strong> Lukáš už má nápady. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Postavit přilepenou (sticky) lištu.</strong> Nespěchá. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Script editor — návrh.</strong> Desktop-first pro psaní a přípravu, ale plná editace musí jít i na mobilu: když stojíš na jevišti a potřebuješ něco změnit, musí se to hned propsat všem. Import: vložíš nebo nahraješ hotový scénář, AI rozebere role a scénické poznámky, ty to projdeš přes chatovací panel vedle. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Barvy pro jednotlivé postavy.</strong> Výběr z pevné palety, <strong>žádný color picker</strong> — aby si nikdo nevybral světle žlutou na světlé pozadí. ↳ 2026-08-19</li><li class="task open"><span class="box"></span><strong>Projít Figmu a doplnit sem zbylé tasky.</strong> (Lukáš, ručně.)</li></ul>
 <h2>Václav</h2>
 <p>Pozvánka do design repa odeslaná 2026-08-18.</p>
 <ul><li class="task open"><span class="box"></span>Založit Claude Code session ve Flutter repu s přístupem do design repa a začít vývoj. ↳ 2026-08-18</li></ul>
@@ -139,6 +138,7 @@
 <p>Rozhodnutí z 2026-08-18: <strong>žádné nové obrazovky, dokud nezačne vývoj.</strong> Postupuje se přírůstkově.</p>
 <ul><li>Global settings — <strong>částečně nakreslené</strong>: sekce Appearance s přepínačem light / dark (z dashboardu přes ozubené kolo, <code>#settings</code>). Zbytek — Account, Playback &amp; voices, Rehearsal defaults, Notes &amp; display, Notifications, Recording &amp; storage, Subscription, About — obrazovka přiznaně hlásí jako To be done</li><li>Note editor — vede na něj line menu, obrazovka není</li><li>Self tape, My characters — zkratky na dashboardu vedou na toast</li><li>Dark mode — až po dotažení light, pak jen výměna palety</li></ul>
 <h2>Platná rozhodnutí</h2>
+<ul><li>Dark mode je uzavřený; dolaďuje se už jen růžová (wine v dark). ↳ 2026-08-19</li><li>Barvy postav = pevná paleta, ne volný color wheel. ↳ 2026-08-19</li><li>Scénické poznámky zůstávají mimo repliku, jako samostatný prvek. ↳ 2026-08-19</li><li>Avatary herců a alternace (více herců na jednu roli) se odkládají — ne do téhle fáze. Alternace ale bude potřeba řešit od základu datového modelu. ↳ 2026-08-19</li></ul>
 <p>Sem se píše jen to, co mění zadání do budoucna. Zdroj je vždycky zápis.</p>
 <ul><li>Dark mode = pouze výměna palety, až po dotažení light. ↳ 2026-08-18</li><li>Rychlost přehrávání: rozsah 0,25–2, krok 0,05. ↳ 2026-08-18</li><li>Předčítání stage directions i private notes narátorem je volitelné. ↳ 2026-08-18</li><li>Design repo je pro Václava <strong>read-only</strong> zdroj pravdy; edituje ho Lukas, nebo se to domluví. ↳ 2026-08-18</li><li>Žádné nové obrazovky před začátkem vývoje. ↳ 2026-08-18</li><li>Claude ve Flutter repu staví obrazovky <strong>primárně z existujících Flutter komponent</strong>; co nezná, označí a projde se to společně (balast vs. nová komponenta). ↳ 2026-08-18</li></ul>
   </div>

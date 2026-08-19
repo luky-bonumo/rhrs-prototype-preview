@@ -85,22 +85,26 @@
   /* Same switch as the prototype, so the project has one way of doing this and
      not two. The attribute is always written and seeded from the system, which
      keeps the dark tokens in a single block instead of a duplicated media query. */
+  /* A raised control, like the prototype's. As a 10% tint of the page it was
+     present and unfindable — on the wine band at the top of these pages, almost
+     invisible. The chosen side wears wine, and `--card` is the text on it: white
+     in light, near-black in dark, because it turns over with the palette. */
   .theme-switch {
     position: fixed; top: 16px; right: 16px; z-index: 50;
-    display: flex; gap: 2px; padding: 3px;
-    background: rgba(var(--noir-rgb), 0.10);
+    display: flex; gap: 3px; padding: 3px;
+    background: var(--card);
+    border: 1px solid var(--divider);
     border-radius: 999px;
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.18);
   }
   .theme-switch button {
     border: none; background: none; cursor: pointer;
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: var(--noir); opacity: 0.45;
+    color: var(--noir); opacity: 0.5;
   }
   .theme-switch button.on {
-    background: var(--card); opacity: 1;
-    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
+    background: var(--wine); color: var(--card); opacity: 1;
   }
 
   /* Optical centring for Platypi — see the Typography section for the why. */
