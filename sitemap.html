@@ -12,19 +12,82 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <style>
   /* ---- shared shell for the rhrs design pages (kept inline: no build step) ---- */
+  /* Same construction as the prototype: every colour is an rgb triplet first and
+     the named token is built from it, so a shadow or a translucent fill can reach
+     the channels. Dark is then one block of triplets and nothing below it knows
+     which mode it is in. The values are checked against the prototype's on every
+     build — see tools/build-preview.py. */
   :root {
-    --noir:#1C0A10; --wine:#7A1E2D; --coral:#EF5350; --stone:#E0E0E0;
-    --mist:#F5F5F5; --white:#FFFFFF; --grey:#BEBEBE;
+    --noir-rgb:28,10,16;     --wine-rgb:122,30,45;   --coral-rgb:239,83,80;
+    --stone-rgb:224,224,224; --mist-rgb:245,245,245; --white-rgb:255,255,255;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+
+    --noir:rgb(var(--noir-rgb));   --wine:rgb(var(--wine-rgb));
+    --coral:rgb(var(--coral-rgb)); --stone:rgb(var(--stone-rgb));
+    --mist:rgb(var(--mist-rgb));   --white:rgb(var(--white-rgb));
+    --grey:rgb(var(--grey-rgb));
+
     --coral-tint:#FDECEB; --coral-border:#F6CBCA;
     --wine-tint:#F3E7E9;  --wine-border:#DFCCD0;
     --text-body:#241318; --text-muted:#8A7C7F; --divider:#E7E0E1;
+
+    --wine-surface: var(--wine);
+    --on-wine-strong: rgba(var(--mist-rgb),0.9);
+    --on-wine-soft:   rgba(var(--mist-rgb),0.72);
+    --on-wine-faint:  rgba(var(--mist-rgb),0.28);
+    --card: var(--white);
+    --glass-edge-rgb: var(--white-rgb);
+    --glass-shadow-v: 2px 2px 8px rgba(var(--stone-rgb),0.5);
+
     --font-display:'Platypi', Georgia, serif;
     --font-body:'DM Sans', system-ui, sans-serif;
     --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
     --page:#F2EDEE; --shell:1120px;
   }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --noir-rgb:247,240,242;  --wine-rgb:223,134,167; --coral-rgb:239,117,113;
+    --stone-rgb:82,40,60;    --mist-rgb:38,21,32;    --white-rgb:13,4,7;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+
+    --coral-tint:#3A1D20; --coral-border:#7A3936;
+    --wine-tint:#33212B;  --wine-border:#6B4557;
+    --text-body:#EFE4E7;  --text-muted:#9B858C;  --divider:#3A2A33;
+
+    --wine-surface: #2E1A23;
+    --on-wine-strong: rgba(var(--noir-rgb),0.92);
+    --on-wine-soft:   rgba(var(--noir-rgb),0.72);
+    --on-wine-faint:  rgba(var(--noir-rgb),0.22);
+    --card: #150A10;
+    --glass-edge-rgb: var(--stone-rgb);
+    --glass-shadow-v: 2px 3px 12px rgba(0,0,0,0.6);
+
+    --page:#1B0F16;
+  }
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; }
+
+  /* Same switch as the prototype and the style kit — one way of doing this in the
+     project, not three. The attribute is always written and seeded from the
+     system, which keeps the dark tokens in a single block. */
+  .theme-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: rgba(var(--noir-rgb), 0.10);
+    border-radius: 999px;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .theme-switch button {
+    border: none; background: none; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--noir); opacity: 0.45;
+  }
+  .theme-switch button.on {
+    background: var(--card); opacity: 1;
+    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
+  }
 
   /* Optical centring for Platypi — see the style kit's Typography section. */
   :root { --cap-shift: 0.092em; }
@@ -40,23 +103,23 @@
   a { color: var(--wine); }
   :focus-visible { outline: 2.5px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
 
-  .top { background: var(--wine); color: var(--mist); padding-block: 26px 34px; }
+  .top { background: var(--wine-surface); color: var(--on-wine-strong); padding-block: 26px 34px; }
   /* padding-inline only: `main`/`footer` set padding-block, and mixing the
      shorthand here would let this class win the cascade and flatten them. */
   .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
   .top .back {
     display: inline-flex; align-items: center; gap: 8px;
-    color: rgba(245,245,245,0.8); text-decoration: none;
+    color: var(--on-wine-soft); text-decoration: none;
     font-size: 14px; font-weight: 600; margin-bottom: 22px;
   }
-  .top .back:hover { color: var(--mist); }
+  .top .back:hover { color: var(--on-wine-strong); }
   .top h1 {
     font-family: var(--font-display); font-weight: 400;
     font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
     text-wrap: balance; max-width: 20ch;
   }
   .top h1 em { font-style: normal; font-weight: 700; color: var(--coral); }
-  .top .lede { margin-top: 14px; max-width: 62ch; color: rgba(245,245,245,0.78); font-size: 16px; }
+  .top .lede { margin-top: 14px; max-width: 62ch; color: var(--on-wine-soft); font-size: 16px; }
 
   main { padding-block: 46px 76px; }
   section + section { margin-top: 46px; }
@@ -86,13 +149,23 @@
   }
   .map svg { display: block; width: 100%; min-width: 880px; height: auto; }
 
+  /* The rects carry their colours as SVG attributes, which any CSS rule outranks —
+     so the diagram follows the palette without a single edit to the markup. */
+  .node rect { fill: var(--card); stroke: var(--wine-border); }
+  .n-entry rect { fill: var(--wine-surface); stroke: none; }
+  .n-planned rect { fill: none; stroke: var(--grey); }
+  .n-overlay rect { fill: var(--card); stroke: var(--coral-border); }
+  .g-frame { fill: var(--wine); fill-opacity: 0.035; stroke: var(--wine-border); }
+  .arrow-head { fill: var(--wine); }
+  svg line { stroke: var(--wine-border); }
+
   .node rect { transition: filter .15s ease; }
   .node:hover rect { filter: drop-shadow(0 3px 10px rgba(122,30,45,.22)); }
   .n-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; fill: var(--noir); }
   .n-sub   { font-family: var(--font-body); font-size: 11.5px; fill: var(--text-muted); }
-  .n-entry .n-title { fill: #FFFFFF; }
-  .n-entry .n-sub   { fill: rgba(255,255,255,.72); }
-  .n-planned .n-title { fill: #8A7C7F; font-weight: 500; }
+  .n-entry .n-title { fill: var(--on-wine-strong); }
+  .n-entry .n-sub   { fill: var(--on-wine-soft); }
+  .n-planned .n-title { fill: var(--text-muted); font-weight: 500; }
   .n-overlay .n-title { fill: var(--coral); font-size: 15px; }
   .g-label {
     font-family: var(--font-body); font-size: 11px; font-weight: 700;
@@ -106,7 +179,7 @@
   .legend { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px; }
   .legend span { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text-muted); }
   .legend .sw { width: 26px; height: 17px; border-radius: 5px; flex: 0 0 auto; }
-  .sw-entry   { background: var(--wine); }
+  .sw-entry   { background: var(--wine-surface); }
   .sw-built   { background: var(--white); border: 1.5px solid var(--wine-border); }
   .sw-overlay { background: var(--white); border: 1.5px dashed var(--coral-border); }
   .sw-planned { background: transparent; border: 1.5px dashed var(--grey); }
@@ -126,7 +199,7 @@
   }
   .st-built   { color: var(--wine);  border: 1.5px solid var(--wine-border); }
   .st-overlay { color: var(--coral); border: 1.5px solid var(--coral-border); }
-  .st-todo    { color: #8A7C7F; border: 1.5px dashed var(--grey); }
+  .st-todo    { color: var(--text-muted); border: 1.5px dashed var(--grey); }
   @media (max-width: 640px) {
     .row { grid-template-columns: 1fr auto; }
     .row .r-what { grid-column: 1 / -1; }
@@ -138,9 +211,10 @@
      rim is a masked gradient on ::before, so border-radius: inherit makes one
      rule cover circles, pills and cards alike with no extra markup. */
   :root {
-    --glass-fill:   rgba(255, 255, 255, 0.5);
-    --glass-shadow: 2px 2px 8px rgba(224, 224, 224, 0.5);
-    --glass-edge:   linear-gradient(135deg, #FFFFFF 20%, rgba(255,255,255,0) 50%, #FFFFFF 81%);
+    --glass-fill:   rgba(var(--white-rgb), 0.5);
+    --glass-shadow: var(--glass-shadow-v);
+    --glass-edge:   linear-gradient(135deg, rgba(var(--glass-edge-rgb),1) 20%,
+                    rgba(var(--glass-edge-rgb),0) 50%, rgba(var(--glass-edge-rgb),1) 81%);
     --glass-rim:    1.5px;
   }
 
@@ -168,6 +242,11 @@
 </head>
 <body>
 
+<div class="theme-switch" role="group" aria-label="Theme">
+  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph ph-sun"></i></button>
+  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph ph-moon"></i></button>
+</div>
+
 <header class="top">
   <div class="shell">
     <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
@@ -187,16 +266,16 @@
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
+            <path class="arrow-head" d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
           </marker>
           <marker id="arrow-both" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
+            <path class="arrow-head" d="M0,0 L10,5 L0,10 z" fill="#7A1E2D" opacity=".55"/>
           </marker>
         </defs>
 
         <!-- ===== scene group ===== -->
-        <rect x="282" y="190" width="718" height="396" rx="22"
+        <rect class="g-frame" x="282" y="190" width="718" height="396" rx="22"
               fill="#7A1E2D" fill-opacity="0.035" stroke="#DFCCD0" stroke-dasharray="2 5"/>
         <text class="g-label" x="308" y="218">One scene · three modes</text>
         <text class="g-note"  x="308" y="580">The mode bar at the bottom of the phone switches between the three without leaving the scene.</text>
@@ -390,5 +469,14 @@
   <a href="index.html">rhrs design</a> · <a href="rhrs-prototype.html">Prototype</a> · <a href="style-kit.html">Style kit</a>
 </footer>
 
+
+<script>
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
+    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+  }
+  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+</script>
 </body>
 </html>

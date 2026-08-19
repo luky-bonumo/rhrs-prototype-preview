@@ -12,13 +12,45 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <style>
   :root {
-    --noir: #1C0A10; --wine: #7A1E2D; --coral: #EF5350;
-    --stone: #E0E0E0; --mist: #F5F5F5; --white: #FFFFFF;
+    --noir-rgb:28,10,16;     --wine-rgb:122,30,45;   --coral-rgb:239,83,80;
+    --stone-rgb:224,224,224; --mist-rgb:245,245,245; --white-rgb:255,255,255;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+    --noir:rgb(var(--noir-rgb));   --wine:rgb(var(--wine-rgb));
+    --coral:rgb(var(--coral-rgb)); --stone:rgb(var(--stone-rgb));
+    --mist:rgb(var(--mist-rgb));   --white:rgb(var(--white-rgb));
+    --grey:rgb(var(--grey-rgb));
     --text-body: #241318; --text-muted: #8A7C7F; --divider: #E7E0E1;
     --coral-tint: #FDECEB; --coral-border: #F6CBCA;
+    --card: var(--white);
     --font-display: 'Platypi', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
     --page: #F2EDEE;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --noir-rgb:247,240,242;  --wine-rgb:223,134,167; --coral-rgb:239,117,113;
+    --stone-rgb:82,40,60;    --mist-rgb:38,21,32;    --white-rgb:13,4,7;
+    --grey-rgb:190,190,190;  --shadow-rgb:0,0,0;
+    --text-body: #EFE4E7; --text-muted: #9B858C; --divider: #3A2A33;
+    --coral-tint: #3A1D20; --coral-border: #7A3936;
+    --card: #150A10;
+    --page: #1B0F16;
+  }
+  .theme-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 2px; padding: 3px;
+    background: rgba(var(--noir-rgb), 0.10); border-radius: 999px;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .theme-switch button {
+    border: none; background: none; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--noir); opacity: 0.45;
+  }
+  .theme-switch button.on {
+    background: var(--card); opacity: 1;
+    box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.15);
   }
   *, *::before, *::after { box-sizing: border-box; }
   * { margin: 0; padding: 0; }
@@ -73,7 +105,7 @@
   }
   .doc code {
     font-family: var(--font-body); font-weight: 600; font-size: 0.92em;
-    background: var(--white); border: 1px solid var(--divider);
+    background: var(--card); border: 1px solid var(--divider);
     border-radius: 5px; padding: 1px 5px;
   }
   .doc strong { font-weight: 700; color: var(--noir); }
@@ -82,6 +114,10 @@
 </style>
 </head>
 <body>
+<div class="theme-switch" role="group" aria-label="Theme">
+  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph ph-sun"></i></button>
+  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph ph-moon"></i></button>
+</div>
 <main class="shell">
   <a class="back" href="index.html"><i class="ph ph-arrow-left"></i>Design hub</a>
   <div class="doc">
@@ -90,11 +126,12 @@
 <p>Priorita se řídí jednou větou z posledního meetingu: <strong>vývojář teď potřebuje Read, Listen a Rehearse.</strong> Všechno ostatní čeká.</p>
 <hr>
 <h2>Rozhodnout (nikdo to zatím nerozhodl)</h2>
+<ul><li class="task open"><span class="box"></span><strong><code>--text-muted</code> je v aplikaci plochá šedá, na designových stránkách ne.</strong> Appka má <code>#9A9A9A</code>, stránky <code>#8A7C7F</code> (stažená k wine). Style kit přitom sám tvrdí, že „tints, borders and muted text all sit on the same wine axis rather than on a neutral grey" — což o stránkách platí a o aplikaci ne. Buď se srovná appka, nebo se opraví ta věta.</li><li class="task open"><span class="box"></span><strong><code>--grey</code> (<code>#BEBEBE</code>) aplikace nepoužívá ani jednou.</strong> Žije jen v sitemapě na čárkované obrysy „ještě nenakreslené". Do style kitu se proto nepřidal — paleta aplikace je opravdu šest barev. Otázka je, jestli má token zůstat v <code>:root</code> prototypu, kde ho nic nečte.</li></ul>
 <p>Obě otázky kolem selhání evaluace jsou <strong>odložené</strong> — 2026-08-18 padlo, že se teď řešit nebudou.</p>
 <ul><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Co se děje se zvukem, když evaluace selže.</strong> ↳ 2026-08-18</li><li class="task open"><span class="box"></span><em>(odloženo)</em> <strong>Jak se uživateli komunikuje, že se neúspěšná nahrávka někam ukládá.</strong> Nejspíš přes onboarding, ale není potvrzeno. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Jak se Václavovi hlásí změny v designu</strong> — buď poznámka na Telegram, nebo routine v Claude Code, která diffne design repo a udělá mu briefing. Na meetingu padly obě varianty, vybraná není. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Dashboard — čeká na Lukášův nový návrh.</strong> Původní záměr nebyl nikde zapsaný a nikdo si ho nevybavuje. Lukáš dělá nový vzhled; do té doby se dashboard nechává být — současný stav je v pořádku, jen ještě není „sexy".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — chybí detail průchodu.</strong> V zápisu je u něj prázdná odrážka; vstupní bod („separate screen under notifications") je jasný, samotný krok po kroku ne.</li></ul>
 <h2>Lukas — úkoly z posledního meetingu</h2>
 <p>Pořadí podle toho, co potřebuje vývojář: nejdřív věci uvnitř Read / Listen / Rehearse, pak zbytek.</p>
-<ul><li class="task open"><span class="box"></span><strong>Projít dark mode a doladit odvozené barvy.</strong> Sedm pojmenovaných je od Lukáše, zbytek odhadl Claude. V dark je teď <strong>coral úplně stejný jako ve světle</strong> (<code>EF5350</code>) a <strong>wine je zaprášená růžová</strong> <code>D9A1AC</code> — chladnější odstín než coral, aby se ty dvě nikdy nečetly jako jedna barva, a 1,6× jeho kontrast, což wine drží jako tu těžší z dvojice. Ve světle je ten poměr 2,9×; dorovnat ho tady by znamenalo skoro bílou.</li><li class="task open"><span class="box"></span><strong>Doladit dark mode na designových stránkách.</strong> <code>index</code>, <code>sitemap</code>, <code>style-kit</code> a <code>todo</code> jsou zatím jen světlé. Dark je jen výměna palety, dělá se až po dotažení light. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Recording Wizard — obrazovka.</strong> Uživatel je obsazený, ale nemá nahrané všechny repliky; wizard ukáže nenahrané a nahrává se replika po replice. Odkaz na Script detailu pod „Whole play" <strong>už je</strong> — vede na toast. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Navigační menu v prototypu</strong> pro snazší přepínání mezi obrazovkami. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Projít Figmu a doplnit sem zbylé tasky.</strong> (Lukáš, ručně.)</li></ul>
+<ul><li class="task open"><span class="box"></span><strong>Projít dark mode a doladit odvozené barvy.</strong> Šest pojmenovaných je od Lukáše, zbytek odhadl Claude. V dark je coral <code>EF7571</code> (světlejší než ve světle, ale s plnou sytostí) a wine <code>DF86A7</code> — růžová do fialova, tmavší než coral. Wine drží 7,5 : 1 proti coralovým 6,9 : 1, takže zůstává tou těžší z dvojice, ale jen těsně; ten zbytek mezery <strong>je</strong> rozdíl „já / ostatní".</li><li class="task open"><span class="box"></span><strong>Recording Wizard — obrazovka.</strong> Uživatel je obsazený, ale nemá nahrané všechny repliky; wizard ukáže nenahrané a nahrává se replika po replice. Odkaz na Script detailu pod „Whole play" <strong>už je</strong> — vede na toast. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Navigační menu v prototypu</strong> pro snazší přepínání mezi obrazovkami. ↳ 2026-08-18</li><li class="task open"><span class="box"></span><strong>Projít Figmu a doplnit sem zbylé tasky.</strong> (Lukáš, ručně.)</li></ul>
 <h2>Václav</h2>
 <p>Pozvánka do design repa odeslaná 2026-08-18.</p>
 <ul><li class="task open"><span class="box"></span>Založit Claude Code session ve Flutter repu s přístupem do design repa a začít vývoj. ↳ 2026-08-18</li></ul>
@@ -110,5 +147,13 @@
     Markdown, not this page.
   </p>
 </main>
+<script>
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
+    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+  }
+  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+</script>
 </body>
 </html>
