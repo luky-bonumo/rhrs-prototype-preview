@@ -448,16 +448,25 @@
   }
   .card .chevron { color: var(--wine); flex: 0 0 auto; display: flex; }
 
+  /* The featured card no longer names a thing you open but a place you return to,
+     so it needs a word above the title saying which place. Same size and weight as
+     the section labels, because that is what it is: a label for what follows. */
+  .card .card-over {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+  }
+
   /* The primary action, so it wears the colour itself rather than the ground that
      colour makes — a mark, like a filled pill. */
   .card.featured { background: var(--wine); }
+  .card.featured .card-over { color: var(--on-mark-soft); }
   .card.featured .card-title { color: var(--on-mark); }
   .card.featured .meta-lines { color: var(--on-mark-soft); }
   .card.featured .badge { color: var(--on-mark-tint); border-color: var(--on-mark-line); }
   .card.featured .chevron { color: var(--on-mark); }
 
   /* Recording Wizard — the way into recording the lines that have no audio yet.
-     It hangs off the Whole script card rather than standing beside it, so it is
+     It follows the Whole script card rather than standing beside it, so it is
      tinted rather than filled: a follow-on, not a rival to the primary action.
      Coral because the lines it is missing are mine. Carrying coral, it drops the
      glass for a flat fill, like everything else that does. */
@@ -2908,8 +2917,23 @@
       </div>`).join('');
   }
   function renderScenes() {
+    /* What you came back for goes first and wears the mark. Whole script keeps its
+       place in the list but not its prominence — it is one way in among several,
+       and the one you are least likely to want on opening the screen. */
+    const last = SCENES[0];
     let html = `
-      <div class="card featured" onclick="openScene('Whole script')">
+      <div class="card featured" onclick="openScene('${last.title}')">
+        <div class="card-main">
+          <div class="card-over">Where you left off</div>
+          <div class="card-title">${last.title}</div>
+          <div class="card-meta">
+            <span class="meta-lines">${last.lines} lines</span>
+            ${last.assigned ? '<span class="badge">Assigned</span>' : ''}
+          </div>
+        </div>
+        <span class="chevron">${ICON.chevron}</span>
+      </div>
+      <div class="card" onclick="openScene('Whole script')">
         <div class="card-main">
           <div class="card-title">Whole script</div>
           <div class="card-meta">
