@@ -2683,7 +2683,15 @@
          the band and the line you had just moved to arrived half dissolved. Read
          the band's own length rather than repeating the number here. */
       const fade = parseFloat(getComputedStyle(scroll).getPropertyValue('--fade-t')) || 0;
-      scroll.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior: behavior || 'smooth' });
+      /* A scene mark introduces the card under it, so it travels with it. Anchoring
+         on the card alone put the title of the scene you were just starting up
+         under the fade — worst of all on entering Listen or Rehearse, where the
+         first card is the active one and the mark is the first thing in the list.
+         Read has no such scroll, which is why it looked right there and nowhere
+         else. */
+      const prev = card.previousElementSibling;
+      const anchor = prev && prev.classList.contains('scene-mark') ? prev : card;
+      scroll.scrollTo({ top: Math.max(0, anchor.offsetTop - fade - 12), behavior: behavior || 'smooth' });
     }
     setTimeout(() => { progScroll[mode] = 0; updateTransport(mode); }, 450);
   }
