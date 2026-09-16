@@ -266,7 +266,7 @@
 
   <section>
     <div class="map">
-      <svg viewBox="0 0 1040 620" role="img" aria-label="Map of the rhrs app screens and the routes between them">
+      <svg viewBox="0 -78 1040 698" role="img" aria-label="Map of the rhrs app screens and the routes between them">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
@@ -285,6 +285,7 @@
         <text class="g-note"  x="308" y="580">The mode bar at the bottom of the phone switches between the three without leaving the scene.</text>
 
         <!-- ===== spine ===== -->
+        <path class="edge" d="M140,-18 L140,42" marker-end="url(#arrow)"/>
         <path class="edge" d="M140,112 L140,162" marker-end="url(#arrow)"/>
         <path class="edge" d="M140,232 L140,282" marker-end="url(#arrow)"/>
         <path class="edge" d="M140,352 L140,402" marker-end="url(#arrow)"/>
@@ -304,6 +305,11 @@
         <path class="edge" d="M836,304 L836,364" marker-end="url(#arrow)"/>
 
         <!-- ===== spine nodes ===== -->
+        <!-- Before everything else, and above it: the way into the app. -->
+        <a class="node" href="rhrs-prototype.html#login">
+          <rect x="40" y="-66" width="200" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="140" y="-36" text-anchor="middle">Login</text>
+        </a>
         <a class="node n-entry" href="rhrs-prototype.html#dashboard">
           <rect x="40" y="48" width="200" height="64" rx="15" fill="#7A1E2D"/>
           <text class="n-title" x="140" y="76"  text-anchor="middle">Dashboard</text>
@@ -414,6 +420,11 @@
       <div class="row">
         <span class="r-name cap-trim">Script detail</span>
         <span class="r-what">The scenes of one script, plus a whole-script entry. Leads to Edit script.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim">Login</span>
+        <span class="r-what">Email, then a six-digit code. One route rather than two — there is nothing to choose between signing in and signing up, so a new account is one extra screen (your name) instead of a separate path. In the prototype the code 000000 is wrong and 111111 has expired; nina@example.com is an existing account and anything else is new.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">

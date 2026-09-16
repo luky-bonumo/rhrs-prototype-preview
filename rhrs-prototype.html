@@ -451,6 +451,74 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ LOGIN ============
+     The first screens anyone sees, and the only ones in the app that are a form.
+     Mist, not wine: the wine ground stays the dashboard's. */
+  .auth {
+    flex: 1 1 auto; overflow-y: auto;
+    display: flex; flex-direction: column;
+    padding: 14px 26px 30px;
+  }
+  .auth::-webkit-scrollbar { width: 0; }
+  .auth-logo { color: var(--coral); display: flex; padding: 10px 0 0; }
+  .auth-logo svg { height: 20px; width: auto; }
+  .auth-head {
+    font-family: var(--font-display); font-weight: 400; font-size: 27px;
+    line-height: 1.2; color: var(--noir); margin: 44px 0 10px;
+  }
+  .auth-head .accent { color: var(--coral); font-weight: 700; }
+  .auth-sub { font-size: 15px; color: var(--text-muted); line-height: 1.4; margin-bottom: 26px; }
+  .auth-sub b { color: var(--noir); font-weight: 600; }
+
+  /* A glass surface carries no border, so the rim does the work: wine while you
+     are in the field, coral when what you typed came back wrong. */
+  .auth-field {
+    position: relative;
+    border-radius: var(--radius-card); padding: 15px 18px; margin-bottom: 14px;
+  }
+  .auth-field input {
+    width: 100%; border: none; background: none; outline: none;
+    font-family: var(--font-body); font-size: 16px; color: var(--noir);
+  }
+  .auth-field input::placeholder { color: var(--text-muted); }
+  .auth-field:focus-within::before { background: var(--wine); }
+  .auth-field.err::before { background: var(--coral); }
+
+  /* Six boxes rather than one field: the code arrives as six characters and is
+     read back as six. Pasting the whole thing still works. */
+  .otp { display: flex; gap: 8px; margin-bottom: 14px; }
+  .otp .otp-box {
+    position: relative; flex: 1 1 0;
+    border-radius: var(--radius-card); padding: 16px 0;
+  }
+  .otp .otp-box input {
+    width: 100%; border: none; background: none; outline: none; text-align: center;
+    font-family: var(--font-body); font-size: 20px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--noir);
+  }
+  .otp .otp-box:focus-within::before { background: var(--wine); }
+  .otp.err .otp-box::before { background: var(--coral); }
+
+  .auth-err { font-size: 13px; color: var(--coral); font-weight: 500; margin: -4px 0 14px; }
+
+  .auth-spacer { flex: 1 1 auto; min-height: 20px; }
+  .auth-btn {
+    width: 100%; border: none; cursor: pointer;
+    background: var(--wine); color: var(--white);
+    border-radius: var(--radius-pill); padding: 16px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 700;
+    box-shadow: 0 5px 18px var(--lift-wine);
+  }
+  .auth-btn:active { transform: scale(0.98); }
+  .auth-btn:disabled { opacity: 0.4; box-shadow: none; cursor: default; transform: none; }
+  .auth-link {
+    display: block; width: 100%; margin-top: 14px;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+    color: var(--wine); padding: 8px; text-align: center;
+  }
+  .auth-link:disabled { color: var(--text-muted); cursor: default; }
+
   /* ============ RECORDING WIZARD ============ */
   /* Two states shown as two, so the one you are in is a place rather than a
      switch you have to read — the same shape the theme switch uses. */
@@ -1529,7 +1597,7 @@
   }
 
   .round-btn, .detail-header .back, .icon-btn,
-  .card, .lcard, .edit-card, .next-scene,
+  .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box,
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
@@ -1541,6 +1609,7 @@
 
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
+  .auth-field::before, .otp-box::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
@@ -1699,6 +1768,61 @@
       <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
     </div>
     <div class="list fades" id="scriptsList"></div>
+  </div>
+
+  <!-- ============ SCREENS: LOGIN ============
+       One route, not two. With an email code there is nothing for the user to
+       choose between signing in and signing up — the system knows which it is, so
+       a new account is one extra screen rather than a separate path. -->
+  <div class="screen" id="loginScreen">
+    <div class="auth">
+      <span class="auth-logo"><svg viewBox="0 0 39 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.4149 14.0451C33.9354 14.0451 33.4379 14.0032 32.9224 13.9193C32.4069 13.8353 31.9094 13.7214 31.4298 13.5776C30.9623 13.4337 30.5547 13.2719 30.207 13.0921L31.268 10.3947H31.7895L34.2351 13.6136H32.3829V11.8153C32.5507 12.115 32.8384 12.3548 33.246 12.5346C33.6656 12.7144 34.1452 12.8043 34.6846 12.8043C35.1402 12.8043 35.4819 12.7324 35.7096 12.5886C35.9494 12.4447 36.0693 12.2229 36.0693 11.9232C36.0693 11.6235 35.9374 11.3837 35.6737 11.2039C35.4099 11.0121 35.0683 10.8503 34.6487 10.7184C34.2411 10.5745 33.8035 10.4307 33.336 10.2868C32.8804 10.143 32.4428 9.96313 32.0232 9.74735C31.6156 9.53156 31.28 9.24983 31.0162 8.90217C30.7525 8.55451 30.6206 8.11095 30.6206 7.57148C30.6206 6.57646 31.0042 5.8152 31.7715 5.28772C32.5507 4.74825 33.6596 4.47852 35.0982 4.47852C35.5418 4.47852 35.9973 4.51448 36.4649 4.58641C36.9444 4.65834 37.406 4.76024 37.8495 4.89211C38.2931 5.02398 38.6707 5.17983 38.9824 5.35965L37.9215 8.00306H37.4L34.9544 4.91009H36.8066V6.70833C36.6387 6.39663 36.351 6.15687 35.9434 5.98903C35.5478 5.80921 35.1282 5.7193 34.6846 5.7193C34.313 5.7193 34.0253 5.77924 33.8215 5.89912C33.6177 6.019 33.5158 6.18684 33.5158 6.40263C33.5158 6.70233 33.6477 6.94809 33.9114 7.1399C34.1751 7.33172 34.5168 7.50555 34.9364 7.66139C35.356 7.80525 35.7935 7.9551 36.2491 8.11095C36.7166 8.25481 37.1602 8.43463 37.5798 8.65042C37.9994 8.86621 38.341 9.14194 38.6048 9.47761C38.8685 9.81328 39.0004 10.2389 39.0004 10.7544C39.0004 11.8093 38.6048 12.6245 37.8136 13.2C37.0223 13.7634 35.8895 14.0451 34.4149 14.0451Z" fill="currentColor"/>
+<path d="M21.3576 13.7563V13.4326L22.7062 11.8861L22.4185 12.3896V7.12078L23.1918 8.5234L21.1777 6.23964V5.80806L25.008 4.58526H25.6014L25.4755 6.3835H25.6553V12.3896L25.3676 11.8142L27.2558 13.4326V13.7563H21.3576ZM25.3137 7.6063L25.3856 6.3835H25.5654C25.9011 5.78409 26.3327 5.31055 26.8602 4.96289C27.3876 4.61524 27.9331 4.44141 28.4966 4.44141C29.012 4.44141 29.4736 4.5493 29.8812 4.76509L28.4966 8.61331H27.9751L25.7632 6.3835L27.9571 6.77911C27.3337 6.77911 26.8002 6.85104 26.3567 6.9949C25.9251 7.12677 25.5774 7.33057 25.3137 7.6063Z" fill="currentColor"/>
+<path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
+<path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
+      <div class="auth-head">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
+      <div class="auth-sub">Enter your email and we will send you a code.</div>
+      <div class="auth-field" id="emailField">
+        <input id="emailInput" type="email" inputmode="email" autocomplete="email"
+               placeholder="Your email" oninput="authEmailTyped()">
+      </div>
+      <div class="auth-err" id="emailErr" hidden>That does not look like an email.</div>
+      <div class="auth-spacer"></div>
+      <button class="auth-btn" id="emailBtn" onclick="authSubmitEmail()" disabled>Continue</button>
+    </div>
+  </div>
+
+  <div class="screen" id="codeScreen">
+    <div class="auth">
+      <span class="auth-logo"><svg viewBox="0 0 39 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.4149 14.0451C33.9354 14.0451 33.4379 14.0032 32.9224 13.9193C32.4069 13.8353 31.9094 13.7214 31.4298 13.5776C30.9623 13.4337 30.5547 13.2719 30.207 13.0921L31.268 10.3947H31.7895L34.2351 13.6136H32.3829V11.8153C32.5507 12.115 32.8384 12.3548 33.246 12.5346C33.6656 12.7144 34.1452 12.8043 34.6846 12.8043C35.1402 12.8043 35.4819 12.7324 35.7096 12.5886C35.9494 12.4447 36.0693 12.2229 36.0693 11.9232C36.0693 11.6235 35.9374 11.3837 35.6737 11.2039C35.4099 11.0121 35.0683 10.8503 34.6487 10.7184C34.2411 10.5745 33.8035 10.4307 33.336 10.2868C32.8804 10.143 32.4428 9.96313 32.0232 9.74735C31.6156 9.53156 31.28 9.24983 31.0162 8.90217C30.7525 8.55451 30.6206 8.11095 30.6206 7.57148C30.6206 6.57646 31.0042 5.8152 31.7715 5.28772C32.5507 4.74825 33.6596 4.47852 35.0982 4.47852C35.5418 4.47852 35.9973 4.51448 36.4649 4.58641C36.9444 4.65834 37.406 4.76024 37.8495 4.89211C38.2931 5.02398 38.6707 5.17983 38.9824 5.35965L37.9215 8.00306H37.4L34.9544 4.91009H36.8066V6.70833C36.6387 6.39663 36.351 6.15687 35.9434 5.98903C35.5478 5.80921 35.1282 5.7193 34.6846 5.7193C34.313 5.7193 34.0253 5.77924 33.8215 5.89912C33.6177 6.019 33.5158 6.18684 33.5158 6.40263C33.5158 6.70233 33.6477 6.94809 33.9114 7.1399C34.1751 7.33172 34.5168 7.50555 34.9364 7.66139C35.356 7.80525 35.7935 7.9551 36.2491 8.11095C36.7166 8.25481 37.1602 8.43463 37.5798 8.65042C37.9994 8.86621 38.341 9.14194 38.6048 9.47761C38.8685 9.81328 39.0004 10.2389 39.0004 10.7544C39.0004 11.8093 38.6048 12.6245 37.8136 13.2C37.0223 13.7634 35.8895 14.0451 34.4149 14.0451Z" fill="currentColor"/>
+<path d="M21.3576 13.7563V13.4326L22.7062 11.8861L22.4185 12.3896V7.12078L23.1918 8.5234L21.1777 6.23964V5.80806L25.008 4.58526H25.6014L25.4755 6.3835H25.6553V12.3896L25.3676 11.8142L27.2558 13.4326V13.7563H21.3576ZM25.3137 7.6063L25.3856 6.3835H25.5654C25.9011 5.78409 26.3327 5.31055 26.8602 4.96289C27.3876 4.61524 27.9331 4.44141 28.4966 4.44141C29.012 4.44141 29.4736 4.5493 29.8812 4.76509L28.4966 8.61331H27.9751L25.7632 6.3835L27.9571 6.77911C27.3337 6.77911 26.8002 6.85104 26.3567 6.9949C25.9251 7.12677 25.5774 7.33057 25.3137 7.6063Z" fill="currentColor"/>
+<path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
+<path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
+      <div class="auth-head">Check your email</div>
+      <div class="auth-sub">We sent a code to <b id="codeEmail">you</b></div>
+      <div class="otp" id="otp"></div>
+      <div class="auth-err" id="codeErr" hidden></div>
+      <div class="auth-spacer"></div>
+      <button class="auth-btn" id="codeBtn" onclick="authSubmitCode()" disabled>Continue</button>
+      <button class="auth-link" id="resendBtn" onclick="authResend()">Resend code</button>
+      <button class="auth-link" onclick="authBackToEmail()">Wrong email?</button>
+    </div>
+  </div>
+
+  <div class="screen" id="nameScreen">
+    <div class="auth">
+      <span class="auth-logo"><svg viewBox="0 0 39 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.4149 14.0451C33.9354 14.0451 33.4379 14.0032 32.9224 13.9193C32.4069 13.8353 31.9094 13.7214 31.4298 13.5776C30.9623 13.4337 30.5547 13.2719 30.207 13.0921L31.268 10.3947H31.7895L34.2351 13.6136H32.3829V11.8153C32.5507 12.115 32.8384 12.3548 33.246 12.5346C33.6656 12.7144 34.1452 12.8043 34.6846 12.8043C35.1402 12.8043 35.4819 12.7324 35.7096 12.5886C35.9494 12.4447 36.0693 12.2229 36.0693 11.9232C36.0693 11.6235 35.9374 11.3837 35.6737 11.2039C35.4099 11.0121 35.0683 10.8503 34.6487 10.7184C34.2411 10.5745 33.8035 10.4307 33.336 10.2868C32.8804 10.143 32.4428 9.96313 32.0232 9.74735C31.6156 9.53156 31.28 9.24983 31.0162 8.90217C30.7525 8.55451 30.6206 8.11095 30.6206 7.57148C30.6206 6.57646 31.0042 5.8152 31.7715 5.28772C32.5507 4.74825 33.6596 4.47852 35.0982 4.47852C35.5418 4.47852 35.9973 4.51448 36.4649 4.58641C36.9444 4.65834 37.406 4.76024 37.8495 4.89211C38.2931 5.02398 38.6707 5.17983 38.9824 5.35965L37.9215 8.00306H37.4L34.9544 4.91009H36.8066V6.70833C36.6387 6.39663 36.351 6.15687 35.9434 5.98903C35.5478 5.80921 35.1282 5.7193 34.6846 5.7193C34.313 5.7193 34.0253 5.77924 33.8215 5.89912C33.6177 6.019 33.5158 6.18684 33.5158 6.40263C33.5158 6.70233 33.6477 6.94809 33.9114 7.1399C34.1751 7.33172 34.5168 7.50555 34.9364 7.66139C35.356 7.80525 35.7935 7.9551 36.2491 8.11095C36.7166 8.25481 37.1602 8.43463 37.5798 8.65042C37.9994 8.86621 38.341 9.14194 38.6048 9.47761C38.8685 9.81328 39.0004 10.2389 39.0004 10.7544C39.0004 11.8093 38.6048 12.6245 37.8136 13.2C37.0223 13.7634 35.8895 14.0451 34.4149 14.0451Z" fill="currentColor"/>
+<path d="M21.3576 13.7563V13.4326L22.7062 11.8861L22.4185 12.3896V7.12078L23.1918 8.5234L21.1777 6.23964V5.80806L25.008 4.58526H25.6014L25.4755 6.3835H25.6553V12.3896L25.3676 11.8142L27.2558 13.4326V13.7563H21.3576ZM25.3137 7.6063L25.3856 6.3835H25.5654C25.9011 5.78409 26.3327 5.31055 26.8602 4.96289C27.3876 4.61524 27.9331 4.44141 28.4966 4.44141C29.012 4.44141 29.4736 4.5493 29.8812 4.76509L28.4966 8.61331H27.9751L25.7632 6.3835L27.9571 6.77911C27.3337 6.77911 26.8002 6.85104 26.3567 6.9949C25.9251 7.12677 25.5774 7.33057 25.3137 7.6063Z" fill="currentColor"/>
+<path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
+<path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
+      <div class="auth-head">What should we call you?</div>
+      <div class="auth-sub">Your scene partners will see this.</div>
+      <div class="auth-field">
+        <input id="nameInput" type="text" autocomplete="name" placeholder="Your name" oninput="authNameTyped()">
+      </div>
+      <div class="auth-spacer"></div>
+      <button class="auth-btn" id="nameBtn" onclick="authFinish()" disabled>Start rehearsing</button>
+    </div>
   </div>
 
   <!-- ============ SCREEN: RECORDING WIZARD ============
@@ -3380,6 +3504,138 @@
   }
 
   /* ============================================================
+     LOGIN
+     ============================================================ */
+  /* The prototype has no server, so the demo decides by hand what a real one
+     would decide for itself. Written down here and in the README, because from
+     the screen there is no way to tell:
+       code 000000  the code is wrong
+       code 111111  the code has expired
+       any other    it works
+       and the email says whether the account is new: this one is not, so it
+       goes straight in, while any other email gets the name screen. */
+  const KNOWN_EMAIL = 'nina@example.com';
+  const RESEND_SECONDS = 30;
+  const auth = { email: '', resendLeft: 0 };
+  let resendTimer;
+
+  function openLogin() {
+    auth.email = '';
+    document.getElementById('emailInput').value = '';
+    document.getElementById('emailErr').hidden = true;
+    document.getElementById('emailField').classList.remove('err');
+    document.getElementById('emailBtn').disabled = true;
+    showScreen('loginScreen');
+  }
+
+  const looksLikeEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  function authEmailTyped() {
+    const v = document.getElementById('emailInput').value;
+    document.getElementById('emailBtn').disabled = !v.trim();
+    /* The message goes as soon as they start fixing it — telling someone their
+       email is wrong while they are still typing it is just noise. */
+    document.getElementById('emailErr').hidden = true;
+    document.getElementById('emailField').classList.remove('err');
+  }
+
+  function authSubmitEmail() {
+    const v = document.getElementById('emailInput').value.trim();
+    if (!looksLikeEmail(v)) {
+      document.getElementById('emailErr').hidden = false;
+      document.getElementById('emailField').classList.add('err');
+      return;
+    }
+    auth.email = v;
+    document.getElementById('codeEmail').textContent = v;
+    renderOtp();
+    startResend();
+    showScreen('codeScreen');
+    setTimeout(() => document.querySelector('#otp input')?.focus(), 250);
+  }
+  function authBackToEmail() { clearInterval(resendTimer); showScreen('loginScreen'); }
+
+  function renderOtp() {
+    document.getElementById('otp').className = 'otp';
+    document.getElementById('otp').innerHTML = Array.from({ length: 6 }, (_, i) => `
+      <div class="otp-box"><input id="otp${i}" inputmode="numeric" maxlength="1"
+        autocomplete="${i === 0 ? 'one-time-code' : 'off'}"
+        oninput="otpTyped(${i})" onkeydown="otpKey(event, ${i})" onpaste="otpPaste(event)"></div>`).join('');
+    document.getElementById('codeErr').hidden = true;
+    document.getElementById('codeBtn').disabled = true;
+  }
+  const otpValue = () => Array.from({ length: 6 }, (_, i) => document.getElementById('otp' + i).value).join('');
+  function otpSync() {
+    document.getElementById('codeBtn').disabled = otpValue().length < 6;
+    document.getElementById('otp').classList.remove('err');
+    document.getElementById('codeErr').hidden = true;
+  }
+  function otpTyped(i) {
+    const el = document.getElementById('otp' + i);
+    el.value = el.value.replace(/\D/g, '').slice(0, 1);
+    if (el.value && i < 5) document.getElementById('otp' + (i + 1)).focus();
+    otpSync();
+  }
+  /* Backspace in an empty box steps back a box, or the only way out of a typo is
+     to click each one. */
+  function otpKey(e, i) {
+    if (e.key === 'Backspace' && !e.target.value && i > 0) document.getElementById('otp' + (i - 1)).focus();
+  }
+  function otpPaste(e) {
+    const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    if (!digits) return;
+    e.preventDefault();
+    digits.split('').forEach((d, i) => { document.getElementById('otp' + i).value = d; });
+    document.getElementById('otp' + Math.min(digits.length, 5)).focus();
+    otpSync();
+  }
+
+  function startResend() {
+    clearInterval(resendTimer);
+    auth.resendLeft = RESEND_SECONDS;
+    paintResend();
+    resendTimer = setInterval(() => {
+      auth.resendLeft--;
+      paintResend();
+      if (auth.resendLeft <= 0) clearInterval(resendTimer);
+    }, 1000);
+  }
+  function paintResend() {
+    const b = document.getElementById('resendBtn');
+    b.disabled = auth.resendLeft > 0;
+    b.textContent = auth.resendLeft > 0 ? `Resend in ${auth.resendLeft}s` : 'Resend code';
+  }
+  function authResend() { renderOtp(); startResend(); toast('Code sent'); }
+
+  function authCodeError(msg) {
+    document.getElementById('otp').classList.add('err');
+    const e = document.getElementById('codeErr');
+    e.textContent = msg; e.hidden = false;
+  }
+  function authSubmitCode() {
+    const code = otpValue();
+    /* The wrong code stays in the boxes. Clearing it hides what you typed, which
+       is the one thing that tells you where it went wrong. */
+    if (code === '000000') return authCodeError('That code is not right.');
+    if (code === '111111') return authCodeError('That code has expired. Send a new one.');
+    clearInterval(resendTimer);
+    if (auth.email.toLowerCase() === KNOWN_EMAIL) return authFinish();
+    document.getElementById('nameInput').value = '';
+    document.getElementById('nameBtn').disabled = true;
+    showScreen('nameScreen');
+  }
+  function authNameTyped() {
+    document.getElementById('nameBtn').disabled = !document.getElementById('nameInput').value.trim();
+  }
+  function authFinish() {
+    /* Signing in is not a place you go back to, so the stack starts again here. */
+    navStack.length = 0;
+    showScreen('dashboardScreen');
+    navStack.length = 0;
+    navStack.push('dashboardScreen');
+  }
+
+  /* ============================================================
      RECORDING WIZARD
      ============================================================ */
   /* Defaults. The cue is off to start with: most of the time you know your own
@@ -3577,6 +3833,7 @@
     detail:     () => openScript('s1'),
     edit:       () => { openScript('s1'); showScreen('editScriptScreen'); },
     wizard:     () => { openScript('s1'); openWizard(); },
+    login:      () => openLogin(),
     read:       () => openScene(DEMO_SCENE),
     listen:     () => { openScene(DEMO_SCENE); switchMode('listen'); },
     rehearse:   () => { openScene(DEMO_SCENE); switchMode('rehearse'); },
