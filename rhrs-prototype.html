@@ -419,6 +419,21 @@
 
   .list { flex: 1 1 auto; overflow-y: auto; padding: 26px 20px 24px; }
   .list::-webkit-scrollbar { width: 0; }
+  /* A scene boundary inside a chained script. It is neither a line nor a note, so
+     it takes neither treatment: the name on the ground with a hairline either
+     side, which reads as a join rather than as something to perform. Same mark in
+     all three modes — a boundary that looked different in each would be three
+     things to learn instead of one. */
+  .scene-mark { display: flex; align-items: center; gap: 14px; padding: 28px 0 18px; }
+  .scene-mark::before, .scene-mark::after {
+    content: ''; flex: 1 1 0; height: 1px; background: var(--stone);
+  }
+  .scene-mark .sm-name {
+    flex: 0 1 auto;
+    font-family: var(--font-display); font-weight: 600; font-size: 15px;
+    color: var(--wine); text-align: center;
+  }
+
   .list-sublabel {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
     text-transform: uppercase; color: var(--text-muted);
@@ -2044,7 +2059,7 @@
                                         its own
      Everyone but you is wine; you are coral. Per-character colours may come
      later, but the rule today is one colour for the scene and one for you. */
-  const SCRIPT = [
+  const SCENE_1 = [
     { stage: "A kitchen, ten past two in the morning. The big light is off. MICHAEL is eating cereal standing up, over the sink, in the dark." },
 
     { who:'Nina',    mine:true,  text:"You're eating." },
@@ -2093,6 +2108,61 @@
     { who:'Anna',    mine:false, text:"Goodnight." }
   ];
 
+  /* The other four scenes. Short on purpose: the whole-script flow needs more than
+     one scene before a scene separator has anything to separate, and these carry
+     the joins without pretending to be a finished play. */
+  const SCENE_2 = [
+    { stage:"A car park outside the theatre. NINA has the phone against her ear and her coat over one arm." },
+    { who:'Nina',    mine:true,  text:"I know what time it is." },
+    { who:'Michael', mine:false, text:"Then why are you calling?" },
+    { who:'Nina',    mine:true,  text:"Because you'd have worried if I didn't." },
+    { who:'Michael', mine:false, text:"I'd have slept." },
+    { who:'Nina',    mine:true,  text:"You'd have worried, and then not slept, and in the morning you'd have told me you slept fine.",
+      note:"Say it flat. It is a thing she has said before." },
+    { stage:"A long pause. Somewhere a car door." },
+    { who:'Michael', mine:false, text:"Come home." }
+  ];
+  const SCENE_3 = [
+    { stage:"ANNA's flat. Two cups, one of them untouched." },
+    { who:'Anna',    mine:false, text:"You're going to tell him." },
+    { who:'Nina',    mine:true,  text:"I'm going to tell him.",
+      note:"She hasn't decided. She is listening to how it sounds out loud." },
+    { who:'Anna',    mine:false, text:"When?" },
+    { who:'Nina',    mine:true,  text:"When he asks me something I can't answer around." },
+    { who:'Anna',    mine:false, text:"He asks you things like that every day." },
+    { who:'Nina',    mine:true,  text:"I know." }
+  ];
+  const SCENE_4 = [
+    { stage:"The same kitchen. Daylight, which is worse." },
+    { who:'Michael', mine:false, text:"There's coffee." },
+    { who:'Nina',    mine:true,  text:"Thank you." },
+    { who:'Michael', mine:false, text:"I'm not going to ask." },
+    { who:'Nina',    mine:true,  text:"You are.", dir:"Not unkindly." },
+    { who:'Michael', mine:false, text:"Not yet." }
+  ];
+  const SCENE_5 = [
+    { stage:"A doorway. A bag that has been packed and unpacked twice." },
+    { who:'Michael', mine:false, text:"You'll call when you get there." },
+    { who:'Nina',    mine:true,  text:"I'll call when I get there." },
+    { who:'Michael', mine:false, text:"You won't." },
+    { who:'Nina',    mine:true,  text:"No." },
+    { stage:"She goes. He does not watch her go." }
+  ];
+
+  /* A third kind of item, alongside a line and a standalone stage direction:
+       { scene }   the title of the scene starting here
+     It only ever appears in the whole-script list, where scenes are chained and
+     the reader would otherwise have no idea one had ended. It is not playable and
+     not a stage direction, so the playhead steps over it and the stage-direction
+     switch does not hide it. */
+  const SCENE_LISTS = [SCENE_1, SCENE_2, SCENE_3, SCENE_4, SCENE_5];
+  SCENES.forEach((sc, i) => { sc.items = SCENE_LISTS[i]; });
+  const WHOLE_SCRIPT = SCENES.flatMap(sc => [{ scene: sc.title }, ...sc.items]);
+
+  /* What the modes are rendering right now: one scene, or the whole script. */
+  let SCRIPT = SCENE_1;
+  const isSceneMark = it => !!it && !!it.scene;
+
   const isLine  = i => !!SCRIPT[i] && !!SCRIPT[i].who;
   const lineIdx = () => SCRIPT.map((it, i) => it.who ? i : -1).filter(i => i >= 0);
 
@@ -2134,8 +2204,8 @@
 
   const CHARACTERS = ['Nina', 'Michael', 'Anna'].map(name => ({
     name,
-    lines: SCRIPT.filter(it => it.who === name).length,
-    mine: SCRIPT.some(it => it.who === name && it.mine)
+    lines: WHOLE_SCRIPT.filter(it => it.who === name).length,
+    mine: WHOLE_SCRIPT.some(it => it.who === name && it.mine)
   }));
 
   /* Icons — swap any ph-* name from https://phosphoricons.com */
@@ -2181,8 +2251,8 @@
   let activeIdx   = 0;             // the line currently being played / rehearsed
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
-  /* Script-level figure, same as the 320 lines on the Whole script card: this scene
-     is the only one with real text, so the wizard's count is simulated too. */
+  /* Script-level figure. Still simulated: lines do not carry a recorded flag yet,
+     so there is nothing to count. The Recording Wizard work replaces this. */
   const UNRECORDED_LINES = 4;
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
   const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
@@ -2229,6 +2299,10 @@
     showScreen('detailScreen');
   }
   function openScene(name) {
+    /* Whole script is a scene name like any other as far as the header is
+       concerned; what changes is the list underneath it. */
+    const sc = SCENES.find(x => x.title === name);
+    SCRIPT = sc ? sc.items : WHOLE_SCRIPT;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
     /* The top of the scene, whatever it is. A leading stage direction used to be
@@ -2319,6 +2393,12 @@
   /* The scene ends with the way out of it. In the prototype it loops back to the
      top of this same sample scene. */
   const NEXT_SCENE = 'Late night phone call';
+  /* The same mark in all three modes. Read, Listen and Rehearse scroll the same
+     list of items, so a scene boundary that looked different in each would be
+     three things to learn instead of one. */
+  function sceneMark(title) {
+    return `<div class="scene-mark"><span class="sm-name cap-trim">${title}</span></div>`;
+  }
   function nextSceneCard() {
     return `<div class="next-scene">
       <div class="ns-label">Next scene</div>
@@ -2349,6 +2429,7 @@
      ============================================================ */
   function renderRead() {
     document.getElementById('readScroll').innerHTML = SCRIPT.map((item, idx) => {
+      if (isSceneMark(item)) return sceneMark(item.scene);
       if (!item.who) return defaults.stage ? stageBlock(idx, item.stage) : '';
       return `<div class="line ${item.mine ? 'mine' : 'others'}" data-idx="${idx}">
         <div class="line-head">
@@ -2369,6 +2450,7 @@
   function renderCards(mode) {
     const isReh = mode === 'rehearse';
     document.getElementById(mode + 'Scroll').innerHTML = SCRIPT.map((line, idx) => {
+      if (isSceneMark(line)) return sceneMark(line.scene);
       if (!line.who) return defaults.stage ? stageBlock(idx, line.stage, mode) : '';
       const isActive = idx === activeIdx;
 
@@ -2937,7 +3019,7 @@
         <div class="card-main">
           <div class="card-title">Whole script</div>
           <div class="card-meta">
-            <span class="meta-lines">320 lines · all scenes</span>
+            <span class="meta-lines">${WHOLE_SCRIPT.filter(it => it.who).length} lines · all scenes</span>
             <span class="badge">Assigned</span>
           </div>
         </div>
@@ -3023,7 +3105,10 @@
 
   /* The one scene we actually have text for. Derived here, not on the way into
      the scene — Script detail is rendered first and used to say "0 lines". */
-  SCENES[0].lines = lineIdx().length;
+  /* Every scene counts its own lines, and the whole script is their sum. These
+     used to be four numbers typed by hand next to a script that disagreed with
+     them. */
+  SCENES.forEach(sc => { sc.lines = sc.items.filter(it => it.who).length; });
   renderRecent();
   renderScripts();
   renderCharacters();
