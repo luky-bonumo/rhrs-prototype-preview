@@ -1469,6 +1469,16 @@
     box-shadow: 0 5px 18px var(--lift-wine);
   }
   .next-scene .ns-go:active { transform: scale(0.97); }
+  /* The end is a terminus, not a door. The filled wine pill is the invitation to
+     go on, and there is nowhere on: the button here only offers the way out, so
+     it is outlined rather than filled and does not compete with the sentence
+     above it. */
+  .next-scene.end .ns-label { color: var(--wine); }
+  .next-scene .ns-go.quiet {
+    background: none; color: var(--wine);
+    border: 1.5px solid var(--wine-border);
+    box-shadow: none;
+  }
 
   /* A stage direction standing between lines is its own beat in the script, so it
      gets its own band: space and a rule on both sides, rather than reading as a
@@ -2521,6 +2531,7 @@
   }
   function openScript(id) {
     const s = SCRIPTS.find(x => x.id === id);
+    currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
     renderScenes();
     showScreen('detailScreen');
@@ -2530,6 +2541,7 @@
        concerned; what changes is the list underneath it. */
     const sc = SCENES.find(x => x.title === name);
     SCRIPT = sc ? sc.items : WHOLE_SCRIPT;
+    currentScene = name;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
     /* The top of the scene, whatever it is. A leading stage direction used to be
@@ -2619,7 +2631,16 @@
 
   /* The scene ends with the way out of it. In the prototype it loops back to the
      top of this same sample scene. */
-  const NEXT_SCENE = 'Late night phone call';
+  let currentScene  = SCENES[0].title;
+  let currentScript = SCRIPTS[0];
+  /* The next scene is whichever one follows this one, not a name written down
+     once. Null means there is no next: the last scene of the single-scene flow,
+     and the whole-script flow, which has just run through all of them. */
+  function nextSceneTitle() {
+    if (SCRIPT === WHOLE_SCRIPT) return null;
+    const i = SCENES.findIndex(sc => sc.title === currentScene);
+    return (i >= 0 && SCENES[i + 1]) ? SCENES[i + 1].title : null;
+  }
   /* The same mark in all three modes. Read, Listen and Rehearse scroll the same
      list of items, so a scene boundary that looked different in each would be
      three things to learn instead of one. */
@@ -2627,16 +2648,40 @@
     return `<div class="scene-mark"><span class="sm-name cap-trim">${title}</span></div>`;
   }
   function nextSceneCard() {
+    const next = nextSceneTitle();
+    /* The end is not a doorway, so it does not wear the filled button a doorway
+       wears — there is nothing to continue to. It still offers the one move Back
+       may not make: arriving here from the dashboard, Back goes to the dashboard,
+       not to the script. */
+    if (!next) {
+      return `<div class="next-scene end">
+        <div class="ns-label">End of the script</div>
+        <div class="ns-name cap-trim">${currentScript.title}</div>
+        <button class="ns-go quiet" onclick="backToScript()">
+          Back to the script <i class="ph-bold ph-arrow-up-left ic-18"></i>
+        </button>
+      </div>`;
+    }
     return `<div class="next-scene">
       <div class="ns-label">Next scene</div>
-      <div class="ns-name cap-trim">${NEXT_SCENE}</div>
+      <div class="ns-name cap-trim">${next}</div>
       <button class="ns-go" onclick="goNextScene()">
         Continue <i class="ph-bold ph-arrow-right ic-18"></i>
       </button>
     </div>`;
   }
+  function backToScript() {
+    renderScenes();
+    showScreen('detailScreen');
+  }
   function goNextScene() {
-    document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = NEXT_SCENE);
+    const next = nextSceneTitle();
+    if (!next) return;
+    /* It used to rename the header and leave the lines alone, because every scene
+       held the same ones. They hold their own now, so the list changes too. */
+    SCRIPT = SCENES.find(sc => sc.title === next).items;
+    currentScene = next;
+    document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = next);
     activeIdx = 0;
     playing = true;
     if (currentMode === 'read') {
@@ -3295,6 +3340,7 @@
      open Script detail, where Where you left off is waiting. */
   function continueLastScene() {
     const s = SCRIPTS[0];
+    currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
     renderScenes();
     openScene(LAST_SCENE[s.id]);
