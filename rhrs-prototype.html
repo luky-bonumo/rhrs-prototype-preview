@@ -451,6 +451,43 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ NOTIFICATIONS ============
+     A sheet, not a screen: nothing here is a place you stay. */
+  .notif-list { overflow-y: auto; padding: 4px 22px 10px; }
+  .notif-list::-webkit-scrollbar { width: 0; }
+  .notif {
+    display: flex; align-items: flex-start; gap: 13px;
+    width: 100%; text-align: left; background: none; border: none;
+    font-family: var(--font-body);
+    padding: 15px 0; border-bottom: 1px solid var(--divider);
+  }
+  .notif:last-child { border-bottom: none; }
+  .notif.go { cursor: pointer; }
+  .notif.go:active { opacity: 0.6; }
+  /* The glyph carries which kind it is. Coral when what is missing is mine,
+     wine when it is the app talking about itself. */
+  .notif .n-ic {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%;
+  }
+  .notif.mine .n-ic  { background: var(--coral-tint); color: var(--coral); }
+  .notif.app  .n-ic  { background: var(--wine-tint);  color: var(--wine); }
+  .notif .n-main { flex: 1 1 auto; min-width: 0; }
+  .notif .n-title {
+    display: block;
+    font-family: var(--font-display); font-weight: 600; font-size: 15px;
+    color: var(--noir); margin-bottom: 3px;
+  }
+  .notif .n-body { display: block; font-size: 13.5px; color: var(--text-body); line-height: 1.4; }
+  /* Which script and which scene, by name — without them the notification says
+     there is work but not where. */
+  .notif .n-where { display: block; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+  .notif .n-time { display: block; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .notif .n-right { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding-top: 9px; }
+  .notif .n-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+  .notif .chevron { color: var(--wine); display: flex; }
+  .notif-empty { text-align: center; padding: 40px 20px 30px; color: var(--text-muted); font-size: 14px; }
+
   /* ============ LOGIN ============
      The first screens anyone sees, and the only ones in the app that are a form.
      Mist, not wine: the wine ground stays the dashboard's. */
@@ -1708,9 +1745,9 @@
 <path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
 <path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
       <div class="dash-actions">
-        <button class="dash-btn" onclick="toast('Notifications')" aria-label="Notifications">
+        <button class="dash-btn" onclick="openNotifications()" aria-label="Notifications">
           <i class="ph ph-bell ic-20"></i>
-          <span class="dot"></span>
+          <span class="dot" id="bellDot" hidden></span>
         </button>
         <button class="dash-btn" onclick="showScreen('globalSettingsScreen')" aria-label="Settings">
           <i class="ph ph-gear-six ic-20"></i>
@@ -2316,6 +2353,15 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Notifications. Opens from the bell on the dashboard. -->
+  <div class="settings-sheet" id="notifSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title">
+      <span class="h-title cap-trim">Notifications</span>
+    </div>
+    <div class="notif-list" id="notifList"></div>
   </div>
 
   <!-- Recording Wizard settings. Only what changes how recording behaves; the
@@ -3322,6 +3368,8 @@
     document.getElementById('settingsSheet').classList.remove('open');
     document.getElementById('speedSheet').classList.remove('open');
     document.getElementById('wizardSettingsSheet').classList.remove('open');
+    if (document.getElementById('notifSheet').classList.contains('open')) markNotificationsRead();
+    document.getElementById('notifSheet').classList.remove('open');
   }
   function openSettings(mode) {
     const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
@@ -3501,6 +3549,83 @@
           <i class="ph ph-pencil-simple ic-18"></i>
         </button>
       </div>`).join('');
+  }
+
+  /* ============================================================
+     NOTIFICATIONS
+     ============================================================ */
+  /* Two kinds so far. The missing-audio one names the script and the scene,
+     because a notification that says there is work but not where it is only
+     sends you looking. Its count is read off the script, not stored here — the
+     backend will send the titles, but the number has to agree with the app.
+
+     Shake-to-feedback is the app talking about itself: during the alpha the
+     fastest way to report something is to shake the phone, and nobody discovers
+     that on their own. */
+  const NOTIFS = [
+    { id:'n1', kind:'missing', read:false, time:'2 hours ago' },
+    { id:'n2', kind:'shake',   read:false, time:'Yesterday' }
+  ];
+
+  function renderNotifications() {
+    const list = document.getElementById('notifList');
+    if (!NOTIFS.length) {
+      list.innerHTML = '<div class="notif-empty">Nothing new.</div>';
+      return paintBellDot();
+    }
+    list.innerHTML = NOTIFS.map(n => {
+      if (n.kind === 'missing') {
+        const count = missingLines().length;
+        /* Nothing left to record means nothing to say about it. */
+        if (!count) return '';
+        return `<button class="notif mine go" onclick="notifOpenWizard()">
+          <span class="n-ic"><i class="ph-fill ph-microphone ic-20"></i></span>
+          <span class="n-main">
+            <span class="n-title">Lines you still need to record</span>
+            <span class="n-body">${count} of your lines have no audio yet.</span>
+            <span class="n-where">${SCENES[0].title} · ${SCRIPTS[0].title}</span>
+            <span class="n-time">${n.time}</span>
+          </span>
+          <span class="n-right">
+            ${n.read ? '' : '<span class="n-dot"></span>'}
+            <span class="chevron">${ICON.chevron}</span>
+          </span>
+        </button>`;
+      }
+      return `<div class="notif app">
+        <span class="n-ic"><i class="ph ph-device-mobile-speaker ic-20"></i></span>
+        <span class="n-main">
+          <span class="n-title">Shake to send feedback</span>
+          <span class="n-body">Something looks wrong? Give your phone a shake and tell us.</span>
+          <span class="n-time">${n.time}</span>
+        </span>
+        <span class="n-right">${n.read ? '' : '<span class="n-dot"></span>'}</span>
+      </div>`;
+    }).join('') || '<div class="notif-empty">Nothing new.</div>';
+    paintBellDot();
+  }
+
+  /* The dot is whether anything is unread, not a decoration switched on by hand. */
+  function paintBellDot() {
+    document.getElementById('bellDot').hidden = !NOTIFS.some(n => !n.read);
+  }
+
+  function openNotifications() {
+    renderNotifications();
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('notifSheet').classList.add('open');
+  }
+  /* Marked read on the way out, not on the way in: while the sheet is open you
+     can still see which ones were new. */
+  function markNotificationsRead() {
+    NOTIFS.forEach(n => { n.read = true; });
+    paintBellDot();
+  }
+  function notifOpenWizard() {
+    markNotificationsRead();
+    closeSheet();
+    openScript('s1');
+    openWizard();
   }
 
   /* ============================================================
@@ -3818,6 +3943,7 @@
      them. */
   SCENES.forEach(sc => { sc.lines = sc.items.filter(it => it.who).length; });
   renderContinue();
+  renderNotifications();
   renderRecent();
   renderScripts();
   renderCharacters();
@@ -3834,6 +3960,7 @@
     edit:       () => { openScript('s1'); showScreen('editScriptScreen'); },
     wizard:     () => { openScript('s1'); openWizard(); },
     login:      () => openLogin(),
+    notifications: () => { showScreen('dashboardScreen'); openNotifications(); },
     read:       () => openScene(DEMO_SCENE),
     listen:     () => { openScene(DEMO_SCENE); switchMode('listen'); },
     rehearse:   () => { openScene(DEMO_SCENE); switchMode('rehearse'); },

@@ -294,6 +294,8 @@
         <path class="edge" d="M40,336 C12,336 12,532 40,532" marker-end="url(#arrow)"/>
         <!-- script detail → the scene -->
         <path class="edge" d="M240,320 C272,320 274,272 300,272" marker-end="url(#arrow)"/>
+        <!-- dashboard → the notifications sheet -->
+        <path class="edge" d="M240,80 C266,80 268,-24 294,-24" marker-end="url(#arrow)"/>
         <!-- dashboard → planned destinations -->
         <path class="edge-planned" d="M240,80 C266,80 268,40 294,40"/>
         <path class="edge-planned" d="M240,80 L294,88"/>
@@ -335,6 +337,13 @@
           <rect x="40" y="500" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="528" text-anchor="middle">Recording Wizard</text>
           <text class="n-sub"   x="140" y="547" text-anchor="middle">My lines without audio</text>
+        </a>
+
+        <!-- A sheet, and one you can open: it has a link of its own. Sits above the
+             other things the dashboard reaches, in the room the login made. -->
+        <a class="node n-overlay" href="rhrs-prototype.html#notifications">
+          <rect x="294" y="-44" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="389" y="-19" text-anchor="middle">Notifications</text>
         </a>
 
         <!-- ===== planned ===== -->
@@ -425,6 +434,11 @@
       <div class="row">
         <span class="r-name cap-trim">Login</span>
         <span class="r-what">Email, then a six-digit code. One route rather than two — there is nothing to choose between signing in and signing up, so a new account is one extra screen (your name) instead of a separate path. In the prototype the code 000000 is wrong and 111111 has expired; nina@example.com is an existing account and anything else is new.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim">Notifications</span>
+        <span class="r-what">A sheet from the bell on the dashboard. Two kinds: lines of yours still without audio, naming the scene and the script and leading into the wizard, and a note that shaking the phone sends feedback. The bell's dot is whether anything is unread; they are marked read when the sheet closes, so you can still see which were new while it is open.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
