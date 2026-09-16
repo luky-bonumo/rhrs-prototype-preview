@@ -436,8 +436,12 @@
      the gap — there is nothing above it to be separated from. It still needs to
      clear the header, and in the card modes it was sitting too close under it. */
   .scene-mark:first-child { padding-top: 28px; }
+  /* 42 cleared the header but left a hole under it once the scroll no longer ran
+     away — the list read as already scrolled. 6 puts the title 26px into the
+     container, still clear of the 18px fade band, and the script starts where the
+     eye expects it. */
   #listenScroll .scene-mark:first-child,
-  #rehearseScroll .scene-mark:first-child { padding-top: 42px; }
+  #rehearseScroll .scene-mark:first-child { padding-top: 6px; }
   .scene-mark::before, .scene-mark::after {
     content: ''; flex: 1 1 0; height: 1px; background: var(--stone);
   }
@@ -1187,6 +1191,36 @@
     text-transform: uppercase; color: var(--on-wine-soft);
     margin-bottom: 12px; flex: 0 0 auto;
   }
+  /* The one thing you almost always came to do. On the wine ground a wine mark
+     would sink into it, so this one wears coral — which is also what coral means
+     here: this is my place in the script. `--white` is the established text on a
+     coral fill and inverts with the mode, same as `--on-mark` does over wine. */
+  .dash-continue {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; text-align: left; border: none; cursor: pointer;
+    font-family: var(--font-body);
+    background: var(--coral); border-radius: 18px; padding: 16px 18px;
+    margin-bottom: 26px; flex: 0 0 auto;
+    box-shadow: 0 4px 16px var(--lift-coral);
+  }
+  .dash-continue:active { transform: scale(0.985); }
+  .dash-continue .dc-main { flex: 1 1 auto; min-width: 0; }
+  .dash-continue .dc-over {
+    display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--on-mark-soft); margin-bottom: 5px;
+  }
+  .dash-continue .dc-title {
+    display: block;
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    line-height: 1.25; color: var(--on-mark);
+  }
+  .dash-continue .dc-sub {
+    display: block; font-size: 13px; color: var(--on-mark-soft); margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dash-continue .dc-chev { color: var(--on-mark); flex: 0 0 auto; display: flex; }
+
   .dash-recent-list { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
   /* One script, one box. The same object as a scene card or a line card, on a
      different ground: the fill is opaque rather than the translucent glass one,
@@ -1547,7 +1581,8 @@
     <div class="dash-scroll fades">
       <div class="dash-hero">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
 
-      <div class="dash-recent-label">Last open</div>
+      <button class="dash-continue" id="dashContinue" onclick="continueLastScene()"></button>
+      <div class="dash-recent-label">Last open scripts</div>
       <div class="dash-recent-list" id="recentList"></div>
       <button class="dash-alllink" onclick="showScreen('scriptsScreen')">
         All scripts
@@ -3069,8 +3104,33 @@
       </div>`).join('');
     document.getElementById('scenesList').innerHTML = html;
   }
+  /* Where each script was left off. The dashboard says it twice — once in the
+     continue button and once under the script it belongs to — so it is written
+     once here. */
+  const LAST_SCENE = { s1:'Opening — the kitchen argument', s2:'Act II — the arrival', s3:'Act I' };
+
+  /* The most recent script of all, straight into Read. It skips Script detail
+     rather than stacking it, so Back from the scene returns to the dashboard you
+     actually came from. The three boxes under it do the opposite on purpose: they
+     open Script detail, where Where you left off is waiting. */
+  function continueLastScene() {
+    const s = SCRIPTS[0];
+    document.getElementById('detailTitle').textContent = s.title;
+    renderScenes();
+    openScene(LAST_SCENE[s.id]);
+  }
+  function renderContinue() {
+    const s = SCRIPTS[0];
+    document.getElementById('dashContinue').innerHTML = `
+      <span class="dc-main">
+        <span class="dc-over">Where you left off</span>
+        <span class="dc-title">${LAST_SCENE[s.id]}</span>
+        <span class="dc-sub">${s.title}</span>
+      </span>
+      <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
+  }
   function renderRecent() {
-    const scenesByScript = { s1:'Opening — the kitchen argument', s2:'Act II — the arrival', s3:'Act I' };
+    const scenesByScript = LAST_SCENE;
     document.getElementById('recentList').innerHTML = SCRIPTS.slice(0, 3).map(s => `
       <button class="dash-recent" onclick="openScript('${s.id}')">
         <span class="r-main">
@@ -3131,6 +3191,7 @@
      used to be four numbers typed by hand next to a script that disagreed with
      them. */
   SCENES.forEach(sc => { sc.lines = sc.items.filter(it => it.who).length; });
+  renderContinue();
   renderRecent();
   renderScripts();
   renderCharacters();
