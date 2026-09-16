@@ -424,7 +424,20 @@
      side, which reads as a join rather than as something to perform. Same mark in
      all three modes — a boundary that looked different in each would be three
      things to learn instead of one. */
-  .scene-mark { display: flex; align-items: center; gap: 14px; padding: 28px 0 18px; }
+  /* The space above carries the break, so it runs to about twice the space below:
+     the title belongs to the scene it opens, not to the one it ends. Measured from
+     text to text rather than set as padding, because the two lists have different
+     rhythms — a line in Read butts straight onto the mark, while a card in Listen
+     and Rehearse brings 14px of its own. Hence the second rule: same optical gap,
+     14 less padding to get there. */
+  .scene-mark { display: flex; align-items: center; gap: 14px; padding: 55px 0 18px; }
+  #listenScroll .scene-mark, #rehearseScroll .scene-mark { padding-top: 41px; }
+  /* The first mark opens the script rather than breaking it, so it does not carry
+     the gap — there is nothing above it to be separated from. It still needs to
+     clear the header, and in the card modes it was sitting too close under it. */
+  .scene-mark:first-child { padding-top: 28px; }
+  #listenScroll .scene-mark:first-child,
+  #rehearseScroll .scene-mark:first-child { padding-top: 42px; }
   .scene-mark::before, .scene-mark::after {
     content: ''; flex: 1 1 0; height: 1px; background: var(--stone);
   }
@@ -2132,8 +2145,9 @@
     { who:'Anna',    mine:false, text:"He asks you things like that every day." },
     { who:'Nina',    mine:true,  text:"I know." }
   ];
+  /* This one opens straight on a line, with no stage direction under the scene
+     mark — the other case the mark has to sit above. */
   const SCENE_4 = [
-    { stage:"The same kitchen. Daylight, which is worse." },
     { who:'Michael', mine:false, text:"There's coffee." },
     { who:'Nina',    mine:true,  text:"Thank you." },
     { who:'Michael', mine:false, text:"I'm not going to ask." },
