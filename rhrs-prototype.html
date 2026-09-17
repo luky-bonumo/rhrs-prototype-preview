@@ -1989,10 +1989,21 @@
         <button id="gsDark"  onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
       </div>
 
+      <!-- The way to the login screens from inside the app. Sign out is not here:
+           it is a different question and has not been settled. -->
+      <div class="gs-label" style="margin-top:26px;">Account</div>
+      <div class="gs-group">
+        <button class="edit-row" onclick="openLogin()">
+          <span class="er-ic"><i class="ph ph-sign-in ic-20"></i></span>
+          <span class="er-label">Login / Sign up</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+      </div>
+
       <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
       <div class="gs-todo">
         <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
-        <p>Account, Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
+        <p>Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
            Notifications, Recording &amp; storage, Subscription, About. Not drawn yet —
            the theme switch is here first so the prototype can be looked at on a
            phone in either mode.</p>
