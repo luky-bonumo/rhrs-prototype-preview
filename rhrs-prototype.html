@@ -538,6 +538,34 @@
 
   .auth-err { font-size: 13px; color: var(--coral); font-weight: 500; margin: -4px 0 14px; }
 
+  /* Apple and Google get the same button, deliberately. Apple asks to be shown at
+     least as prominently as any other provider, and identical treatment is the
+     shortest way there — it also stops the screen implying one of them is the
+     right answer. No brand black and no brand white: the palette has neither, and
+     a literal here would be the one colour in the app that cannot follow the
+     mode. The glyph carries whose it is. */
+  .auth-provider {
+    position: relative;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; border: none; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 15px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    color: var(--noir); margin-bottom: 10px;
+  }
+  .auth-provider:active { transform: scale(0.98); }
+  .auth-provider i { font-size: 20px; }
+
+  /* Same construction as a scene mark: a word sitting on the rule rather than
+     above it, so it reads as a join between two ways in, not as a heading. */
+  .auth-or {
+    display: flex; align-items: center; gap: 14px;
+    margin: 18px 0 20px;
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+  }
+  .auth-or::before, .auth-or::after {
+    content: ''; flex: 1 1 0; height: 1px; background: var(--stone);
+  }
+
   .auth-spacer { flex: 1 1 auto; min-height: 20px; }
   .auth-btn {
     width: 100%; border: none; cursor: pointer;
@@ -1634,7 +1662,7 @@
   }
 
   .round-btn, .detail-header .back, .icon-btn,
-  .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box,
+  .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box, .auth-provider,
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
@@ -1646,7 +1674,7 @@
 
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
-  .auth-field::before, .otp-box::before,
+  .auth-field::before, .otp-box::before, .auth-provider::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
@@ -1818,14 +1846,25 @@
 <path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
 <path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
       <div class="auth-head">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
-      <div class="auth-sub">Enter your email and we will send you a code.</div>
+      <div class="auth-sub">Sign in to pick up where you left off.</div>
+      <button class="auth-provider" onclick="authProvider('Apple')">
+        <i class="ph-fill ph-apple-logo"></i>Continue with Apple
+      </button>
+      <button class="auth-provider" onclick="authProvider('Google')">
+        <i class="ph-fill ph-google-logo"></i>Continue with Google
+      </button>
+      <div class="auth-or">or</div>
       <div class="auth-field" id="emailField">
         <input id="emailInput" type="email" inputmode="email" autocomplete="email"
                placeholder="Your email" oninput="authEmailTyped()">
       </div>
       <div class="auth-err" id="emailErr" hidden>That does not look like an email.</div>
-      <div class="auth-spacer"></div>
+      <!-- Under the field rather than at the foot of the screen: the email route is
+           the one below the divider now, and its button belongs to it. Pinned to
+           the bottom it sat a screen away from what it acts on, greyed out and
+           still the loudest thing there. -->
       <button class="auth-btn" id="emailBtn" onclick="authSubmitEmail()" disabled>Continue</button>
+      <div class="auth-spacer"></div>
     </div>
   </div>
 
@@ -3677,6 +3716,13 @@
     startResend();
     showScreen('codeScreen');
     setTimeout(() => document.querySelector('#otp input')?.focus(), 250);
+  }
+  /* A provider hands over the name with the account, so there is no code to
+     check and no name to ask for — the two screens the email route needs are
+     both answered before the tap finishes. */
+  function authProvider(name) {
+    toast('Signed in with ' + name);
+    authFinish();
   }
   function authBackToEmail() { clearInterval(resendTimer); showScreen('loginScreen'); }
 
