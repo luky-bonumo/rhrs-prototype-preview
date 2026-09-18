@@ -943,6 +943,16 @@
      state can be collapsed — rehSetState forces the player open for both — so
      neither has a fold to bite on, and the trim only ever cut them square. */
   #rehTalking, #rehSuccess { overflow: visible; }
+  /* The wizard reuses the recorder and so inherits the same halo, but it was left
+     out of this rule and its rings were cut square across the top. Its transport
+     never folds either, so it takes the same exemption for the same reason. */
+  #wzRec, #wzSuccess { overflow: visible; }
+  /* In Rehearse the idle and recording buttons are different buttons — play, then
+     the mic — so the size change reads as a change of control. Here it is the
+     same mic before and during, so it keeps its size and only the rings arrive.
+     At 96 against the recording 84 it shrank and, with the transport anchored to
+     the bottom, dropped 12px the moment you pressed it. */
+  #wzIdle .big-btn { width: 84px; height: 84px; }
   .t-fold.show {
     grid-template-rows: 1fr; opacity: 1; pointer-events: auto;
     transition: grid-template-rows var(--fold-ms) var(--fold-ease),
@@ -3946,7 +3956,7 @@
      when you are recording out of order, which is why it can be switched on. */
   const wz = { filter: 'missing', idx: -1, state: 'idle', autoAdvance: true,
                showCue: false, playCue: false, countdown: false };
-  let wzTimer, wzSeconds = 0;
+  let wzTimer;
 
   const wzList = () => (wz.filter === 'missing' ? missingLines() : myLines());
 
@@ -4044,26 +4054,31 @@
     if (key === 'showCue') renderWizard();
   }
 
+  /* The same simulation as Rehearse: a take runs TAKE_MS and then ends itself.
+     The prototype cannot hear, so it uses how the take ended to decide how the
+     check comes out — both results have to be reachable by hand:
+       left to finish on its own   recorded, and the check passes
+       stopped with a tap          the check fails
+     That is a rule of the demo, not of the app: in the real one a take ends when
+     you stop talking, and the check listens to what you said. */
+  let wzDone;
   function wzStart() {
     if (wz.idx < 0) return;
-    wzSeconds = 0;
     wzSetState('rec');
-    document.getElementById('wzRecTime').textContent = '0:00';
-    clearInterval(wzTimer);
-    wzTimer = setInterval(() => {
-      wzSeconds++;
-      document.getElementById('wzRecTime').textContent = fmtLen(wzSeconds);
-    }, 1000);
+    const started = Date.now(), time = document.getElementById('wzRecTime');
+    time.textContent = '0:00';
+    clearInterval(wzTimer); clearTimeout(wzDone);
+    wzTimer = setInterval(() => { time.textContent = clock((Date.now() - started) / 1000); }, 200);
+    wzDone = setTimeout(() => wzFinish(true), TAKE_MS);
   }
-
-  /* The check is simulated: every third take fails, so the failure path is
-     reachable without pretending the prototype can hear anything. */
-  let wzTakes = 0;
-  function wzStop() {
-    clearInterval(wzTimer);
+  function wzStop() { wzFinish(false); }
+  function wzFinish(passed) {
+    /* A take still running when you leave the screen must not land later on
+       whatever line is selected by then. */
+    if (wz.state !== 'rec') return;
+    clearInterval(wzTimer); clearTimeout(wzDone);
     wzSetState('checking');
-    wzTakes++;
-    setTimeout(() => (wzTakes % 3 === 0 ? wzSetState('failed') : wzPass()), 900);
+    setTimeout(() => (passed ? wzPass() : wzSetState('failed')), 900);
   }
 
   /* The take failed the check and is gone — nothing to overwrite, so Retake just
