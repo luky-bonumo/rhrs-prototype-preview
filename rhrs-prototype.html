@@ -567,11 +567,19 @@
   .se-row .se-ic { flex: 0 0 auto; display: flex; color: var(--wine); }
   /* The chevron lives inside the button, or it is a picture of a target rather
      than part of one. */
+  /* `color: inherit` is not decoration: Safari gives a button its own blue unless
+     told, and the scene titles came out blue on iOS because nothing set a colour
+     on that branch. */
   .se-row .se-open {
     flex: 1 1 auto; min-width: 0; text-align: left;
     display: flex; align-items: center; gap: 10px;
-    background: none; border: none; cursor: pointer; font-family: var(--font-body);
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); color: inherit;
   }
+  .se-row .se-who { color: var(--noir); }
+  .se-flags { display: inline-flex; gap: 4px; margin-left: 7px; vertical-align: middle; }
+  .se-flags .lbl-ic.private { color: var(--coral); }
+  .se-flags .lbl-ic.stage   { color: var(--wine); }
   .se-row .se-open .se-body { flex: 1 1 auto; min-width: 0; }
   .se-row .se-who {
     display: block; font-family: var(--font-display); font-weight: 600; font-size: 15px;
@@ -4967,6 +4975,15 @@
       renderSceneEdit();
     }
   }
+  /* What a line carries, said where the line is named: a private note, a stage
+     direction of its own, or both. Same two glyphs as everywhere else. */
+  function seFlags(it) {
+    let f = '';
+    if (it.note) f += '<i class="ph-fill ph-note ic-13 lbl-ic private"></i>';
+    if (it.dir)  f += '<i class="ph-fill ph-note ic-13 lbl-ic stage"></i>';
+    return f ? `<span class="se-flags">${f}</span>` : '';
+  }
+
   /* On the right, where the thumb already is, with a rule between it and the row
      so it reads as a handle on the row rather than part of what the row says. */
   const grip = kind => `<span class="se-grip" onpointerdown="dragBegin(event, '${kind}')"
@@ -5015,7 +5032,7 @@
         <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit stage direction')`}">
           ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
           <span class="se-body">
-            <span class="se-who cap-trim">${who}</span>
+            <span class="se-who cap-trim">${who}${it.who ? seFlags(it) : ''}</span>
             <span class="se-text">${text}</span>
           </span>
           <span class="se-chev"><i class="ph ph-pencil-simple ic-18"></i></span>
@@ -5135,7 +5152,9 @@
           <i class="ph ph-plus ic-18"></i>${addLabel}
         </button>`;
     } else {
-      body = `<div class="le-text">${value}</div>`;
+      /* The trigger says the way in out loud; tapping the text is the way anyone
+         tries first. Both work — naming it was never meant to take it away. */
+      body = `<div class="le-text" onclick="editOpen('${key}')">${value}</div>`;
     }
     return `<div class="le-label">${icon || ''}${label}${trigger}</div>${body}`;
   }
