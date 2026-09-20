@@ -539,6 +539,62 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ LINE EDIT ============ */
+  .le-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    color: var(--text-muted); padding: 18px 2px 8px;
+  }
+  .le-row {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; text-align: left; border: none; cursor: pointer;
+    font-family: var(--font-body);
+    border-radius: var(--radius-card); padding: 14px 16px;
+  }
+  .le-row .le-main { flex: 1 1 auto; min-width: 0; }
+  /* Spans, because a button may only hold phrasing content — so they have to be
+     made block or the label and its explanation run together on one line. */
+  .le-row .le-main { display: block; }
+  .le-row .le-top { display: block; font-size: 15px; font-weight: 600; color: var(--noir); }
+  .le-row .le-sub { display: block; font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .le-row .le-chev { color: var(--wine); flex: 0 0 auto; display: flex; }
+  .le-row.mine .le-top { color: var(--coral); font-family: var(--font-display); font-size: 17px; }
+  .le-row.others .le-top { color: var(--wine); font-family: var(--font-display); font-size: 17px; }
+  .le-row .le-play {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--coral); color: var(--white);
+  }
+  /* The text is edited where it is read. A screen of its own for one field would
+     be a journey for a typo. */
+  .le-text {
+    position: relative;
+    border-radius: var(--radius-card); padding: 16px;
+    font-size: 16px; line-height: 1.5; color: var(--noir); cursor: text;
+  }
+  .le-text textarea {
+    width: 100%; border: none; background: none; outline: none; resize: none;
+    font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: var(--noir);
+  }
+  .le-edit-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .le-edit-actions button {
+    flex: 1 1 0; border: none; cursor: pointer; border-radius: var(--radius-pill);
+    padding: 12px; font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  }
+  .le-edit-actions .save   { background: var(--wine); color: var(--white); }
+  .le-edit-actions .cancel { background: none; color: var(--wine); border: 1.5px solid var(--wine-border); }
+  .le-danger {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; border: none; cursor: pointer; background: none;
+    border: 1.5px solid var(--coral); border-radius: var(--radius-pill);
+    padding: 14px; margin-top: 26px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--coral);
+  }
+  #noteSheet textarea {
+    width: 100%; border: none; background: none; outline: none; resize: none;
+    font-family: var(--font-body); font-size: 15px; line-height: 1.5; color: var(--noir);
+  }
+
   /* ============ AUDIO EDIT ============ */
   /* The line being worked on, so you know whose takes these are without going
      back to check. Quiet: it is the subject, not the content. */
@@ -613,14 +669,17 @@
     height: 4px; border-radius: 2px; background: var(--stone);
     margin-top: 8px; cursor: pointer; position: relative;
   }
+  /* Coral only on the take that is in use — the bar carries the same meaning the
+     row does, so an ordinary take plays in wine. */
   .ae-take .ae-bar .ae-fill {
     position: absolute; inset: 0 auto 0 0; border-radius: 2px;
-    background: var(--coral);
+    background: var(--wine);
   }
   .ae-take .ae-bar .ae-thumb {
     position: absolute; top: 50%; width: 11px; height: 11px; border-radius: 50%;
-    background: var(--coral); transform: translate(-50%, -50%);
+    background: var(--wine); transform: translate(-50%, -50%);
   }
+  .ae-take.inuse .ae-bar .ae-fill, .ae-take.inuse .ae-bar .ae-thumb { background: var(--coral); }
   .ae-take .ae-time {
     display: flex; justify-content: space-between;
     font-size: 11px; color: var(--text-muted); margin-top: 5px;
@@ -640,8 +699,9 @@
   }
   /* Recording here is the same mic as everywhere else, so it is the same object:
      the pill gives way to it rather than sitting beside it. */
-  .ae-recording { display: flex; flex-direction: column; align-items: center; margin: 18px 0 26px; }
-  .ae-recording .wz-hint { padding-top: 12px; }
+  /* One button in a row built for three, so it centres rather than sitting where
+     the first of three would. */
+  #aeTransport .t-main { grid-template-columns: auto; justify-content: center; }
 
   /* ============ ALERT ============
      Centred, unlike every other sheet: an alert is one thing said once, and a
@@ -1936,6 +1996,7 @@
 
   .round-btn, .detail-header .back, .icon-btn,
   .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box, .ae-take,
+  .le-row, .le-text,
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
@@ -1948,6 +2009,7 @@
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   .auth-field::before, .otp-box::before, .ae-take::before,
+  .le-row::before, .le-text::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
@@ -2227,6 +2289,34 @@
     </div>
   </div>
 
+  <!-- ============ SCREEN: LINE EDIT ============
+       One line, everything about it in one place: who says it, what it says,
+       its audio, its note, and the handle the rest of the app knows it by. -->
+  <div class="screen" id="lineScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim">Edit line</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+    <div class="scroll fades" id="lineScroll"></div>
+  </div>
+
+  <!-- Note. One field and one question about who sees it, so it is a sheet. -->
+  <div class="settings-sheet" id="noteSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title"><span class="h-title cap-trim">Note</span></div>
+    <div style="padding: 0 22px 20px;">
+      <div class="auth-field" style="margin-bottom:16px;">
+        <textarea id="noteInput" rows="4" placeholder="What do you want to remember about this line?"></textarea>
+      </div>
+      <div class="gs-theme" style="margin-bottom:18px;">
+        <button id="noteMine" onclick="setNoteWho('mine')"><i class="ph-bold ph-user ic-18"></i>Only me</button>
+        <button id="noteAll"  onclick="setNoteWho('all')"><i class="ph-bold ph-users ic-18"></i>Everyone</button>
+      </div>
+      <button class="auth-btn" onclick="saveNote()">Save note</button>
+    </div>
+  </div>
+
   <!-- ============ SCREEN: AUDIO EDIT ============
        One line's takes. The wizard adds them; this is where you look back and
        choose which one everybody hears. -->
@@ -2238,6 +2328,20 @@
     </div>
 
     <div class="scroll fades" id="audioScroll"></div>
+
+    <!-- While a take is being recorded the mic stands where it does in Rehearse,
+         at the foot of the screen, and the list above clears — so a long line can
+         still be scrolled and read while you say it. -->
+    <div class="transport" id="aeTransport" hidden>
+      <div class="expanded show">
+        <div class="t-main">
+          <button class="big-btn recording" onclick="aeStopRec()" aria-label="Stop recording">
+            <i class="ph-fill ph-microphone ic-32"></i>
+            <span class="btn-time" id="aeRecTime">0:00</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ============ SCREEN: RECORDING WIZARD ============
@@ -3853,8 +3957,8 @@
       html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
       html += '<div class="sheet-sep"></div>';
     }
-    html += item('edit', 'Edit line', false, "Open line editor");
-    html += item('note', 'Add / edit private note', false, "Private note");
+    html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
+    html += item('note', 'Add / edit private note', false, null, `openLineEdit(${sheetIdx}); openNoteEditor()`);
     if (isMine) html += item('record', 'Audio', true, null, `openAudioEdit(${sheetIdx})`);
     return html;
   }
@@ -3897,6 +4001,7 @@
     if (document.getElementById('notifSheet').classList.contains('open')) markNotificationsRead();
     document.getElementById('notifSheet').classList.remove('open');
     document.getElementById('alertSheet').classList.remove('open');
+    document.getElementById('noteSheet').classList.remove('open');
   }
   function openSettings(mode) {
     const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
@@ -4156,6 +4261,13 @@
       title: 'Delete this recording?',
       text: 'The take for this line will be removed and the line will need recording again. This cannot be undone.',
       primary: 'Delete recording', act: "sheetAction('Recording deleted')",
+      ghost: 'Keep it'
+    },
+    deleteLine: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this line?',
+      text: 'The line, its note and all of its takes go with it. This cannot be undone.',
+      primary: 'Delete line', act: "closeSheet(); toast('Line deleted')",
       ghost: 'Keep it'
     },
     deleteTake: {
@@ -4603,6 +4715,10 @@
                   go: () => openLogin() },
     alert:      { label:'Alert',            group:'proto',
                   go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
+    line:       { label:'Line edit',        group:'app', screen:'lineScreen',
+                  go: () => { openScript('s1');
+                              openLineEdit(lineIdx().find(i => SCENE_1[i].mine && SCENE_1[i].note)
+                                        ?? lineIdx()[0]); } },
     audio:      { label:'Audio edit',       group:'app', screen:'audioScreen',
                   /* Reached in the app from a line's menu — Audio — on any line
                      of yours. */
@@ -4616,6 +4732,133 @@
     androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
+  /* ============================================================
+     LINE EDIT
+     ============================================================ */
+  let lineEditIdx = 0, lineTextEditing = false, noteWho = 'mine';
+  function openLineEdit(idx) {
+    lineEditIdx = idx;
+    lineTextEditing = false;
+    renderLineEdit();
+    showScreen('lineScreen');
+  }
+  function renderLineEdit() {
+    const line = SCENE_1[lineEditIdx];
+    const take = line.rec === false ? null : takeInUse(lineEditIdx);
+    /* A note that is shared is a different thing from a private one, so the row
+       says which it is rather than only that one exists. */
+    const noteLabel = !line.note ? 'Add a note'
+      : (line.noteShared ? 'Note · everyone' : 'Note · only me');
+    document.getElementById('lineScroll').innerHTML = `
+      <div class="le-label">Character</div>
+      <button class="le-row ${line.mine ? 'mine' : 'others'}" onclick="openCharacterPick()">
+        <span class="le-main">
+          <span class="le-top cap-trim">${line.who}</span>
+          <span class="le-sub">${line.mine ? 'Your part' : 'Someone else'}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+
+      <div class="le-label">Line</div>
+      ${lineTextEditing ? `
+        <div class="le-text">
+          <textarea id="lineTextInput" rows="4">${line.text}</textarea>
+        </div>
+        <div class="le-edit-actions">
+          <button class="cancel" onclick="lineTextEditing = false; renderLineEdit();">Cancel</button>
+          <button class="save" onclick="saveLineText()">Save</button>
+        </div>`
+      : `<div class="le-text" onclick="lineTextEditing = true; renderLineEdit(); document.getElementById('lineTextInput').focus();">
+          ${line.text}
+        </div>`}
+
+      <div class="le-label">Audio</div>
+      <div class="le-row">
+        <button class="le-play" onclick="toast('${take ? 'Playing take' : 'No audio yet'}')" aria-label="Play line">
+          <i class="ph-fill ph-play ic-16"></i>
+        </button>
+        <span class="le-main">
+          <span class="le-top">${take ? 'In use · ' + fmtLen(take.len) : 'No audio yet'}</span>
+          <span class="le-sub">${take ? takesFor(lineEditIdx).length + ' takes' : 'Record one in Audio'}</span>
+        </span>
+        <button class="le-chev" onclick="openAudioEdit(${lineEditIdx})" aria-label="Audio edit"
+                style="background:none;border:none;cursor:pointer;">
+          <i class="ph ph-caret-right ic-20"></i>
+        </button>
+      </div>
+
+      <div class="le-label">Note</div>
+      <button class="le-row" onclick="openNoteEditor()">
+        <span class="le-main">
+          <span class="le-top">${noteLabel}</span>
+          ${line.note ? `<span class="le-sub">${shorten(line.note)}</span>` : ''}
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+
+      <div class="le-label">Reference</div>
+      <button class="le-row" onclick="copyLineId(${lineEditIdx})">
+        <span class="le-main">
+          <span class="le-top" style="font-variant-numeric:tabular-nums;">${lineId(lineEditIdx)}</span>
+          <span class="le-sub">Tap to copy — use it to point someone at this line</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
+      </button>
+
+      <button class="le-danger" onclick="openAlert('deleteLine')">
+        <i class="ph ph-trash ic-20"></i>Delete line
+      </button>`;
+    applyTextStyle();
+  }
+  function saveLineText() {
+    const v = document.getElementById('lineTextInput').value.trim();
+    if (v) SCENE_1[lineEditIdx].text = v;
+    lineTextEditing = false;
+    renderLineEdit();
+    toast('Line saved');
+  }
+  /* The cast, as a sheet: it is one choice, not a place. */
+  function openCharacterPick() {
+    document.getElementById('sheetContext').className = 'sheet-context ' +
+      (SCENE_1[lineEditIdx].mine ? 'mine' : 'others');
+    document.getElementById('ctxName').textContent = 'Change character';
+    document.getElementById('ctxLine').textContent = shorten(SCENE_1[lineEditIdx].text);
+    document.getElementById('sheetItems').innerHTML = CHARACTERS.map(c =>
+      `<button class="sheet-item ${c.mine ? 'accent' : ''}" onclick="closeSheet(); setCharacter('${c.name}', ${c.mine})">
+        <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${c.name}${c.mine ? ' · you' : ''}
+      </button>`).join('');
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+  function setCharacter(name, mine) {
+    const line = SCENE_1[lineEditIdx];
+    line.who = name; line.mine = mine;
+    renderLineEdit();
+    toast('Character changed');
+  }
+  function openNoteEditor() {
+    const line = SCENE_1[lineEditIdx];
+    document.getElementById('noteInput').value = line.note || '';
+    noteWho = line.noteShared ? 'all' : 'mine';
+    setNoteWho(noteWho);
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('noteSheet').classList.add('open');
+  }
+  function setNoteWho(who) {
+    noteWho = who;
+    document.getElementById('noteMine').classList.toggle('on', who === 'mine');
+    document.getElementById('noteAll').classList.toggle('on', who === 'all');
+  }
+  function saveNote() {
+    const line = SCENE_1[lineEditIdx];
+    const v = document.getElementById('noteInput').value.trim();
+    line.note = v || undefined;
+    line.noteShared = noteWho === 'all';
+    closeSheet();
+    renderLineEdit();
+    toast(v ? 'Note saved' : 'Note removed');
+  }
+
   /* ============================================================
      AUDIO EDIT
      ============================================================ */
@@ -4643,10 +4886,15 @@
         </button>
       </div>
       ${aeNotes(line)}
-      ${aeRecorder()}
-      <div class="list-sublabel">Takes</div>
-      ${takes.map(t => aeTake(t)).join('')}
-      <div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`;
+      ${aeRec ? '' : `
+        <button class="ae-record" onclick="aeStartRec()">
+          <i class="ph-fill ph-microphone ic-20"></i>Record a new take
+        </button>
+        <div class="list-sublabel">Takes</div>
+        ${takes.map(t => aeTake(t)).join('')}
+        <div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`}`;
+    document.getElementById('aeTransport').hidden = !aeRec;
+    document.getElementById('audioScroll').classList.toggle('fade-b', aeRec);
     applyTextStyle();
   }
   const KEEP_TAKES = 5;
@@ -4667,16 +4915,17 @@
           (line.dir  ? noteBlock(audioIdx, 'stage',   line.dir,  false) : '')
         : '');
   }
-  /* A take plays inside its own row: the icon becomes pause and the bar appears
-     under it, so what is playing and where you are in it are the same object. */
-  let aePlaying = null, aeAt = 0, aeTick;
+  /* Two different things: which take the bar belongs to, and whether it is
+     running. Pausing stops the second only — the bar stays where you left it, and
+     moves away only when another take takes over. */
+  let aeOpen = null, aePlaying = false, aeAt = 0, aeTick;
   function aeTake(t) {
-    const on = aePlaying === t.id;
+    const on = aeOpen === t.id;
     const pct = on ? Math.min(100, (aeAt / t.len) * 100) : 0;
     return `<div class="ae-take ${t.use ? 'inuse' : ''} ${on ? 'playing' : ''}">
       <div style="display:flex;align-items:center;gap:12px;width:100%;">
         <button class="ae-play" onclick="aeToggle('${t.id}', ${t.len})" aria-label="Play take">
-          <i class="ph-fill ph-${on ? 'pause' : 'play'} ic-16"></i>
+          <i class="ph-fill ph-${on && aePlaying ? 'pause' : 'play'} ic-16"></i>
         </button>
         <div class="ae-main">
           <div class="ae-when">${t.when}</div>
@@ -4690,29 +4939,50 @@
         </button>
       </div>
       ${on ? `<div style="width:100%">
-        <div class="ae-bar" onclick="aeSeek(event, ${t.len})">
-          <div class="ae-fill" style="width:${pct}%"></div>
-          <div class="ae-thumb" style="left:${pct}%"></div>
+        <div class="ae-bar" id="aeBar" onclick="aeSeek(event, ${t.len})">
+          <div class="ae-fill" id="aeFill" style="width:${pct}%"></div>
+          <div class="ae-thumb" id="aeThumb" style="left:${pct}%"></div>
         </div>
-        <div class="ae-time"><span>${fmtLen(Math.round(aeAt))}</span><span>${fmtLen(t.len)}</span></div>
+        <div class="ae-time"><span id="aeNow">${fmtLen(Math.round(aeAt))}</span><span>${fmtLen(t.len)}</span></div>
       </div>` : ''}
     </div>`;
   }
   function aeToggle(id, len) {
     clearInterval(aeTick);
-    if (aePlaying === id) { aePlaying = null; return renderAudioEdit(); }
-    aePlaying = id; aeAt = 0;
-    aeTick = setInterval(() => {
-      aeAt += 0.25;
-      if (aeAt >= len) { clearInterval(aeTick); aePlaying = null; }
-      renderAudioEdit();
-    }, 250);
+    if (aeOpen === id) {
+      /* Same take: this is play/pause, and the bar stays either way. */
+      aePlaying = !aePlaying;
+      if (aeAt >= len) aeAt = 0;
+    } else {
+      aeOpen = id; aeAt = 0; aePlaying = true;
+    }
     renderAudioEdit();
+    if (aePlaying) aeRun(len);
+  }
+  /* Paints the bar in place rather than re-rendering the list, so the fill can
+     move every 50ms and read as continuous instead of stepping. */
+  function aeRun(len) {
+    const started = Date.now(), from = aeAt;
+    aeTick = setInterval(() => {
+      aeAt = from + (Date.now() - started) / 1000;
+      if (aeAt >= len) { aeAt = len; clearInterval(aeTick); aePlaying = false; renderAudioEdit(); return; }
+      aePaint(len);
+    }, 50);
+  }
+  function aePaint(len) {
+    const pct = Math.min(100, (aeAt / len) * 100);
+    const fill = document.getElementById('aeFill');
+    if (!fill) return clearInterval(aeTick);
+    fill.style.width = pct + '%';
+    document.getElementById('aeThumb').style.left = pct + '%';
+    document.getElementById('aeNow').textContent = fmtLen(Math.round(aeAt));
   }
   function aeSeek(e, len) {
     const r = e.currentTarget.getBoundingClientRect();
     aeAt = Math.max(0, Math.min(len, ((e.clientX - r.left) / r.width) * len));
-    renderAudioEdit();
+    clearInterval(aeTick);
+    aePaint(len);
+    if (aePlaying) aeRun(len);
   }
 
   /* Choosing is exclusive: this is which one everybody hears, so there is exactly
@@ -4746,22 +5016,8 @@
      does in the wizard. Stopped by hand it goes to Evaluation, where you decide
      — that is the path the wizard will share. */
   let aeRec = false, aeRecTimer, aeRecDone, aeRecStart = 0;
-  function aeRecorder() {
-    if (!aeRec) {
-      return `<button class="ae-record" onclick="aeStartRec()">
-        <i class="ph-fill ph-microphone ic-20"></i>Record a new take
-      </button>`;
-    }
-    return `<div class="ae-recording">
-      <button class="big-btn recording" onclick="aeStopRec()" aria-label="Stop recording">
-        <i class="ph-fill ph-microphone ic-32"></i>
-        <span class="btn-time" id="aeRecTime">0:00</span>
-      </button>
-      <div class="wz-hint">Tap to stop</div>
-    </div>`;
-  }
   function aeStartRec() {
-    clearInterval(aeTick); aePlaying = null;
+    clearInterval(aeTick); aePlaying = false; aeOpen = null;
     aeRec = true; aeRecStart = Date.now();
     renderAudioEdit();
     clearInterval(aeRecTimer); clearTimeout(aeRecDone);
