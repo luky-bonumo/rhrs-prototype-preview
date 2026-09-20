@@ -551,8 +551,9 @@
      would fight scrolling. */
   .se-row .se-grip {
     flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
-    width: 30px; height: 38px; color: var(--text-muted);
-    cursor: grab; touch-action: none;
+    width: 34px; height: 40px; margin-left: 4px; padding-left: 10px;
+    border-left: 1px solid var(--divider);
+    color: var(--text-muted); cursor: grab; touch-action: none;
   }
   .se-row .se-grip:active { cursor: grabbing; }
   .se-row { transition: transform .16s cubic-bezier(0.32,0.72,0,1); }
@@ -607,8 +608,14 @@
      before it is read. */
   .le-label .lbl-ic.private { color: var(--coral); }
   .le-label .lbl-ic.stage   { color: var(--wine); }
-  /* Nothing written yet is an invitation, not an empty box. */
-  .le-text.empty { color: var(--text-muted); font-style: italic; }
+  /* Reading and changing are different acts, so the way in is said out loud
+     rather than hidden in a tap on the text itself. */
+  .le-trigger {
+    margin-left: auto; display: flex; align-items: center; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 2px 0;
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.7px; text-transform: uppercase; color: var(--wine);
+  }
   .le-takes {
     flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
     background: none; border: none; cursor: pointer;
@@ -3214,10 +3221,14 @@
   }
   const shorten = t => t.length > 44 ? t.slice(0, 43).trimEnd() + '…' : t;
 
+  /* Who is playing each part. `mine` is the one that is yours; `actor` is the
+     person on it when that person is not you. Neither means nobody has it yet. */
+  const CAST = { Michael: 'Luděk Sobota', Anna: null };
   const CHARACTERS = ['Nina', 'Michael', 'Anna'].map(name => ({
     name,
     lines: WHOLE_SCRIPT.filter(it => it.who === name).length,
-    mine: WHOLE_SCRIPT.some(it => it.who === name && it.mine)
+    mine: WHOLE_SCRIPT.some(it => it.who === name && it.mine),
+    actor: CAST[name] || null
   }));
 
   /* Icons — swap any ph-* name from https://phosphoricons.com */
@@ -4050,7 +4061,7 @@
       html += '<div class="sheet-sep"></div>';
     }
     html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
-    html += item('note', 'Add / edit private note', false, null, `openLineEdit(${sheetIdx}); leOpen('note')`);
+    html += item('note', 'Add / edit private note', false, null, `openLineEdit(${sheetIdx}); editOpen('note')`);
     if (isMine) html += item('record', 'Audio', true, null, `openAudioEdit(${sheetIdx})`);
     return html;
   }
@@ -4272,54 +4283,57 @@
   let charEditing = null;
   function openCharacter(name) {
     charEditing = name;
-    const c = CHARACTERS.find(x => x.name === name);
-    document.getElementById('charTitle').textContent = name ? 'Edit character' : 'Add character';
-    document.getElementById('charBody').innerHTML = `
-      <div class="le-label">Name</div>
-      <div class="le-text">
-        <textarea id="charName" rows="1" oninput="growTextarea(this)"
-          placeholder="Who is this?">${name || ''}</textarea>
-      </div>
+    editingKey = null;
+    editRender = renderCharacter;
+    showScreen('characterScreen');
+    renderCharacter();
+    /* A character with no name yet has nothing to read, so it opens straight into
+       writing one. */
+    if (!name) editOpen('charname');
+  }
+  function renderCharacter() {
+    const c = CHARACTERS.find(x => x.name === charEditing);
+    document.getElementById('charTitle').textContent = charEditing ? 'Edit character' : 'Add character';
+    document.getElementById('charBody').innerHTML =
+      editSection('charname', 'Name', '', charEditing, 'Name this character') + `
 
       <div class="le-label">Part</div>
-      <!-- One part is yours at a time, so this is a state of the cast rather than
-           a switch on one character: turning it on here takes it off whoever had
-           it. -->
-      <div class="le-row">
-        <span class="le-main">
-          <span class="le-top">Assign to me</span>
-          <span class="le-sub">${c && c.mine ? 'This is your part' : 'Rehearse as this character'}</span>
-        </span>
-        <button class="toggle ${c && c.mine ? 'on' : ''}" id="charMine"
-                onclick="this.classList.toggle('on')"></button>
-      </div>
+      ${!c ? '' : c.actor
+        /* Taken by someone else: there is nothing to switch here, only something
+           to know. A toggle would be offering to take a part off a person. */
+        ? `<div class="le-row">
+             <span class="le-main">
+               <span class="le-top">Assigned to ${c.actor}</span>
+               <span class="le-sub">Their lines play in your scenes</span>
+             </span>
+           </div>`
+        : `<div class="le-row">
+             <span class="le-main">
+               <span class="le-top">Assign to me</span>
+               <span class="le-sub">${c.mine ? 'This is your part' : 'Rehearse as this character'}</span>
+             </span>
+             <button class="toggle ${c.mine ? 'on' : ''}" onclick="toggleMine()"></button>
+           </div>`}
 
       ${c ? `<div class="le-label">Lines</div>
       <div class="le-row"><span class="le-main"><span class="le-top">${c.lines} lines</span>
-        <span class="le-sub">Across the whole script</span></span></div>` : ''}
+        <span class="le-sub">Across the whole script</span></span></div>
 
-      <button class="auth-btn" style="margin-top:26px;" onclick="saveCharacter()">
-        ${name ? 'Save' : 'Add character'}
-      </button>
-      ${name ? `<button class="le-danger" onclick="toast('Character deleted')">
+      <button class="le-danger" onclick="toast('Character deleted')">
         <i class="ph ph-trash ic-20"></i>Delete character
       </button>` : ''}`;
-    /* After the screen is up, not before: a hidden element measures zero, and the
-       field was being set to nought pixels tall with the name still inside it. */
-    showScreen('characterScreen');
-    growTextarea(document.getElementById('charName'));
+    growTextarea(document.getElementById('leInput'));
   }
-  function saveCharacter() {
-    const v = document.getElementById('charName').value.trim();
-    if (!v) return toast('Give the character a name');
-    const mine = document.getElementById('charMine').classList.contains('on');
-    if (mine) CHARACTERS.forEach(c => { c.mine = false; });
+  /* One part is yours at a time, so taking one releases the other. It applies on
+     the tap — there is nothing here to confirm, which is why there is no Save. */
+  function toggleMine() {
     const c = CHARACTERS.find(x => x.name === charEditing);
-    if (c) { c.name = v; c.mine = mine; }
-    else CHARACTERS.push({ name: v, lines: 0, mine });
+    const becoming = !c.mine;
+    if (becoming) CHARACTERS.forEach(x => { x.mine = false; });
+    c.mine = becoming;
+    renderCharacter();
     renderCharacters();
-    goBack();
-    toast(charEditing ? 'Character saved' : 'Character added');
+    toast(becoming ? 'This is your part now' : 'Part released');
   }
 
   function openEditScript() {
@@ -4332,7 +4346,7 @@
       <div class="char-row">
         <div class="cr-main">
           <div class="cr-name">${c.name}${c.mine ? '<span class="mine-tag">Me</span>' : ''}</div>
-          <div class="cr-lines">${c.lines} lines</div>
+          <div class="cr-lines">${c.lines} lines · ${c.mine ? 'Me' : (c.actor || 'Unassigned')}</div>
         </div>
         <button class="cr-edit" onclick="openCharacter('${c.name}')" aria-label="Edit character">
           <i class="ph ph-pencil-simple ic-18"></i>
@@ -4953,6 +4967,8 @@
       renderSceneEdit();
     }
   }
+  /* On the right, where the thumb already is, with a rule between it and the row
+     so it reads as a handle on the row rather than part of what the row says. */
   const grip = kind => `<span class="se-grip" onpointerdown="dragBegin(event, '${kind}')"
       onpointermove="dragMove(event)" onpointerup="dragEnd()" onpointercancel="dragEnd()"
       aria-label="Drag to reorder"><i class="ph ph-dots-six-vertical ic-20"></i></span>`;
@@ -4962,14 +4978,14 @@
     document.getElementById('editScenes').innerHTML =
       `<div class="se-list">` + scenes.map(sc => `
       <div class="se-row">
-        ${grip('scene')}
         <button class="se-open" onclick="openSceneEdit(${scenes.indexOf(sc)})">
           <span class="se-body">
             <span class="se-who">${sc.title}</span>
             <span class="se-text">${sc.lines ? sc.lines + ' lines' : 'No text yet'}</span>
           </span>
-          <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
+          <span class="se-chev"><i class="ph ph-pencil-simple ic-18"></i></span>
         </button>
+        ${grip('scene')}
       </div>`).join('') + `</div>` +
       `<button class="se-add" onclick="toast('Add scene')">
         <i class="ph ph-plus ic-18"></i>Add scene
@@ -4996,15 +5012,15 @@
       const who  = it.who || 'Stage direction';
       const text = it.who ? it.text : it.stage;
       return `<div class="se-row ${kind}">
-        ${grip('item')}
         <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit stage direction')`}">
           ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
           <span class="se-body">
             <span class="se-who cap-trim">${who}</span>
             <span class="se-text">${text}</span>
           </span>
-          <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
+          <span class="se-chev"><i class="ph ph-pencil-simple ic-18"></i></span>
         </button>
+        ${grip('item')}
       </div>`;
     }).join('') + `</div>` +
       `<button class="se-add" onclick="toast('Add line')">
@@ -5017,10 +5033,11 @@
   /* ============================================================
      LINE EDIT
      ============================================================ */
-  let lineEditIdx = 0, leEditing = null;
+  let lineEditIdx = 0;
   function openLineEdit(idx) {
     lineEditIdx = idx;
-    lineTextEditing = false;
+    editingKey = null;
+    editRender = renderLineEdit;
     renderLineEdit();
     showScreen('lineScreen');
   }
@@ -5040,8 +5057,7 @@
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>
 
-      <div class="le-label">Line</div>
-      ${leField('text', line.text, 'Add the line')}
+      ${editSection('text', 'Line', '', line.text, 'Add the line')}
 
       <div class="le-label">Audio</div>
       <div class="ae-take">
@@ -5060,11 +5076,9 @@
         </div>
       </div>
 
-      <div class="le-label"><i class="ph-fill ph-note ic-16 lbl-ic private"></i>Private note</div>
-      ${leField('note', line.note, 'Add private note')}
+      ${editSection('note', 'Private note', '<i class="ph-fill ph-note ic-16 lbl-ic private"></i>', line.note, 'Add private note')}
 
-      <div class="le-label"><i class="ph-fill ph-note ic-16 lbl-ic stage"></i>Stage directions</div>
-      ${leField('dir', line.dir, 'Add stage direction')}
+      ${editSection('dir', 'Stage directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add stage direction')}
 
       <div class="le-label">Reference</div>
       <button class="le-row" onclick="copyLineId(${lineEditIdx})">
@@ -5079,35 +5093,67 @@
         <i class="ph ph-trash ic-20"></i>Delete line
       </button>`;
     applyTextStyle();
-    if (leEditing) growTextarea(document.getElementById('leInput'));
+    growTextarea(document.getElementById('leInput'));
   }
-  /* The three writable things behave the same way: read it, tap it, write it.
-     A note that is not there yet is an invitation rather than an empty box. */
-  function leField(key, value, placeholder) {
-    if (leEditing === key) {
-      return `<div class="le-text">
+  /* One editable field, used by every piece of writing in the app — the line, the
+     private note, the stage direction, a character's name. Whoever renders it
+     registers how to redraw and what to do with the text; nothing else differs,
+     so nothing else is written twice.
+
+     Reading a field and changing it are different acts, so the way in is stated:
+     an Edit trigger on the section's own label rather than a tap on text that
+     looks like text. Where there is nothing yet, the add button is that trigger. */
+  let editingKey = null, editRender = () => {};
+  const EDIT_SAVE = {
+    text: v => { if (v) SCENE_1[lineEditIdx].text = v; },
+    note: v => { SCENE_1[lineEditIdx].note = v || undefined; },
+    dir:  v => { SCENE_1[lineEditIdx].dir  = v || undefined; },
+    charname: v => {
+      if (!v) return toast('Give the character a name');
+      const ch = CHARACTERS.find(x => x.name === charEditing);
+      if (ch) { ch.name = v; charEditing = v; } else { CHARACTERS.push({ name: v, lines: 0 }); charEditing = v; }
+      renderCharacters();
+    }
+  };
+  function editSection(key, label, icon, value, addLabel) {
+    const editing = editingKey === key;
+    const trigger = value && !editing
+      ? `<button class="le-trigger" onclick="editOpen('${key}')">
+           <i class="ph ph-pencil-simple ic-14"></i>Edit
+         </button>` : '';
+    let body;
+    if (editing) {
+      body = `<div class="le-text">
           <textarea id="leInput" oninput="growTextarea(this)">${value || ''}</textarea>
         </div>
         <div class="le-edit-actions">
-          <button class="cancel" onclick="leEditing = null; renderLineEdit();">Cancel</button>
-          <button class="save" onclick="leSave('${key}')">Save</button>
+          <button class="cancel" onclick="editCancel()">Cancel</button>
+          <button class="save" onclick="editSave('${key}')">Save</button>
         </div>`;
+    } else if (!value) {
+      body = `<button class="se-add" onclick="editOpen('${key}')">
+          <i class="ph ph-plus ic-18"></i>${addLabel}
+        </button>`;
+    } else {
+      body = `<div class="le-text">${value}</div>`;
     }
-    /* Nothing written yet is not an empty box to tap but a thing to add, so it
-       says so and looks like the other adds in the editor. */
-    if (!value) {
-      return `<button class="se-add" onclick="leOpen('${key}')">
-        <i class="ph ph-plus ic-18"></i>${placeholder}
-      </button>`;
-    }
-    return `<div class="le-text" onclick="leOpen('${key}')">${value}</div>`;
+    return `<div class="le-label">${icon || ''}${label}${trigger}</div>${body}`;
   }
-  function leOpen(key) {
-    leEditing = key;
-    renderLineEdit();
+  function editOpen(key) {
+    editingKey = key;
+    editRender();
     const el = document.getElementById('leInput');
+    if (!el) return;
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
+  }
+  function editCancel() { editingKey = null; editRender(); }
+  function editSave(key) {
+    const v = document.getElementById('leInput').value.trim();
+    EDIT_SAVE[key](v);
+    editingKey = null;
+    editRender();
+    toast('Saved');
   }
   /* No scrollbar inside the box: the box grows to the text, so the whole line is
      in front of you while you change it. */
@@ -5120,15 +5166,7 @@
     if (!el.scrollHeight) { el.style.height = ''; return; }
     el.style.height = el.scrollHeight + 'px';
   }
-  function leSave(key) {
-    const v = document.getElementById('leInput').value.trim();
-    const line = SCENE_1[lineEditIdx];
-    if (key === 'text') { if (v) line.text = v; }
-    else line[key] = v || undefined;
-    leEditing = null;
-    renderLineEdit();
-    toast('Saved');
-  }
+
   /* The cast, as a sheet: it is one choice, not a place. */
   function openCharacterPick() {
     document.getElementById('sheetContext').className = 'sheet-context ' +
