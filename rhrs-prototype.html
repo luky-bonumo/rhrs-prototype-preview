@@ -539,6 +539,45 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ SCRIPT / SCENE EDIT ============ */
+  .se-row {
+    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    border-radius: var(--radius-card); padding: 12px 14px; margin-bottom: 10px;
+  }
+  /* Moving something is a different act from opening it, so the handles are their
+     own targets and the body of the row is the way in. */
+  .se-row .se-move {
+    display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto;
+  }
+  .se-row .se-move button {
+    width: 26px; height: 20px; border: none; background: none; cursor: pointer;
+    color: var(--wine); display: flex; align-items: center; justify-content: center;
+  }
+  .se-row .se-move button:disabled { color: var(--stone); cursor: default; }
+  .se-row .se-open {
+    flex: 1 1 auto; min-width: 0; text-align: left;
+    background: none; border: none; cursor: pointer; font-family: var(--font-body);
+  }
+  .se-row .se-who {
+    display: block; font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  }
+  .se-row.mine   .se-who { color: var(--coral); }
+  .se-row.others .se-who { color: var(--wine); }
+  .se-row.stage  .se-who { color: var(--wine); font-style: italic; font-size: 13px; }
+  .se-row .se-text {
+    display: block; font-size: 13.5px; color: var(--text-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .se-row .se-chev { color: var(--text-muted); flex: 0 0 auto; display: flex; }
+  .se-add {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; border: none; cursor: pointer;
+    background: none; border: 1.5px dashed var(--wine-border);
+    border-radius: var(--radius-card); padding: 13px; margin-bottom: 10px;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--wine);
+  }
+
   /* ============ LINE EDIT ============ */
   /* Which scene this line is in. You can arrive here from a lot of places and
      one line out of context is hard to place. */
@@ -2031,7 +2070,7 @@
 
   .round-btn, .detail-header .back, .icon-btn,
   .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box, .ae-take,
-  .le-row, .le-text,
+  .le-row, .le-text, .se-row,
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
@@ -2044,7 +2083,7 @@
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
   .auth-field::before, .otp-box::before, .ae-take::before,
-  .le-row::before, .le-text::before,
+  .le-row::before, .le-text::before, .se-row::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
@@ -2432,7 +2471,7 @@
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" id="detailTitle">I love you, you're fine, but change…</span>
-      <button class="back" onclick="showScreen('editScriptScreen')" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
+      <button class="back" onclick="openEditScript()" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list fades" id="scenesList"></div>
   </div>
@@ -2483,24 +2522,26 @@
       <div class="list-sublabel">Characters</div>
       <div class="edit-card" id="charactersList"></div>
       <div class="list-sublabel">Scenes</div>
-      <div class="edit-card">
-        <button class="edit-row" onclick="toast('Reorder scenes')">
-          <span class="er-ic"><i class="ph ph-list-dashes ic-21"></i></span>
-          <span class="er-label">Reorder scenes</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
-        </button>
-        <button class="edit-row" onclick="toast('Edit scenes')">
-          <span class="er-ic"><i class="ph ph-pencil-simple ic-21"></i></span>
-          <span class="er-label">Edit scenes</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
-        </button>
-        <button class="edit-row danger" onclick="toast('Delete scenes')">
-          <span class="er-ic"><i class="ph ph-trash ic-21"></i></span>
-          <span class="er-label">Delete scenes</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-20"></i></span>
-        </button>
-      </div>
+      <!-- The scenes themselves, not three buttons that talk about them: each one
+           moves with its own handles and opens into its lines. -->
+      <div id="editScenes"></div>
+      <button class="le-danger" style="margin-top:22px;" onclick="openAlert('deleteScript')">
+        <i class="ph ph-trash ic-20"></i>Delete script
+      </button>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: SCENE EDIT ============
+       The missing middle: scenes could be reordered, the lines inside them could
+       not. Lines and standalone stage directions are both items here, because in
+       the script they are both items. -->
+  <div class="screen" id="sceneEditScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:20px;font-weight:700;" id="sceneEditTitle">Scene</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list" id="sceneEditList"></div>
   </div>
 
   <!-- ============ SCREEN: READ ============ -->
@@ -4194,6 +4235,11 @@
         <span class="r-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>`).join('');
   }
+  function openEditScript() {
+    renderCharacters();
+    renderEditScenes();
+    showScreen('editScriptScreen');
+  }
   function renderCharacters() {
     document.getElementById('charactersList').innerHTML = CHARACTERS.map(c => `
       <div class="char-row">
@@ -4279,6 +4325,13 @@
       title: 'Delete this recording?',
       text: 'The take for this line will be removed and the line will need recording again. This cannot be undone.',
       primary: 'Delete recording', act: "sheetAction('Recording deleted')",
+      ghost: 'Keep it'
+    },
+    deleteScript: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this script?',
+      text: 'Every scene, every line, every note and every take goes with it, for everyone in the cast. This cannot be undone.',
+      primary: 'Delete script', act: "closeSheet(); toast('Script deleted')",
       ghost: 'Keep it'
     },
     deleteLine: {
@@ -4709,7 +4762,9 @@
     detail:     { label:'Script detail',    group:'app', screen:'detailScreen',
                   go: () => openScript('s1') },
     edit:       { label:'Edit script',      group:'app', screen:'editScriptScreen',
-                  go: () => { openScript('s1'); showScreen('editScriptScreen'); } },
+                  go: () => { openScript('s1'); openEditScript(); } },
+    sceneedit:  { label:'Scene edit',       group:'app', screen:'sceneEditScreen',
+                  go: () => { openScript('s1'); openSceneEdit(0); } },
     wizard:     { label:'Recording Wizard', group:'app', screen:'wizardScreen',
                   go: () => { openScript('s1'); openWizard(); } },
     read:       { label:'Read',             group:'app', screen:'readScreen',
@@ -4750,6 +4805,85 @@
     androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
+  /* ============================================================
+     SCRIPT EDIT / SCENE EDIT
+     ============================================================ */
+  /* Moving is the same operation on both lists, so it is written once: swap the
+     item with its neighbour and redraw. */
+  function moveItem(list, i, dir, redraw) {
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    redraw();
+  }
+  function moveHandles(i, len, call) {
+    return `<span class="se-move">
+      <button onclick="${call}(${i}, -1)" ${i === 0 ? 'disabled' : ''} aria-label="Move up">
+        <i class="ph-bold ph-caret-up ic-14"></i>
+      </button>
+      <button onclick="${call}(${i}, 1)" ${i === len - 1 ? 'disabled' : ''} aria-label="Move down">
+        <i class="ph-bold ph-caret-down ic-14"></i>
+      </button>
+    </span>`;
+  }
+
+  function renderEditScenes() {
+    const scenes = sceneList();
+    document.getElementById('editScenes').innerHTML = scenes.map((sc, i) => `
+      <div class="se-row">
+        ${moveHandles(i, scenes.length, 'moveScene')}
+        <button class="se-open" onclick="openSceneEdit(${i})">
+          <span class="se-who">${sc.title}</span>
+          <span class="se-text">${sc.lines ? sc.lines + ' lines' : 'No text yet'}</span>
+        </button>
+        <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
+      </div>`).join('') +
+      `<button class="se-add" onclick="toast('Add scene')">
+        <i class="ph ph-plus ic-18"></i>Add scene
+      </button>`;
+  }
+  function moveScene(i, dir) {
+    moveItem(sceneList(), i, dir, () => { renderEditScenes(); renderScenes(); });
+  }
+
+  let sceneEditIdx = 0;
+  function openSceneEdit(i) {
+    sceneEditIdx = i;
+    const sc = sceneList()[i];
+    document.getElementById('sceneEditTitle').textContent = sc.title;
+    renderSceneEdit();
+    showScreen('sceneEditScreen');
+  }
+  function renderSceneEdit() {
+    const sc = sceneList()[sceneEditIdx];
+    const items = sc.items || SCENE_1;
+    document.getElementById('sceneEditList').innerHTML = items.map((it, i) => {
+      /* A standalone direction is an item of the scene like a line is, so it sits
+         in the same list and moves the same way — it just has no one to say it. */
+      const kind = it.who ? (it.mine ? 'mine' : 'others') : 'stage';
+      const who  = it.who || 'Stage direction';
+      const text = it.who ? it.text : it.stage;
+      return `<div class="se-row ${kind}">
+        ${moveHandles(i, items.length, 'moveSceneItem')}
+        <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit stage direction')`}">
+          <span class="se-who cap-trim">${who}</span>
+          <span class="se-text">${text}</span>
+        </button>
+        <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
+      </div>`;
+    }).join('') +
+      `<button class="se-add" onclick="toast('Add line')">
+        <i class="ph ph-plus ic-18"></i>Add line
+      </button>
+      <button class="se-add" onclick="toast('Add stage direction')">
+        <i class="ph ph-plus ic-18"></i>Add stage direction
+      </button>`;
+  }
+  function moveSceneItem(i, dir) {
+    const sc = sceneList()[sceneEditIdx];
+    moveItem(sc.items || SCENE_1, i, dir, renderSceneEdit);
+  }
+
   /* ============================================================
      LINE EDIT
      ============================================================ */
