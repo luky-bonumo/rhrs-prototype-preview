@@ -545,20 +545,33 @@
     display: flex; align-items: center; gap: 10px;
     border-radius: var(--radius-card); padding: 12px 14px; margin-bottom: 10px;
   }
-  /* Moving something is a different act from opening it, so the handles are their
-     own targets and the body of the row is the way in. */
-  .se-row .se-move {
-    display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto;
+  .se-list { position: relative; }
+  /* Moving something is a different act from opening it, so the grip is its own
+     target and the body of the row is the way in. Dragging by the row itself
+     would fight scrolling. */
+  .se-row .se-grip {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 38px; color: var(--text-muted);
+    cursor: grab; touch-action: none;
   }
-  .se-row .se-move button {
-    width: 26px; height: 20px; border: none; background: none; cursor: pointer;
-    color: var(--wine); display: flex; align-items: center; justify-content: center;
+  .se-row .se-grip:active { cursor: grabbing; }
+  .se-row { transition: transform .16s cubic-bezier(0.32,0.72,0,1); }
+  /* The one in your hand leaves the page: no transition, so it tracks the finger,
+     and lifted so it is plainly above the others it is moving through. */
+  .se-row.dragging {
+    transition: none; z-index: 5;
+    box-shadow: 0 10px 28px var(--lift-noir);
+    opacity: 0.96;
   }
-  .se-row .se-move button:disabled { color: var(--stone); cursor: default; }
+  .se-row .se-ic { flex: 0 0 auto; display: flex; color: var(--wine); }
+  /* The chevron lives inside the button, or it is a picture of a target rather
+     than part of one. */
   .se-row .se-open {
     flex: 1 1 auto; min-width: 0; text-align: left;
+    display: flex; align-items: center; gap: 10px;
     background: none; border: none; cursor: pointer; font-family: var(--font-body);
   }
+  .se-row .se-open .se-body { flex: 1 1 auto; min-width: 0; }
   .se-row .se-who {
     display: block; font-family: var(--font-display); font-weight: 600; font-size: 15px;
   }
@@ -747,6 +760,12 @@
   }
   /* What the app will and will not keep. It sits under the list because it is a
      fact about the list, not a warning about any one take. */
+  /* Not an error and not a gap in the page: a line simply has no takes until it
+     has one, and the list says that rather than showing nothing at all. */
+  .ae-empty {
+    text-align: center; padding: 26px 20px;
+    font-size: 14px; color: var(--text-muted);
+  }
   .ae-keep {
     font-size: 12.5px; color: var(--text-muted); line-height: 1.4;
     padding: 4px 2px 0;
@@ -2521,6 +2540,9 @@
     <div class="list">
       <div class="list-sublabel">Characters</div>
       <div class="edit-card" id="charactersList"></div>
+      <button class="se-add" style="margin-top:10px;" onclick="openCharacter(null)">
+        <i class="ph ph-plus ic-18"></i>Add character
+      </button>
       <div class="list-sublabel">Scenes</div>
       <!-- The scenes themselves, not three buttons that talk about them: each one
            moves with its own handles and opens into its lines. -->
@@ -2529,6 +2551,16 @@
         <i class="ph ph-trash ic-20"></i>Delete script
       </button>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: EDIT CHARACTER ============ -->
+  <div class="screen" id="characterScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:20px;font-weight:700;" id="charTitle">Character</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list" id="charBody"></div>
   </div>
 
   <!-- ============ SCREEN: SCENE EDIT ============
@@ -4235,6 +4267,59 @@
         <span class="r-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>`).join('');
   }
+  /* Null means a character that does not exist yet — the same screen either way,
+     because naming a new one and renaming an old one are the same act. */
+  let charEditing = null;
+  function openCharacter(name) {
+    charEditing = name;
+    const c = CHARACTERS.find(x => x.name === name);
+    document.getElementById('charTitle').textContent = name ? 'Edit character' : 'Add character';
+    document.getElementById('charBody').innerHTML = `
+      <div class="le-label">Name</div>
+      <div class="le-text">
+        <textarea id="charName" rows="1" oninput="growTextarea(this)"
+          placeholder="Who is this?">${name || ''}</textarea>
+      </div>
+
+      <div class="le-label">Part</div>
+      <!-- One part is yours at a time, so this is a state of the cast rather than
+           a switch on one character: turning it on here takes it off whoever had
+           it. -->
+      <div class="le-row">
+        <span class="le-main">
+          <span class="le-top">Assign to me</span>
+          <span class="le-sub">${c && c.mine ? 'This is your part' : 'Rehearse as this character'}</span>
+        </span>
+        <button class="toggle ${c && c.mine ? 'on' : ''}" id="charMine"
+                onclick="this.classList.toggle('on')"></button>
+      </div>
+
+      ${c ? `<div class="le-label">Lines</div>
+      <div class="le-row"><span class="le-main"><span class="le-top">${c.lines} lines</span>
+        <span class="le-sub">Across the whole script</span></span></div>` : ''}
+
+      <button class="auth-btn" style="margin-top:26px;" onclick="saveCharacter()">
+        ${name ? 'Save' : 'Add character'}
+      </button>
+      ${name ? `<button class="le-danger" onclick="toast('Character deleted')">
+        <i class="ph ph-trash ic-20"></i>Delete character
+      </button>` : ''}`;
+    growTextarea(document.getElementById('charName'));
+    showScreen('characterScreen');
+  }
+  function saveCharacter() {
+    const v = document.getElementById('charName').value.trim();
+    if (!v) return toast('Give the character a name');
+    const mine = document.getElementById('charMine').classList.contains('on');
+    if (mine) CHARACTERS.forEach(c => { c.mine = false; });
+    const c = CHARACTERS.find(x => x.name === charEditing);
+    if (c) { c.name = v; c.mine = mine; }
+    else CHARACTERS.push({ name: v, lines: 0, mine });
+    renderCharacters();
+    goBack();
+    toast(charEditing ? 'Character saved' : 'Character added');
+  }
+
   function openEditScript() {
     renderCharacters();
     renderEditScenes();
@@ -4247,7 +4332,7 @@
           <div class="cr-name">${c.name}${c.mine ? '<span class="mine-tag">Me</span>' : ''}</div>
           <div class="cr-lines">${c.lines} lines</div>
         </div>
-        <button class="cr-edit" onclick="toast('Edit ${c.name}')" aria-label="Edit character">
+        <button class="cr-edit" onclick="openCharacter('${c.name}')" aria-label="Edit character">
           <i class="ph ph-pencil-simple ic-18"></i>
         </button>
       </div>`).join('');
@@ -4802,48 +4887,91 @@
                   go: () => { openScript('s1');
                               openAudioEdit(lineIdx().find(i => SCENE_1[i].mine && (SCENE_1[i].note || SCENE_1[i].dir))
                                          ?? lineIdx().find(i => SCENE_1[i].mine)); } },
+    lineempty:  { label:'Line edit — empty',  group:'proto',
+                  go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
+    audioempty: { label:'Audio edit — empty', group:'proto',
+                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } },
     androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
   /* ============================================================
      SCRIPT EDIT / SCENE EDIT
      ============================================================ */
-  /* Moving is the same operation on both lists, so it is written once: swap the
-     item with its neighbour and redraw. */
-  function moveItem(list, i, dir, redraw) {
-    const j = i + dir;
-    if (j < 0 || j >= list.length) return;
-    [list[i], list[j]] = [list[j], list[i]];
-    redraw();
+  /* Reordering by dragging, on one pointer path so a finger and a mouse behave
+     the same — HTML5 drag-and-drop does not fire on touch, and this is a phone
+     prototype first. Nothing re-renders while the drag runs: the row in hand
+     follows the pointer and the others slide out of its way, and the list is
+     rewritten only when it is let go.
+
+     The step is the dragged row's own height. Rows here are all a name and one
+     clipped line, so they are near enough the same height for that to hold. */
+  let drag = null;
+  function dragBegin(e, kind) {
+    const row = e.currentTarget.closest('.se-row');
+    const list = row.parentElement;
+    const rows = [...list.querySelectorAll('.se-row')];
+    const from = rows.indexOf(row);
+    const box = row.getBoundingClientRect();
+    drag = { kind, rows, from, to: from, y0: e.clientY,
+             step: box.height + parseFloat(getComputedStyle(row).marginBottom || 0) };
+    row.classList.add('dragging');
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
   }
-  function moveHandles(i, len, call) {
-    return `<span class="se-move">
-      <button onclick="${call}(${i}, -1)" ${i === 0 ? 'disabled' : ''} aria-label="Move up">
-        <i class="ph-bold ph-caret-up ic-14"></i>
-      </button>
-      <button onclick="${call}(${i}, 1)" ${i === len - 1 ? 'disabled' : ''} aria-label="Move down">
-        <i class="ph-bold ph-caret-down ic-14"></i>
-      </button>
-    </span>`;
+  function dragMove(e) {
+    if (!drag) return;
+    const dy = e.clientY - drag.y0;
+    drag.rows[drag.from].style.transform = `translateY(${dy}px)`;
+    const to = Math.max(0, Math.min(drag.rows.length - 1,
+                                    drag.from + Math.round(dy / drag.step)));
+    if (to === drag.to) return;
+    drag.to = to;
+    drag.rows.forEach((r, i) => {
+      if (i === drag.from) return;
+      let shift = 0;
+      if (drag.from < to && i > drag.from && i <= to) shift = -drag.step;
+      if (drag.from > to && i < drag.from && i >= to) shift = drag.step;
+      r.style.transform = `translateY(${shift}px)`;
+    });
   }
+  function dragEnd() {
+    if (!drag) return;
+    const { kind, from, to, rows } = drag;
+    rows.forEach(r => { r.style.transform = ''; r.classList.remove('dragging'); });
+    drag = null;
+    if (from === to) return;
+    if (kind === 'scene') {
+      const list = sceneList();
+      list.splice(to, 0, list.splice(from, 1)[0]);
+      renderEditScenes(); renderScenes();
+    } else {
+      const sc = sceneList()[sceneEditIdx];
+      const items = sc.items || SCENE_1;
+      items.splice(to, 0, items.splice(from, 1)[0]);
+      renderSceneEdit();
+    }
+  }
+  const grip = kind => `<span class="se-grip" onpointerdown="dragBegin(event, '${kind}')"
+      onpointermove="dragMove(event)" onpointerup="dragEnd()" onpointercancel="dragEnd()"
+      aria-label="Drag to reorder"><i class="ph ph-dots-six-vertical ic-20"></i></span>`;
 
   function renderEditScenes() {
     const scenes = sceneList();
-    document.getElementById('editScenes').innerHTML = scenes.map((sc, i) => `
+    document.getElementById('editScenes').innerHTML =
+      `<div class="se-list">` + scenes.map(sc => `
       <div class="se-row">
-        ${moveHandles(i, scenes.length, 'moveScene')}
-        <button class="se-open" onclick="openSceneEdit(${i})">
-          <span class="se-who">${sc.title}</span>
-          <span class="se-text">${sc.lines ? sc.lines + ' lines' : 'No text yet'}</span>
+        ${grip('scene')}
+        <button class="se-open" onclick="openSceneEdit(${scenes.indexOf(sc)})">
+          <span class="se-body">
+            <span class="se-who">${sc.title}</span>
+            <span class="se-text">${sc.lines ? sc.lines + ' lines' : 'No text yet'}</span>
+          </span>
+          <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
         </button>
-        <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
-      </div>`).join('') +
+      </div>`).join('') + `</div>` +
       `<button class="se-add" onclick="toast('Add scene')">
         <i class="ph ph-plus ic-18"></i>Add scene
       </button>`;
-  }
-  function moveScene(i, dir) {
-    moveItem(sceneList(), i, dir, () => { renderEditScenes(); renderScenes(); });
   }
 
   let sceneEditIdx = 0;
@@ -4857,21 +4985,26 @@
   function renderSceneEdit() {
     const sc = sceneList()[sceneEditIdx];
     const items = sc.items || SCENE_1;
-    document.getElementById('sceneEditList').innerHTML = items.map((it, i) => {
+    document.getElementById('sceneEditList').innerHTML =
+      `<div class="se-list">` + items.map((it, i) => {
       /* A standalone direction is an item of the scene like a line is, so it sits
-         in the same list and moves the same way — it just has no one to say it. */
+         in the same list and moves the same way — it just has no one to say it,
+         and it carries the glyph the notes use so it is told apart at a glance. */
       const kind = it.who ? (it.mine ? 'mine' : 'others') : 'stage';
       const who  = it.who || 'Stage direction';
       const text = it.who ? it.text : it.stage;
       return `<div class="se-row ${kind}">
-        ${moveHandles(i, items.length, 'moveSceneItem')}
+        ${grip('item')}
         <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit stage direction')`}">
-          <span class="se-who cap-trim">${who}</span>
-          <span class="se-text">${text}</span>
+          ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
+          <span class="se-body">
+            <span class="se-who cap-trim">${who}</span>
+            <span class="se-text">${text}</span>
+          </span>
+          <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
         </button>
-        <span class="se-chev"><i class="ph ph-caret-right ic-18"></i></span>
       </div>`;
-    }).join('') +
+    }).join('') + `</div>` +
       `<button class="se-add" onclick="toast('Add line')">
         <i class="ph ph-plus ic-18"></i>Add line
       </button>
@@ -4879,11 +5012,6 @@
         <i class="ph ph-plus ic-18"></i>Add stage direction
       </button>`;
   }
-  function moveSceneItem(i, dir) {
-    const sc = sceneList()[sceneEditIdx];
-    moveItem(sc.items || SCENE_1, i, dir, renderSceneEdit);
-  }
-
   /* ============================================================
      LINE EDIT
      ============================================================ */
@@ -4911,7 +5039,7 @@
       </button>
 
       <div class="le-label">Line</div>
-      ${leField('text', line.text, 'Write the line')}
+      ${leField('text', line.text, 'Add the line')}
 
       <div class="le-label">Audio</div>
       <div class="ae-take">
@@ -4931,10 +5059,10 @@
       </div>
 
       <div class="le-label"><i class="ph-fill ph-note ic-16 lbl-ic private"></i>Private note</div>
-      ${leField('note', line.note, 'Only you will see this')}
+      ${leField('note', line.note, 'Add private note')}
 
       <div class="le-label"><i class="ph-fill ph-note ic-16 lbl-ic stage"></i>Stage directions</div>
-      ${leField('dir', line.dir, 'What happens on this line')}
+      ${leField('dir', line.dir, 'Add stage direction')}
 
       <div class="le-label">Reference</div>
       <button class="le-row" onclick="copyLineId(${lineEditIdx})">
@@ -4963,7 +5091,14 @@
           <button class="save" onclick="leSave('${key}')">Save</button>
         </div>`;
     }
-    return `<div class="le-text ${value ? '' : 'empty'}" onclick="leOpen('${key}')">${value || placeholder}</div>`;
+    /* Nothing written yet is not an empty box to tap but a thing to add, so it
+       says so and looks like the other adds in the editor. */
+    if (!value) {
+      return `<button class="se-add" onclick="leOpen('${key}')">
+        <i class="ph ph-plus ic-18"></i>${placeholder}
+      </button>`;
+    }
+    return `<div class="le-text" onclick="leOpen('${key}')">${value}</div>`;
   }
   function leOpen(key) {
     leEditing = key;
@@ -5039,8 +5174,10 @@
           <i class="ph-fill ph-microphone ic-20"></i>Record a new take
         </button>
         <div class="list-sublabel">Takes</div>
-        ${takes.map(t => aeTake(t)).join('')}
-        <div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`}`;
+        ${takes.length
+          ? takes.map(t => aeTake(t)).join('') +
+            `<div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`
+          : '<div class="ae-empty">No audio recorded yet</div>'}`}`;
     document.getElementById('aeTransport').hidden = !aeRec;
     document.getElementById('audioScroll').classList.toggle('fade-b', aeRec);
     applyTextStyle();
@@ -5209,6 +5346,18 @@
     const id = lineId(idx);
     navigator.clipboard?.writeText(id);
     toast(id + ' copied');
+  }
+
+  /* A line with nothing on it: no note, no direction, no audio. Made rather than
+     found, so the empty states can be looked at whatever has been recorded in
+     this session. */
+  function emptyLine() {
+    const idx = lineIdx().find(i => SCENE_1[i].mine && !SCENE_1[i].note && !SCENE_1[i].dir)
+             ?? lineIdx()[0];
+    const line = SCENE_1[idx];
+    line.note = undefined; line.dir = undefined; line.rec = false;
+    TAKES[idx] = [];
+    return idx;
   }
 
   /* ============================================================
