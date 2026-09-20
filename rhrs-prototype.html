@@ -539,6 +539,72 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ AUDIO EDIT ============ */
+  /* The line being worked on, so you know whose takes these are without going
+     back to check. Quiet: it is the subject, not the content. */
+  .ae-line { padding: 2px 0 6px; }
+  .ae-line .ae-who {
+    font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--coral);
+  }
+  .ae-line .ae-text { font-size: 15px; line-height: 1.45; color: var(--noir); margin-top: 4px; }
+  /* The id is a handle, not a label — it gets pasted into Slack and searched for,
+     so it is set to be picked up rather than just read. */
+  .ae-id {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: none; border: none; cursor: pointer; padding: 6px 0 0;
+    font-family: var(--font-body); font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums; color: var(--text-muted);
+  }
+  .ae-id:active { opacity: 0.6; }
+
+  .ae-record {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; border: none; cursor: pointer;
+    background: var(--coral); color: var(--white);
+    border-radius: var(--radius-pill); padding: 15px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 700;
+    box-shadow: 0 5px 18px var(--lift-coral);
+    margin: 18px 0 26px;
+  }
+  .ae-record:active { transform: scale(0.98); }
+
+  .ae-take {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    border-radius: var(--radius-card); padding: 13px 14px; margin-bottom: 10px;
+  }
+  /* The one the others hear is the only one that wears the mark. */
+  .ae-take.inuse { background: var(--coral-tint); box-shadow: none; }
+  .ae-take.inuse::before { background: var(--coral); padding: 1.5px; }
+  .ae-take .ae-play {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--wine-tint); color: var(--wine);
+  }
+  .ae-take.inuse .ae-play { background: var(--coral); color: var(--white); }
+  .ae-take .ae-main { flex: 1 1 auto; min-width: 0; }
+  .ae-take .ae-when {
+    font-size: 14px; font-weight: 600; color: var(--noir);
+    font-variant-numeric: tabular-nums;
+  }
+  .ae-take .ae-len { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  /* Not a switch: choosing one take unchooses the rest, so it reads as a state
+     on the chosen one and an invitation on the others. */
+  .ae-use {
+    flex: 0 0 auto; border: none; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 6px 12px;
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .ae-use.on  { background: var(--coral); color: var(--white); cursor: default; }
+  .ae-use.off { background: none; color: var(--wine); border: 1.5px solid var(--wine-border); }
+  .ae-del {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+    background: none; color: var(--text-muted);
+  }
+  .ae-del:active { color: var(--coral); }
+
   /* ============ ALERT ============
      Centred, unlike every other sheet: an alert is one thing said once, and a
      left edge would start it reading like a list of settings. */
@@ -1687,8 +1753,8 @@
   .gs-theme { display: flex; gap: 8px; }
   .gs-theme button {
     position: relative;
-    flex: 1 1 0; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    flex: 1 1 0; min-width: 0; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
     background: var(--card-bg); border-radius: var(--radius-pill); padding: 12px;
     box-shadow: var(--glass-shadow);
     font-family: var(--font-body); font-size: 14px; font-weight: 600;
@@ -1831,7 +1897,7 @@
   }
 
   .round-btn, .detail-header .back, .icon-btn,
-  .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box,
+  .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box, .ae-take,
   #listenScroll .stage-only, #rehearseScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
@@ -1843,7 +1909,7 @@
 
   .round-btn::before, .detail-header .back::before, .icon-btn::before,
   .card::before, .lcard::before, .edit-card::before, .next-scene::before,
-  .auth-field::before, .otp-box::before,
+  .auth-field::before, .otp-box::before, .ae-take::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
@@ -1926,6 +1992,7 @@
   <div class="panel-top">
     <span class="panel-name">Prototype</span>
     <div class="theme-switch" role="group" aria-label="Theme">
+      <button id="themeSystem" onclick="setTheme('system')" aria-label="System mode"><i class="ph-bold ph-circle-half ic-18"></i></button>
       <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph-bold ph-sun ic-18"></i></button>
       <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph-bold ph-moon ic-18"></i></button>
     </div>
@@ -2122,6 +2189,19 @@
     </div>
   </div>
 
+  <!-- ============ SCREEN: AUDIO EDIT ============
+       One line's takes. The wizard adds them; this is where you look back and
+       choose which one everybody hears. -->
+  <div class="screen" id="audioScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim">Audio</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+
+    <div class="scroll fades" id="audioScroll"></div>
+  </div>
+
   <!-- ============ SCREEN: RECORDING WIZARD ============
        Rehearse narrowed to one job: the lines of mine that have no audio. Same
        cards, same list, same recorder — a filter and a check on top, not a new
@@ -2206,8 +2286,9 @@
     <div class="gs-list fades">
       <div class="gs-label">Appearance</div>
       <div class="gs-theme">
-        <button id="gsLight" onclick="setTheme('light')"><i class="ph-bold ph-sun ic-20"></i>Light</button>
-        <button id="gsDark"  onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
+        <button id="gsSystem" onclick="setTheme('system')"><i class="ph-bold ph-circle-half ic-20"></i>System</button>
+        <button id="gsLight"  onclick="setTheme('light')"><i class="ph-bold ph-sun ic-20"></i>Light</button>
+        <button id="gsDark"   onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
       </div>
 
       <div class="gs-label" style="margin-top:26px;">Feedback</div>
@@ -2957,6 +3038,34 @@
      line rather than random, or the list would reshuffle on every render. */
   const takeLen = it => 2 + (it.text.length % 7);
   const fmtLen  = sec => '0:' + String(sec).padStart(2, '0');
+
+  /* Every line's takes, newest first. A line keeps its old ones: the wizard only
+     ever adds, and which one the others hear is a choice rather than whatever
+     happened last — that is what `use` records. The newest is chosen when a take
+     is added, so the common case needs no decision, but going back to an older
+     one is a tap, not a re-record. */
+  const TAKES = {};
+  const WHEN = ['Just now', '2 hours ago', 'Yesterday', 'Tuesday', 'Last week'];
+  function takesFor(idx) {
+    if (!TAKES[idx]) {
+      const line = SCENE_1[idx];
+      const n = 1 + (line.text.length % 3);        // one to three, stable per line
+      TAKES[idx] = Array.from({ length: n }, (_, i) => ({
+        id: idx + '-' + i,
+        len: Math.max(2, takeLen(line) - i),
+        when: WHEN[i] || 'Earlier',
+        use: i === 0
+      }));
+    }
+    return TAKES[idx];
+  }
+  /* Recording is what creates a take, so the wizard goes through here too. */
+  function addTake(idx) {
+    const t = takesFor(idx);
+    t.forEach(x => { x.use = false; });
+    t.unshift({ id: idx + '-' + Date.now(), len: takeLen(SCENE_1[idx]), when: 'Just now', use: true });
+  }
+  const takeInUse = idx => takesFor(idx).find(t => t.use);
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
   const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
   /* Speeds are numbers, not labels: the presets and the stepper are two ways at
@@ -4309,6 +4418,7 @@
 
   function wzPass() {
     SCENE_1[wz.idx].rec = true;
+    addTake(wz.idx);
     wzSetState('success');
     setTimeout(() => {
       const next = missingLines()[0];
@@ -4340,15 +4450,29 @@
      The attribute is always written, seeded from the system preference, so the
      dark tokens live in one block instead of two. Nothing else in the sheet knows
      which mode it is in. */
+  /* Three choices, but still only two appearances: System is not a third look,
+     it is the absence of a choice, so it resolves to whatever the phone says and
+     keeps resolving as that changes. The attribute is written either way, so the
+     dark tokens stay in one block and nothing below them knows which mode it is
+     in — the choice lives here, not in the sheet. */
+  let themeChoice = 'system';
+  const systemDark = matchMedia('(prefers-color-scheme: dark)');
   function setTheme(mode) {
-    document.documentElement.dataset.theme = mode;
-    /* Two ways in: the tool on the desk and the app's own screen. Whichever you
-       use, both have to end up saying the same thing. */
-    [['themeLight', 'light'], ['themeDark', 'dark'],
-     ['gsLight', 'light'], ['gsDark', 'dark']].forEach(([id, m]) =>
-      document.getElementById(id).classList.toggle('on', mode === m));
+    themeChoice = mode;
+    applyTheme();
   }
-  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme() {
+    document.documentElement.dataset.theme =
+      themeChoice === 'system' ? (systemDark.matches ? 'dark' : 'light') : themeChoice;
+    /* Two ways in: the panel and the app's own screen. Whichever you use, both
+       have to end up saying the same thing. */
+    [['themeSystem', 'system'], ['themeLight', 'light'], ['themeDark', 'dark'],
+     ['gsSystem', 'system'], ['gsLight', 'light'], ['gsDark', 'dark']].forEach(([id, m]) =>
+      document.getElementById(id).classList.toggle('on', themeChoice === m));
+  }
+  /* Only while the choice is System — otherwise the phone would override you. */
+  systemDark.addEventListener('change', () => { if (themeChoice === 'system') applyTheme(); });
+  setTheme('system');
 
   /* The one scene we actually have text for. Derived here, not on the way into
      the scene — Script detail is rendered first and used to say "0 lines". */
@@ -4403,9 +4527,93 @@
                   go: () => openLogin() },
     alert:      { label:'Alert',            group:'proto',
                   go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
+    audio:      { label:'Audio edit',       group:'app', screen:'audioScreen',
+                  /* One of mine: In use is about which take of yours the others
+                     hear, so the demo lands on a line that has that question. */
+                  go: () => { openScript('s1'); openAudioEdit(lineIdx().find(i => SCENE_1[i].mine)); } },
     androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
+  /* ============================================================
+     AUDIO EDIT
+     ============================================================ */
+  let audioIdx = 0;
+  /* Scene and line, padded — a handle that survives being pasted somewhere else
+     and read back out loud. Derived from position, so it cannot drift from it. */
+  function lineId(idx) {
+    const scene = String(SCENES.findIndex(sc => sc.items === SCENE_1) + 1).padStart(3, '0');
+    const line  = String(lineIdx().indexOf(idx) + 1).padStart(4, '0');
+    return '#' + scene + '-' + line;
+  }
+  function openAudioEdit(idx) {
+    audioIdx = idx;
+    renderAudioEdit();
+    showScreen('audioScreen');
+  }
+  function renderAudioEdit() {
+    const line = SCENE_1[audioIdx], takes = takesFor(audioIdx);
+    document.getElementById('audioScroll').innerHTML = `
+      <div class="ae-line">
+        <div class="ae-who">${line.who}</div>
+        <div class="ae-text">${line.text}</div>
+        <button class="ae-id" onclick="copyLineId(${audioIdx})">
+          <i class="ph ph-link-simple ic-14"></i>${lineId(audioIdx)}
+        </button>
+      </div>
+      <button class="ae-record" onclick="recordHere()">
+        <i class="ph-fill ph-microphone ic-20"></i>Record a new take
+      </button>
+      <div class="list-sublabel">Takes</div>
+      ${takes.map(t => `
+        <div class="ae-take ${t.use ? 'inuse' : ''}">
+          <button class="ae-play" onclick="toast('Playing take')" aria-label="Play take">
+            <i class="ph-fill ph-play ic-16"></i>
+          </button>
+          <div class="ae-main">
+            <div class="ae-when">${t.when}</div>
+            <div class="ae-len">${fmtLen(t.len)}</div>
+          </div>
+          ${t.use
+            ? '<button class="ae-use on" disabled>In use</button>'
+            : `<button class="ae-use off" onclick="useTake('${t.id}')">Use</button>`}
+          <button class="ae-del" onclick="deleteTake('${t.id}')" aria-label="Delete take">
+            <i class="ph ph-trash ic-18"></i>
+          </button>
+        </div>`).join('')}`;
+  }
+  /* Choosing is exclusive: this is which one everybody hears, so there is exactly
+     one and picking another releases the last. */
+  function useTake(id) {
+    const takes = takesFor(audioIdx);
+    takes.forEach(t => { t.use = t.id === id; });
+    renderAudioEdit();
+    toast('This take is now in use');
+  }
+  /* Deleting the one in use would leave the line silent for everyone, so the next
+     newest takes over rather than nothing. The last take left takes the line's
+     audio with it. */
+  function deleteTake(id) {
+    const takes = takesFor(audioIdx);
+    const gone = takes.find(t => t.id === id);
+    TAKES[audioIdx] = takes.filter(t => t.id !== id);
+    if (gone.use && TAKES[audioIdx][0]) TAKES[audioIdx][0].use = true;
+    if (!TAKES[audioIdx].length) SCENE_1[audioIdx].rec = false;
+    renderAudioEdit();
+    renderScenes();
+  }
+  function recordHere() {
+    addTake(audioIdx);
+    SCENE_1[audioIdx].rec = true;
+    renderAudioEdit();
+    renderScenes();
+    toast('Take recorded');
+  }
+  function copyLineId(idx) {
+    const id = lineId(idx);
+    navigator.clipboard?.writeText(id);
+    toast(id + ' copied');
+  }
+
   /* ============================================================
      PROTOTYPE PANEL
      ============================================================ */
