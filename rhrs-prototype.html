@@ -3986,9 +3986,16 @@
        loss is not read as bigger than it is, and offers the one route there is.
        Android only; on iOS this never appears. */
     android: {
-      icon: 'ph ph-bell-slash',
-      title: 'Controls outside the app are off',
-      text: 'Notifications are turned off for rhrs, so there is no player in the notification shade or on the lock screen while you listen. Listening itself still works, and so do your headphone buttons and the controls in your car. Android only lets this be turned back on in Settings.',
+      /* Not a crossed-out bell and not a warning triangle: both read as something
+         gone wrong, and this is an offer. The glyph is the thing on offer —
+         controls. */
+      icon: 'ph ph-play-pause',
+      /* Named for what you get, not what you lost. It says the lock screen and
+         not the car on purpose: car controls and headphone buttons ride the media
+         session and keep working either way, so offering them back would be
+         promising something that was never taken. */
+      title: 'Playback controls on your lock screen',
+      text: 'Notifications are off, so rhrs has no player in the shade or on the lock screen. Playback, headphone buttons and car controls work either way — only Settings can switch the player back on.',
       primary: 'Open Settings', act: "sheetAction('Opening system settings')",
       ghost: 'Not now'
     }
@@ -4396,7 +4403,7 @@
                   go: () => openLogin() },
     alert:      { label:'Alert',            group:'proto',
                   go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
-    androidalert: { label:'Alert — Android notifications', group:'proto',
+    androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
   /* ============================================================
