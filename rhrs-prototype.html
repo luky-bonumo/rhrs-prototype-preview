@@ -539,6 +539,38 @@
     color: var(--wine); text-align: center;
   }
 
+  /* ============ ALERT ============
+     Centred, unlike every other sheet: an alert is one thing said once, and a
+     left edge would start it reading like a list of settings. */
+  .alert-body { padding: 8px 26px 6px; text-align: center; }
+  .alert-ic {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 76px; height: 76px; border-radius: 50%;
+    background: var(--coral-tint); color: var(--coral);
+    margin-bottom: 20px;
+  }
+  .alert-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 22px;
+    color: var(--noir); margin-bottom: 10px;
+  }
+  .alert-text {
+    font-size: 15px; line-height: 1.45; color: var(--text-body);
+    margin-bottom: 26px;
+  }
+  /* Stacked, not side by side: at this width a pair of buttons makes two narrow
+     targets and reads as a choice between equals, which an alert is not. */
+  .alert-btn {
+    display: block; width: 100%; border: none; cursor: pointer;
+    border-radius: var(--radius-pill); padding: 15px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .alert-btn:active { transform: scale(0.98); }
+  .alert-btn.fill  { background: var(--coral); color: var(--white); box-shadow: 0 5px 18px var(--lift-coral); }
+  /* The way out carries the same colour, so it is plainly the other half of the
+     same question — only without the weight that says press me. */
+  .alert-btn.ghost { background: none; color: var(--coral); border: 1.5px solid var(--coral); }
+
   /* ============ NOTIFICATIONS ============
      A sheet, not a screen: nothing here is a place you stay. */
   .notif-list { overflow-y: auto; padding: 4px 22px 10px; }
@@ -650,6 +682,14 @@
     margin-bottom: 10px;
   }
   .auth-provider:active { transform: scale(0.98); }
+  .auth-tagged { position: relative; }
+  .auth-last {
+    position: absolute; top: -8px; right: 14px; z-index: 1;
+    background: var(--coral); color: var(--white);
+    border-radius: var(--radius-pill); padding: 3px 9px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    box-shadow: 0 2px 8px var(--lift-coral);
+  }
   .auth-provider svg { flex: 0 0 auto; display: block; }
   .auth-provider.apple  { color: var(--brand-apple-ink); }
   .auth-provider.google { color: var(--brand-google-ink); }
@@ -785,8 +825,12 @@
   }
 
   /* The primary action, so it wears the colour itself rather than the ground that
-     colour makes — a mark, like a filled pill. */
+     colour makes — a mark, like a filled pill. Where you left off is coral on
+     every screen it appears on, because it is your place in the script; Whole
+     script is the same object in wine, which keeps it a way in without making it
+     the one you are being pointed at. */
   .card.featured { background: var(--wine); }
+  .card.featured.mine { background: var(--coral); }
   .card.featured .card-over { color: var(--on-mark-soft); }
   .card.featured .card-title { color: var(--on-mark); }
   .card.featured .meta-lines { color: var(--on-mark-soft); }
@@ -1936,8 +1980,6 @@
     </div>
 
     <div class="dash-scroll fades">
-      <div class="dash-hero">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
-
       <button class="dash-continue" id="dashContinue" onclick="continueLastScene()"></button>
       <div class="dash-recent-label">Last open scripts</div>
       <div class="dash-recent-list" id="recentList"></div>
@@ -2009,6 +2051,11 @@
            their own artwork and forbid a redrawn one. Faithful reproductions for
            the prototype — the Flutter build must use the files downloaded from
            Apple Design Resources and from Google's branding bundle. -->
+      <!-- Which one you used last, so the choice is already made for you. It rides
+           on the button's top edge rather than above it, or it reads as a heading
+           for everything that follows instead of a tag on one thing. -->
+      <div class="auth-tagged">
+      <span class="auth-last">Last used</span>
       <button class="auth-provider apple" onclick="authProvider('Apple')">
         <!-- Measured, not eyeballed: at the old size Apple's ink was 12.6 x 15 against
              Google's 18 x 18.3. A tall narrow mark beside a round one also reads
@@ -2018,6 +2065,7 @@
           <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25"/>
         </svg>Continue with Apple
       </button>
+      </div>
       <button class="auth-provider google" onclick="authProvider('Google')">
         <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
@@ -2576,6 +2624,21 @@
     </div>
   </div>
 
+  <!-- Alert. A sheet like the others, because an alert interrupts what you were
+       doing rather than taking you somewhere. Nothing in the app leads here yet —
+       it is reached from the prototype panel, which is what that group is for. -->
+  <div class="settings-sheet" id="alertSheet">
+    <div class="sheet-grabber"></div>
+    <div class="alert-body">
+      <span class="alert-ic"><i class="ph-fill ph-warning ic-38"></i></span>
+      <div class="alert-title cap-trim">Delete this recording?</div>
+      <div class="alert-text">The take for this line will be removed and the line
+        will need recording again. This cannot be undone.</div>
+      <button class="alert-btn fill" onclick="sheetAction('Recording deleted')">Delete recording</button>
+      <button class="alert-btn ghost" onclick="closeSheet()">Keep it</button>
+    </div>
+  </div>
+
   <!-- Notifications. Opens from the bell on the dashboard. -->
   <div class="settings-sheet" id="notifSheet">
     <div class="sheet-grabber"></div>
@@ -2658,10 +2721,23 @@
   /* ============================================================
      DATA
      ============================================================ */
+  /* Only the first script has real text. The other two carry their own scene
+     titles all the same, so Script detail is about the script you opened rather
+     than showing the demo one's scenes under someone else's name. Their scenes
+     have no items; opening one falls back to the written scene, which is what
+     the prototype did for every script before. */
   const SCRIPTS = [
-    { id:'s1', title:"I love you, you're fine, but change quickly", scenes:8, assigned:true },
-    { id:'s2', title:"The Cherry Orchard", scenes:12, assigned:true },
-    { id:'s3', title:"Waiting for Godot", scenes:2, assigned:false }
+    { id:'s1', title:"I love you, you're fine, but change quickly", assigned:true },
+    { id:'s2', title:"The Cherry Orchard", assigned:true, scenes:[
+      { title:"Act I — the nursery" },
+      { title:"Act II — the arrival" },
+      { title:"Act III — the sale" },
+      { title:"Act IV — leaving" }
+    ] },
+    { id:'s3', title:"Waiting for Godot", assigned:false, scenes:[
+      { title:"Act I" },
+      { title:"Act II" }
+    ] }
   ];
   const SCENES = [
     { title:"Opening — the kitchen argument", lines:0, assigned:true },  // filled from SCRIPT
@@ -2777,6 +2853,9 @@
      switch does not hide it. */
   const SCENE_LISTS = [SCENE_1, SCENE_2, SCENE_3, SCENE_4, SCENE_5];
   SCENES.forEach((sc, i) => { sc.items = SCENE_LISTS[i]; });
+  SCRIPTS[0].scenes = SCENES;
+  /* Whichever script's scenes Script detail and the scene steps are working on. */
+  const sceneList = () => currentScript.scenes;
   const WHOLE_SCRIPT = SCENES.flatMap(sc => [{ scene: sc.title }, ...sc.items]);
 
   /* What the modes are rendering right now: one scene, or the whole script. */
@@ -2931,8 +3010,10 @@
   function openScene(name) {
     /* Whole script is a scene name like any other as far as the header is
        concerned; what changes is the list underneath it. */
-    const sc = SCENES.find(x => x.title === name);
-    SCRIPT = sc ? sc.items : WHOLE_SCRIPT;
+    const sc = sceneList().find(x => x.title === name);
+    /* A scene of a script that has no text yet still opens — on the one scene
+       that is written. Whole script is the only name that is not a scene. */
+    SCRIPT = sc ? (sc.items || SCENE_1) : WHOLE_SCRIPT;
     currentScene = name;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
@@ -3032,8 +3113,9 @@
      and the whole-script flow, which has just run through all of them. */
   function nextSceneTitle() {
     if (SCRIPT === WHOLE_SCRIPT) return null;
-    const i = SCENES.findIndex(sc => sc.title === currentScene);
-    return (i >= 0 && SCENES[i + 1]) ? SCENES[i + 1].title : null;
+    const list = sceneList();
+    const i = list.findIndex(sc => sc.title === currentScene);
+    return (i >= 0 && list[i + 1]) ? list[i + 1].title : null;
   }
   /* The same mark in all three modes. Read, Listen and Rehearse scroll the same
      list of items, so a scene boundary that looked different in each would be
@@ -3069,8 +3151,9 @@
      only when there is a scene before this one. */
   function prevSceneTitle() {
     if (SCRIPT === WHOLE_SCRIPT) return null;
-    const i = SCENES.findIndex(sc => sc.title === currentScene);
-    return i > 0 ? SCENES[i - 1].title : null;
+    const list = sceneList();
+    const i = list.findIndex(sc => sc.title === currentScene);
+    return i > 0 ? list[i - 1].title : null;
   }
   /* It sits above the first line and the list opens scrolled past it, so the
      scene starts on its own first line and the way back is found by pulling up —
@@ -3115,7 +3198,8 @@
   function changeScene(title) {
     /* It used to rename the header and leave the lines alone, because every scene
        held the same ones. They hold their own now, so the list changes too. */
-    SCRIPT = SCENES.find(sc => sc.title === title).items;
+    const sc = sceneList().find(x => x.title === title);
+    SCRIPT = sc.items || SCENE_1;
     currentScene = title;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = title);
     activeIdx = 0;
@@ -3638,6 +3722,7 @@
     document.getElementById('wizardSettingsSheet').classList.remove('open');
     if (document.getElementById('notifSheet').classList.contains('open')) markNotificationsRead();
     document.getElementById('notifSheet').classList.remove('open');
+    document.getElementById('alertSheet').classList.remove('open');
   }
   function openSettings(mode) {
     const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
@@ -3712,7 +3797,7 @@
         <div class="card-main">
           <div class="card-title">${s.title}</div>
           <div class="card-meta">
-            <span class="meta-lines">${s.scenes} scenes</span>
+            <span class="meta-lines">${s.scenes.length} scenes</span>
             ${s.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
@@ -3720,28 +3805,36 @@
       </div>`).join('');
   }
   function renderScenes() {
-    /* What you came back for goes first and wears the mark. Whole script keeps its
-       place in the list but not its prominence — it is one way in among several,
-       and the one you are least likely to want on opening the screen. */
-    const last = SCENES[0];
+    /* What you came back for goes first and wears the coral mark — it is your
+       place in this script. Whole script is the same object in wine: still a way
+       in, no longer the one you are pointed at. Both name the script you opened,
+       not the one that happens to be written. */
+    const scenes = sceneList();
+    const last = scenes.find(sc => sc.title === LAST_SCENE[currentScript.id]) || scenes[0];
+    /* Lines are only known where there is text. Rather than a made-up number, the
+       scripts without it simply do not claim one. */
+    const lineCount = it => it && it.lines ? `<span class="meta-lines">${it.lines} lines</span>` : '';
+    const wholeLines = currentScript.scenes === SCENES
+      ? `<span class="meta-lines">${WHOLE_SCRIPT.filter(it => it.who).length} lines · all scenes</span>`
+      : '<span class="meta-lines">All scenes</span>';
     let html = `
-      <div class="card featured" onclick="openScene('${last.title}')">
+      <div class="card featured mine" onclick="openScene('${last.title}')">
         <div class="card-main">
           <div class="card-over">Where you left off</div>
           <div class="card-title">${last.title}</div>
           <div class="card-meta">
-            <span class="meta-lines">${last.lines} lines</span>
-            ${last.assigned ? '<span class="badge">Assigned</span>' : ''}
+            ${lineCount(last)}
+            ${currentScript.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
-      <div class="card" onclick="openScene('Whole script')">
+      <div class="card featured" onclick="openScene('Whole script')">
         <div class="card-main">
           <div class="card-title">Whole script</div>
           <div class="card-meta">
-            <span class="meta-lines">${WHOLE_SCRIPT.filter(it => it.who).length} lines · all scenes</span>
-            <span class="badge">Assigned</span>
+            ${wholeLines}
+            ${currentScript.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
@@ -3756,12 +3849,12 @@
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
       <div class="list-sublabel">Scenes</div>`;
-    html += SCENES.map(sc => `
+    html += scenes.map(sc => `
       <div class="card" onclick="openScene('${sc.title}')">
         <div class="card-main">
           <div class="card-title">${sc.title}</div>
           <div class="card-meta">
-            <span class="meta-lines">${sc.lines} lines</span>
+            ${lineCount(sc)}
             ${sc.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
@@ -3881,6 +3974,11 @@
   /* Both buttons and the shake end up in the same place. There is no feedback
      screen yet, so for now it says where it would go. */
   function sendFeedback() { toast('Feedback'); }
+
+  function openAlert() {
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('alertSheet').classList.add('open');
+  }
 
   function openNotifications() {
     renderNotifications();
@@ -4270,7 +4368,9 @@
     notifications: { label:'Notifications', group:'app',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
     login:      { label:'Login',            group:'proto', screen:'loginScreen',
-                  go: () => openLogin() }
+                  go: () => openLogin() },
+    alert:      { label:'Alert',            group:'proto',
+                  go: () => { showScreen('dashboardScreen'); openAlert(); } }
   };
   /* ============================================================
      PROTOTYPE PANEL
