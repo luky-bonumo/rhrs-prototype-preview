@@ -573,6 +573,9 @@
     display: flex; align-items: center; gap: 12px;
     border-radius: var(--radius-card); padding: 13px 14px; margin-bottom: 10px;
   }
+  /* While it plays the row grows a second line for the bar, so the controls and
+     the bar stack instead of sharing one row and squeezing each other. */
+  .ae-take.playing { flex-direction: column; align-items: stretch; gap: 0; }
   /* The one the others hear is the only one that wears the mark. */
   .ae-take.inuse { background: var(--coral-tint); box-shadow: none; }
   .ae-take.inuse::before { background: var(--coral); padding: 1.5px; }
@@ -604,6 +607,41 @@
     background: none; color: var(--text-muted);
   }
   .ae-del:active { color: var(--coral); }
+  /* The bar belongs to the take being played, not to a transport somewhere else:
+     there is one of these per take and only the playing one has it. */
+  .ae-take .ae-bar {
+    height: 4px; border-radius: 2px; background: var(--stone);
+    margin-top: 8px; cursor: pointer; position: relative;
+  }
+  .ae-take .ae-bar .ae-fill {
+    position: absolute; inset: 0 auto 0 0; border-radius: 2px;
+    background: var(--coral);
+  }
+  .ae-take .ae-bar .ae-thumb {
+    position: absolute; top: 50%; width: 11px; height: 11px; border-radius: 50%;
+    background: var(--coral); transform: translate(-50%, -50%);
+  }
+  .ae-take .ae-time {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--text-muted); margin-top: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  /* What the app will and will not keep. It sits under the list because it is a
+     fact about the list, not a warning about any one take. */
+  .ae-keep {
+    font-size: 12.5px; color: var(--text-muted); line-height: 1.4;
+    padding: 4px 2px 0;
+  }
+  .ae-notes-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    color: var(--wine); padding: 8px; margin-bottom: 4px;
+  }
+  /* Recording here is the same mic as everywhere else, so it is the same object:
+     the pill gives way to it rather than sitting beside it. */
+  .ae-recording { display: flex; flex-direction: column; align-items: center; margin: 18px 0 26px; }
+  .ae-recording .wz-hint { padding-top: 12px; }
 
   /* ============ ALERT ============
      Centred, unlike every other sheet: an alert is one thing said once, and a
@@ -2511,7 +2549,9 @@
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Close"><i class="ph-bold ph-x ic-22"></i></button>
       <div class="header-title cap-trim">Evaluation</div>
-      <button class="icon-btn" onclick="openSettings('rehearse')" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
+      <!-- No settings here. This screen is one take against one line; there is
+           nothing on it a setting would change. -->
+      <span style="width:42px;flex:0 0 auto;"></span>
     </div>
 
     <div class="scroll">
@@ -2530,7 +2570,7 @@
         <div class="t-main">
           <button class="reh-action" onclick="toast('Retake')"><i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake</button>
           <button class="big-btn" onclick="toast('Play / pause take')" aria-label="Play / pause"><i class="ph-fill ph-pause ic-38"></i></button>
-          <button class="reh-action" onclick="toast('Skip')"><i class="ph-bold ph-arrow-right ic-28"></i>Skip</button>
+          <button class="reh-action" id="evalRight" onclick="evalRightAction()"></button>
         </div>
         <div class="bar with-thumb" onclick="seek(event)"><div class="fill" style="width:42%"></div></div>
         <div class="t-meta">
@@ -3702,13 +3742,33 @@
      same head a line carries anywhere else: the name, its notes, its menu. */
   let evalTextShown = false;
 
-  function openEvaluation() {
+  /* What the app heard, which is not what was written — otherwise the screen is
+     two identical sentences and there is nothing to evaluate. */
+  const DEMO_TRANSCRIPT = 'You are drinking.';
+  /* Two ways here. From Rehearse you are working through a scene, so the way on
+     is Skip. From a recording you have just made a take, so the way on is to keep
+     it — the wizard will come through here too. */
+  let evalMode = 'rehearse';
+  function openEvaluation(mode) {
+    evalMode = mode || 'rehearse';
     const line = SCRIPT[activeIdx];
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
     evalTextShown = false;
     renderEvalHead();
-    document.getElementById('evalTranscript').textContent = line.text;
+    document.getElementById('evalTranscript').textContent = DEMO_TRANSCRIPT;
+    document.getElementById('evalRight').innerHTML = evalMode === 'record'
+      ? '<i class="ph-bold ph-check ic-28"></i>Use'
+      : '<i class="ph-bold ph-arrow-right ic-28"></i>Skip';
     showScreen('evaluationScreen');
+  }
+  function evalRightAction() {
+    if (evalMode !== 'record') return toast('Skip');
+    addTake(audioIdx);
+    SCENE_1[audioIdx].rec = true;
+    renderAudioEdit();
+    renderScenes();
+    goBack();
+    toast('Take saved and in use');
   }
 
   function renderEvalHead() {
@@ -3724,7 +3784,7 @@
     document.getElementById('evalHead').innerHTML =
       `<span class="char-name cap-trim">${line.who}</span>` +
       (flags ? `<span class="note-flags">${flags}</span>` : '') +
-      `<button class="line-menu-btn" style="margin-left:auto" onclick="openSheet(${activeIdx})" aria-label="Line menu">${DOTS}</button>`;
+      `<button class="line-menu-btn" style="margin-left:auto" onclick="openSheet(${activeIdx}, true)" aria-label="Line menu">${DOTS}</button>`;
     document.getElementById('evalNotes').innerHTML =
       (line.note ? noteBlock(activeIdx, 'private', line.note, true) : '') +
       (line.dir  ? noteBlock(activeIdx, 'stage',   line.dir,  true) : '');
@@ -3784,26 +3844,35 @@
   /* ============================================================
      SHEETS
      ============================================================ */
-  function buildItems(isMine) {
+  function buildItems(isMine, fromEval) {
     let html = '';
-    html += item('listen', 'Listen from here', false, "Listen from this line");
-    html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
-    html += '<div class="sheet-sep"></div>';
+    /* Jumping into a mode from here makes no sense on Evaluation: you are already
+       in the middle of one line, not choosing where to start. */
+    if (!fromEval) {
+      html += item('listen', 'Listen from here', false, "Listen from this line");
+      html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
+      html += '<div class="sheet-sep"></div>';
+    }
     html += item('edit', 'Edit line', false, "Open line editor");
     html += item('note', 'Add / edit private note', false, "Private note");
-    if (isMine) html += item('record', 'Audio', true, "Open Audio Edit");
+    if (isMine) html += item('record', 'Audio', true, null, `openAudioEdit(${sheetIdx})`);
     return html;
   }
-  function item(icon, label, accent, msg) {
-    return `<button class="sheet-item ${accent ? 'accent' : ''}" onclick="sheetAction('${msg}')">
+  function item(icon, label, accent, msg, run) {
+    /* `run` is for the ones that lead somewhere real; the rest still say where
+       they would go. */
+    const act = run ? `closeSheet(); ${run}` : `sheetAction('${msg}')`;
+    return `<button class="sheet-item ${accent ? 'accent' : ''}" onclick="${act}">
       <span class="item-ic">${ICON[icon]}</span>${label}</button>`;
   }
-  function openSheet(idx) {
+  let sheetIdx = 0;
+  function openSheet(idx, fromEval) {
+    sheetIdx = idx;
     const line = SCRIPT[idx];
     document.getElementById('sheetContext').className = 'sheet-context ' + (line.mine ? 'mine' : 'others');
     document.getElementById('ctxName').textContent = line.who;
     document.getElementById('ctxLine').textContent = shorten(line.text);
-    document.getElementById('sheetItems').innerHTML = buildItems(line.mine);
+    document.getElementById('sheetItems').innerHTML = buildItems(line.mine, fromEval);
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -4087,6 +4156,13 @@
       title: 'Delete this recording?',
       text: 'The take for this line will be removed and the line will need recording again. This cannot be undone.',
       primary: 'Delete recording', act: "sheetAction('Recording deleted')",
+      ghost: 'Keep it'
+    },
+    deleteTake: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this take?',
+      text: 'The recording will be removed. If it is the one in use, the newest take left takes over; if it is the last one, the line goes back to needing audio.',
+      primary: 'Delete take', act: 'confirmDeleteTake()',
       ghost: 'Keep it'
     },
     /* Android, after notifications have been refused twice. Not an error and not
@@ -4528,9 +4604,15 @@
     alert:      { label:'Alert',            group:'proto',
                   go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
     audio:      { label:'Audio edit',       group:'app', screen:'audioScreen',
+                  /* Reached in the app from a line's menu — Audio — on any line
+                     of yours. */
                   /* One of mine: In use is about which take of yours the others
                      hear, so the demo lands on a line that has that question. */
-                  go: () => { openScript('s1'); openAudioEdit(lineIdx().find(i => SCENE_1[i].mine)); } },
+                  /* One of mine, and one carrying a note, so the demo shows both
+                     what In use is for and what the notes toggle reveals. */
+                  go: () => { openScript('s1');
+                              openAudioEdit(lineIdx().find(i => SCENE_1[i].mine && (SCENE_1[i].note || SCENE_1[i].dir))
+                                         ?? lineIdx().find(i => SCENE_1[i].mine)); } },
     androidalert: { label:'Alert – Android BG play', group:'proto',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
@@ -4560,27 +4642,79 @@
           <i class="ph ph-link-simple ic-14"></i>${lineId(audioIdx)}
         </button>
       </div>
-      <button class="ae-record" onclick="recordHere()">
-        <i class="ph-fill ph-microphone ic-20"></i>Record a new take
-      </button>
+      ${aeNotes(line)}
+      ${aeRecorder()}
       <div class="list-sublabel">Takes</div>
-      ${takes.map(t => `
-        <div class="ae-take ${t.use ? 'inuse' : ''}">
-          <button class="ae-play" onclick="toast('Playing take')" aria-label="Play take">
-            <i class="ph-fill ph-play ic-16"></i>
-          </button>
-          <div class="ae-main">
-            <div class="ae-when">${t.when}</div>
-            <div class="ae-len">${fmtLen(t.len)}</div>
-          </div>
-          ${t.use
-            ? '<button class="ae-use on" disabled>In use</button>'
-            : `<button class="ae-use off" onclick="useTake('${t.id}')">Use</button>`}
-          <button class="ae-del" onclick="deleteTake('${t.id}')" aria-label="Delete take">
-            <i class="ph ph-trash ic-18"></i>
-          </button>
-        </div>`).join('')}`;
+      ${takes.map(t => aeTake(t)).join('')}
+      <div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`;
+    applyTextStyle();
   }
+  const KEEP_TAKES = 5;
+  /* The same notes as in Read, and off to begin with: you came to listen to a
+     take, not to read. They are here at all because a note often says why the
+     reading was the way it was. */
+  let aeNotesShown = false;
+  function aeNotes(line) {
+    if (!line.note && !line.dir) return '';
+    return `<button class="ae-notes-toggle" onclick="aeNotesShown = !aeNotesShown; renderAudioEdit();">
+        <i class="ph ph-${aeNotesShown ? 'eye-slash' : 'eye'} ic-16"></i>
+        ${aeNotesShown ? 'Hide' : 'Show'} notes and directions
+      </button>` +
+      (aeNotesShown
+        /* false, not true: the last argument is "start collapsed", and the toggle
+         above has already answered that question. */
+      ? (line.note ? noteBlock(audioIdx, 'private', line.note, false) : '') +
+          (line.dir  ? noteBlock(audioIdx, 'stage',   line.dir,  false) : '')
+        : '');
+  }
+  /* A take plays inside its own row: the icon becomes pause and the bar appears
+     under it, so what is playing and where you are in it are the same object. */
+  let aePlaying = null, aeAt = 0, aeTick;
+  function aeTake(t) {
+    const on = aePlaying === t.id;
+    const pct = on ? Math.min(100, (aeAt / t.len) * 100) : 0;
+    return `<div class="ae-take ${t.use ? 'inuse' : ''} ${on ? 'playing' : ''}">
+      <div style="display:flex;align-items:center;gap:12px;width:100%;">
+        <button class="ae-play" onclick="aeToggle('${t.id}', ${t.len})" aria-label="Play take">
+          <i class="ph-fill ph-${on ? 'pause' : 'play'} ic-16"></i>
+        </button>
+        <div class="ae-main">
+          <div class="ae-when">${t.when}</div>
+          <div class="ae-len">${fmtLen(t.len)}</div>
+        </div>
+        ${t.use
+          ? '<button class="ae-use on" disabled>In use</button>'
+          : `<button class="ae-use off" onclick="useTake('${t.id}')">Use</button>`}
+        <button class="ae-del" onclick="askDeleteTake('${t.id}')" aria-label="Delete take">
+          <i class="ph ph-trash ic-18"></i>
+        </button>
+      </div>
+      ${on ? `<div style="width:100%">
+        <div class="ae-bar" onclick="aeSeek(event, ${t.len})">
+          <div class="ae-fill" style="width:${pct}%"></div>
+          <div class="ae-thumb" style="left:${pct}%"></div>
+        </div>
+        <div class="ae-time"><span>${fmtLen(Math.round(aeAt))}</span><span>${fmtLen(t.len)}</span></div>
+      </div>` : ''}
+    </div>`;
+  }
+  function aeToggle(id, len) {
+    clearInterval(aeTick);
+    if (aePlaying === id) { aePlaying = null; return renderAudioEdit(); }
+    aePlaying = id; aeAt = 0;
+    aeTick = setInterval(() => {
+      aeAt += 0.25;
+      if (aeAt >= len) { clearInterval(aeTick); aePlaying = null; }
+      renderAudioEdit();
+    }, 250);
+    renderAudioEdit();
+  }
+  function aeSeek(e, len) {
+    const r = e.currentTarget.getBoundingClientRect();
+    aeAt = Math.max(0, Math.min(len, ((e.clientX - r.left) / r.width) * len));
+    renderAudioEdit();
+  }
+
   /* Choosing is exclusive: this is which one everybody hears, so there is exactly
      one and picking another releases the last. */
   function useTake(id) {
@@ -4592,21 +4726,76 @@
   /* Deleting the one in use would leave the line silent for everyone, so the next
      newest takes over rather than nothing. The last take left takes the line's
      audio with it. */
+  function confirmDeleteTake() {
+    closeSheet();
+    deleteTake(pendingTake);
+    pendingTake = null;
+    toast('Take deleted');
+  }
   function deleteTake(id) {
     const takes = takesFor(audioIdx);
     const gone = takes.find(t => t.id === id);
+    if (!gone) return;
     TAKES[audioIdx] = takes.filter(t => t.id !== id);
     if (gone.use && TAKES[audioIdx][0]) TAKES[audioIdx][0].use = true;
     if (!TAKES[audioIdx].length) SCENE_1[audioIdx].rec = false;
     renderAudioEdit();
     renderScenes();
   }
-  function recordHere() {
-    addTake(audioIdx);
-    SCENE_1[audioIdx].rec = true;
+  /* Left alone it finishes itself after TAKE_MS and keeps the take, the way it
+     does in the wizard. Stopped by hand it goes to Evaluation, where you decide
+     — that is the path the wizard will share. */
+  let aeRec = false, aeRecTimer, aeRecDone, aeRecStart = 0;
+  function aeRecorder() {
+    if (!aeRec) {
+      return `<button class="ae-record" onclick="aeStartRec()">
+        <i class="ph-fill ph-microphone ic-20"></i>Record a new take
+      </button>`;
+    }
+    return `<div class="ae-recording">
+      <button class="big-btn recording" onclick="aeStopRec()" aria-label="Stop recording">
+        <i class="ph-fill ph-microphone ic-32"></i>
+        <span class="btn-time" id="aeRecTime">0:00</span>
+      </button>
+      <div class="wz-hint">Tap to stop</div>
+    </div>`;
+  }
+  function aeStartRec() {
+    clearInterval(aeTick); aePlaying = null;
+    aeRec = true; aeRecStart = Date.now();
     renderAudioEdit();
-    renderScenes();
-    toast('Take recorded');
+    clearInterval(aeRecTimer); clearTimeout(aeRecDone);
+    aeRecTimer = setInterval(() => {
+      const el = document.getElementById('aeRecTime');
+      if (el) el.textContent = clock((Date.now() - aeRecStart) / 1000);
+    }, 200);
+    aeRecDone = setTimeout(() => {
+      if (!aeRec) return;
+      aeEndRec();
+      addTake(audioIdx);
+      SCENE_1[audioIdx].rec = true;
+      renderAudioEdit();
+      renderScenes();
+      toast('Take saved and in use');
+    }, TAKE_MS);
+  }
+  function aeStopRec() {
+    if (!aeRec) return;
+    aeEndRec();
+    renderAudioEdit();
+    /* Evaluation compares a take with a line, so it needs the line it belongs to
+       to be the active one. */
+    SCRIPT = SCENE_1;
+    activeIdx = audioIdx;
+    openEvaluation('record');
+  }
+  function aeEndRec() { aeRec = false; clearInterval(aeRecTimer); clearTimeout(aeRecDone); }
+
+  /* Deleting is the one thing here that cannot be undone, so it asks. */
+  let pendingTake = null;
+  function askDeleteTake(id) {
+    pendingTake = id;
+    openAlert('deleteTake');
   }
   function copyLineId(idx) {
     const id = lineId(idx);
