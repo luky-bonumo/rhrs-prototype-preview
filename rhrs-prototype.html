@@ -4304,8 +4304,10 @@
       ${name ? `<button class="le-danger" onclick="toast('Character deleted')">
         <i class="ph ph-trash ic-20"></i>Delete character
       </button>` : ''}`;
-    growTextarea(document.getElementById('charName'));
+    /* After the screen is up, not before: a hidden element measures zero, and the
+       field was being set to nought pixels tall with the name still inside it. */
     showScreen('characterScreen');
+    growTextarea(document.getElementById('charName'));
   }
   function saveCharacter() {
     const v = document.getElementById('charName').value.trim();
@@ -5112,6 +5114,10 @@
   function growTextarea(el) {
     if (!el) return;
     el.style.height = 'auto';
+    /* Measuring something that is not laid out yet returns zero, and a zero here
+       hides the text rather than showing an empty field — so leave the height
+       alone instead. */
+    if (!el.scrollHeight) { el.style.height = ''; return; }
     el.style.height = el.scrollHeight + 'px';
   }
   function leSave(key) {
