@@ -294,15 +294,92 @@
      not a control of the app — the app's own switch belongs in Global Settings,
      which is not drawn yet. Built from the page tokens rather than the app ones
      so it stays legible on whichever desk it ends up on. */
+  /* ============ PROTOTYPE PANEL ============
+     Not the app. It uses plain greys and the page background rather than the
+     palette, so that nothing here can be mistaken for something to build, and so
+     it does not move when the app's own mode does. 900px is where the mock
+     (393) and the panel stop fitting side by side. */
+  .panel {
+    display: none;
+    width: 340px; flex: 0 0 auto; align-self: stretch;
+    background: rgba(255, 255, 255, 0.62);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    flex-direction: column;
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+  .panel-top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px 14px;
+  }
+  .panel-name {
+    flex: 1 1 auto;
+    font-family: 'Platypi', Georgia, serif; font-weight: 700;
+    font-size: 19px; color: #3A2A2E;
+  }
+  .panel-close { display: none; }
+  .panel-body { flex: 1 1 auto; overflow-y: auto; padding: 0 12px 10px; }
+  .panel-body::-webkit-scrollbar { width: 0; }
+  .panel-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    color: rgba(58, 42, 46, 0.45); padding: 14px 8px 6px;
+  }
+  .panel-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; text-align: left; border: none; background: none; cursor: pointer;
+    border-radius: 10px; padding: 9px 10px;
+    font-family: inherit; font-size: 14px; font-weight: 500; color: #3A2A2E;
+  }
+  .panel-item:hover { background: rgba(0, 0, 0, 0.05); }
+  .panel-item.on { background: #7A1E2D; color: #FFFFFF; font-weight: 600; }
+  /* A dot, not a second label: the group heading already said which these are. */
+  .panel-item .pi-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex: 0 0 auto;
+    background: rgba(58, 42, 46, 0.3);
+  }
+  .panel-item.on .pi-dot { background: rgba(255, 255, 255, 0.7); }
+  .panel-links {
+    display: flex; gap: 8px; padding: 12px 20px 18px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  .panel-links a {
+    flex: 1 1 0;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px; border-radius: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    font-size: 13px; font-weight: 600; color: #7A1E2D; text-decoration: none;
+  }
+  .panel-links a:hover { background: rgba(0, 0, 0, 0.09); }
+
+  /* Wide enough for both: the panel stands beside the mock and the way in from
+     the app's header is not needed. */
+  @media (min-width: 900px) {
+    body { justify-content: flex-start; align-items: stretch; }
+    .panel { display: flex; order: 2; }
+    /* Auto margins eat the free space, so the mock centres in the half that is
+       left rather than the two of them centring together as a pair. */
+    .phone { order: 1; margin: auto; }
+    .panel-open { display: none !important; }
+  }
+  /* Narrow: over everything, from the dashboard button. */
+  @media (max-width: 899px) {
+    .panel {
+      position: fixed; inset: 0; z-index: 60; width: auto;
+      background: rgba(250, 250, 250, 0.97);
+      border-left: none;
+    }
+    .panel.open { display: flex; }
+    .panel-close { display: flex; align-items: center; justify-content: center;
+                   width: 34px; height: 34px; border-radius: 50%;
+                   border: none; background: rgba(0,0,0,0.06); color: #3A2A2E; cursor: pointer; }
+  }
+
   .theme-switch {
-    position: fixed; top: 20px; right: 20px; z-index: 50;
     display: flex; gap: 2px; padding: 3px;
     /* A raised control standing on the desk, not a tint of it. At 10% black on
        grey it was there and nobody found it. */
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(0, 0, 0, 0.06);
     border-radius: var(--radius-pill);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
   .theme-switch button {
     border: none; background: none; cursor: pointer;
@@ -1796,10 +1873,27 @@
 </head>
 <body>
 
-<!-- Prototype tool, not part of the app. See Global Settings in todo.md. -->
-<div class="theme-switch" role="group" aria-label="Theme">
-  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph-bold ph-sun ic-18"></i></button>
-  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph-bold ph-moon ic-18"></i></button>
+<!-- ==== PROTOTYPE PANEL ====
+     A tool, not part of the app. On a wide screen it stands beside the mock and
+     is always there; narrow, it opens over everything from the button on the
+     dashboard, which is the only way in where there is no room beside. It is the
+     way to screens the app itself does not lead to — login today, alerts later. -->
+<div class="panel" id="panel">
+  <div class="panel-top">
+    <span class="panel-name">Prototype</span>
+    <div class="theme-switch" role="group" aria-label="Theme">
+      <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph-bold ph-sun ic-18"></i></button>
+      <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph-bold ph-moon ic-18"></i></button>
+    </div>
+    <button class="panel-close" onclick="closePanel()" aria-label="Close">
+      <i class="ph-bold ph-x ic-18"></i>
+    </button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-links">
+    <a href="sitemap.html"><i class="ph ph-graph ic-18"></i>Screen map</a>
+    <a href="index.html"><i class="ph ph-swatches ic-18"></i>Design hub</a>
+  </div>
 </div>
 
 <div class="phone">
@@ -1821,6 +1915,13 @@
 <path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
 <path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
       <div class="dash-actions">
+        <!-- Prototype tool sitting in the app's own header, because on a handset
+             there is no outside to put it on. Hidden as soon as the panel has
+             room to stand beside the mock, so it is never mistaken for a feature
+             of the app on desktop. -->
+        <button class="dash-btn panel-open" onclick="openPanel()" aria-label="Prototype panel">
+          <i class="ph ph-squares-four ic-20"></i>
+        </button>
         <button class="dash-btn" onclick="openNotifications()" aria-label="Notifications">
           <i class="ph ph-bell ic-20"></i>
           <span class="dot" id="bellDot" hidden></span>
@@ -2061,17 +2162,6 @@
         <button id="gsDark"  onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
       </div>
 
-      <!-- The way to the login screens from inside the app. Sign out is not here:
-           it is a different question and has not been settled. -->
-      <div class="gs-label" style="margin-top:26px;">Account</div>
-      <div class="gs-group">
-        <button class="edit-row" onclick="openLogin()">
-          <span class="er-ic"><i class="ph ph-sign-in ic-20"></i></span>
-          <span class="er-label">Login / Sign up</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
-        </button>
-      </div>
-
       <div class="gs-label" style="margin-top:26px;">Feedback</div>
       <div class="gs-group">
         <button class="edit-row" onclick="sendFeedback()">
@@ -2084,7 +2174,7 @@
       <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
       <div class="gs-todo">
         <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
-        <p>Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
+        <p>Account, Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
            Notifications, Recording &amp; storage, Subscription, About. Not drawn yet —
            the theme switch is here first so the prototype can be looked at on a
            phone in either mode.</p>
@@ -2817,6 +2907,7 @@
   function paint(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    if (document.getElementById('panelBody')) renderPanel();
     document.getElementById('statusbar').classList.toggle('on-wine', id === 'dashboardScreen');
     if (id !== 'rehearseScreen') stopRecording();
   }
@@ -4142,57 +4233,83 @@
   renderCharacters();
   renderRead();
 
-  /* Deep links, so the sitemap can point straight at a screen:
-     rhrs-prototype.html#listen, #evaluation, #edit … */
+  /* One table for every screen: the hash routes read it, and so does the panel.
+     A screen added here turns up in both, which is the point — the panel exists
+     so that screens with no way in from the app still have one somewhere.
+       group  'app'   reachable inside the app as well
+              'proto' only from the panel — login, and the alert screens to come
+       screen the element it lands on, used to mark where you are. Notifications
+              is a sheet over the dashboard, so it has none. */
   const DEMO_SCENE = 'Opening — the kitchen argument';
-  const DEEP_LINKS = {
-    dashboard:  () => showScreen('dashboardScreen'),
-    scripts:    () => showScreen('scriptsScreen'),
-    settings:   () => showScreen('globalSettingsScreen'),
-    detail:     () => openScript('s1'),
-    edit:       () => { openScript('s1'); showScreen('editScriptScreen'); },
-    wizard:     () => { openScript('s1'); openWizard(); },
-    login:      () => openLogin(),
-    notifications: () => { showScreen('dashboardScreen'); openNotifications(); },
-    read:       () => openScene(DEMO_SCENE),
-    listen:     () => { openScene(DEMO_SCENE); switchMode('listen'); },
-    rehearse:   () => { openScene(DEMO_SCENE); switchMode('rehearse'); },
-    evaluation: () => {
-      openScene(DEMO_SCENE);
-      switchMode('rehearse');
-      stepLine('rehearse', 1);          // cue line → your line
-      openEvaluation();
-    }
+  const SCREENS = {
+    dashboard:  { label:'Dashboard',        group:'app', screen:'dashboardScreen',
+                  go: () => showScreen('dashboardScreen') },
+    scripts:    { label:'All scripts',      group:'app', screen:'scriptsScreen',
+                  go: () => showScreen('scriptsScreen') },
+    detail:     { label:'Script detail',    group:'app', screen:'detailScreen',
+                  go: () => openScript('s1') },
+    edit:       { label:'Edit script',      group:'app', screen:'editScriptScreen',
+                  go: () => { openScript('s1'); showScreen('editScriptScreen'); } },
+    wizard:     { label:'Recording Wizard', group:'app', screen:'wizardScreen',
+                  go: () => { openScript('s1'); openWizard(); } },
+    read:       { label:'Read',             group:'app', screen:'readScreen',
+                  go: () => openScene(DEMO_SCENE) },
+    listen:     { label:'Listen',           group:'app', screen:'listenScreen',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); } },
+    rehearse:   { label:'Rehearse',         group:'app', screen:'rehearseScreen',
+                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); } },
+    evaluation: { label:'Evaluation',       group:'app', screen:'evaluationScreen',
+                  go: () => {
+                    openScene(DEMO_SCENE);
+                    switchMode('rehearse');
+                    stepLine('rehearse', 1);          // cue line → your line
+                    openEvaluation();
+                  } },
+    settings:   { label:'Settings',         group:'app', screen:'globalSettingsScreen',
+                  go: () => showScreen('globalSettingsScreen') },
+    notifications: { label:'Notifications', group:'app',
+                  go: () => { showScreen('dashboardScreen'); openNotifications(); } },
+    login:      { label:'Login',            group:'proto', screen:'loginScreen',
+                  go: () => openLogin() }
   };
+  /* ============================================================
+     PROTOTYPE PANEL
+     ============================================================ */
+  const PANEL_GROUPS = [
+    ['In the app',     'app'],
+    ['Prototype only', 'proto']
+  ];
+  function renderPanel() {
+    const here = document.querySelector('.screen.active')?.id;
+    document.getElementById('panelBody').innerHTML = PANEL_GROUPS.map(([label, group]) => {
+      const rows = Object.entries(SCREENS).filter(([, v]) => v.group === group);
+      if (!rows.length) return '';
+      return `<div class="panel-label">${label}</div>` + rows.map(([key, v]) => `
+        <button class="panel-item ${v.screen && v.screen === here ? 'on' : ''}" onclick="panelGo('${key}')">
+          <span class="pi-dot"></span>${v.label}
+        </button>`).join('');
+    }).join('');
+  }
+  function panelGo(key) {
+    SCREENS[key].go();
+    closePanel();          // no-op where the panel is always there
+  }
+  function openPanel()  { renderPanel(); document.getElementById('panel').classList.add('open'); }
+  function closePanel() { document.getElementById('panel').classList.remove('open'); }
+
   function openFromHash() {
-    const go = DEEP_LINKS[location.hash.replace('#', '')];
-    if (go) go();
+    const entry = SCREENS[location.hash.replace('#', '')];
+    if (entry) entry.go();
   }
   window.addEventListener('hashchange', openFromHash);
+  /* After SCREENS and PANEL_GROUPS exist, not with the other renderers further
+     up — up there they are still in the dead zone and the call throws. */
+  renderPanel();
   openFromHash();
 </script>
 
 <!-- ==== preview shell — added by tools/build-preview.py, not part of the prototype ==== -->
 <style>
-  /* Desktop: name the screen above the mock, with a way back to the map.
-     Not on a handset, where the frame is the whole viewport. */
-  #screen-tag { display: none; }
-  @media (min-width: 521px) {
-    body { flex-direction: column; gap: 16px; }
-    #screen-tag {
-      display: flex; align-items: baseline; gap: 16px;
-      font-family: 'DM Sans', system-ui, sans-serif;
-    }
-    #screen-tag b {
-      font-family: 'Platypi', Georgia, serif; font-weight: 700;
-      font-size: 21px; color: #7A1E2D;
-    }
-    #screen-tag a {
-      font-size: 13px; font-weight: 600; color: #7A1E2D;
-      opacity: .6; text-decoration: none;
-    }
-    #screen-tag a:hover { opacity: 1; text-decoration: underline; }
-  }
   @media (max-width: 520px) {
     body { background: var(--mist); align-items: stretch; }
     .phone {
@@ -4201,10 +4318,9 @@
     }
     /* On a real phone the imitation iOS status bar is just a second, wrong clock. */
     .statusbar { display: none; }
-    /* The desk switch is a desktop affordance — it stands on the grey around the
-       mock, and there is no grey here. On a phone the app's own switch in
-       Settings is the way to change mode. */
-    .theme-switch { display: none; }
+    /* The theme switch used to stand on the grey around the mock and there is no
+       grey here, so this hid it. It lives in the prototype panel now, which on a
+       phone is exactly where it is wanted — hiding it here would take it away. */
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -4217,31 +4333,9 @@
   (function () {
     var phone = document.querySelector('.phone');
 
-    var NAMES = {
-      dashboardScreen: 'Dashboard',  scriptsScreen: 'All scripts',
-      globalSettingsScreen: 'Settings',
-      detailScreen: 'Script detail', editScriptScreen: 'Edit script',
-      readScreen: 'Read',            listenScreen: 'Listen',
-      rehearseScreen: 'Rehearse',    evaluationScreen: 'Evaluation'
-    };
-
-    var tag = document.createElement('div');
-    tag.id = 'screen-tag';
-    tag.innerHTML = '<b></b><a href="sitemap.html">Screen map \u2192</a>';
-    document.body.insertBefore(tag, phone);
-    var label = tag.querySelector('b');
-
-    /* The prototype swaps a class to change screens, so watch for that rather
-       than patching its navigation. */
-    function name() {
-      var on = document.querySelector('.screen.active');
-      if (on) label.textContent = NAMES[on.id] || on.id;
-    }
-    new MutationObserver(name).observe(phone, {
-      subtree: true, attributes: true, attributeFilter: ['class']
-    });
-    name();
-
+    /* Naming the screen and listing them is the prototype panel's job now, and
+       the panel is in the prototype itself so it works from disk too. All that
+       is left here is fitting the mock to the window. */
     function fit() {
       if (window.innerWidth <= 520) { phone.style.transform = ''; return; }
       var s = Math.min(1, (window.innerHeight - 90) / 876);
