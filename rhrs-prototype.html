@@ -543,12 +543,12 @@
      Centred, unlike every other sheet: an alert is one thing said once, and a
      left edge would start it reading like a list of settings. */
   .alert-body { padding: 8px 26px 6px; text-align: center; }
+  /* The glyph alone. A tinted disc behind it made it a badge, and an alert is
+     not something you tap. */
   .alert-ic {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 76px; height: 76px; border-radius: 50%;
-    background: var(--coral-tint); color: var(--coral);
-    margin-bottom: 20px;
+    display: inline-flex; color: var(--coral); margin-bottom: 18px;
   }
+  .alert-ic i { font-size: 52px !important; }
   .alert-title {
     font-family: var(--font-display); font-weight: 600; font-size: 22px;
     color: var(--noir); margin-bottom: 10px;
@@ -2629,14 +2629,7 @@
        it is reached from the prototype panel, which is what that group is for. -->
   <div class="settings-sheet" id="alertSheet">
     <div class="sheet-grabber"></div>
-    <div class="alert-body">
-      <span class="alert-ic"><i class="ph-fill ph-warning ic-38"></i></span>
-      <div class="alert-title cap-trim">Delete this recording?</div>
-      <div class="alert-text">The take for this line will be removed and the line
-        will need recording again. This cannot be undone.</div>
-      <button class="alert-btn fill" onclick="sheetAction('Recording deleted')">Delete recording</button>
-      <button class="alert-btn ghost" onclick="closeSheet()">Keep it</button>
-    </div>
+    <div class="alert-body" id="alertBody"></div>
   </div>
 
   <!-- Notifications. Opens from the bell on the dashboard. -->
@@ -2725,18 +2718,21 @@
      titles all the same, so Script detail is about the script you opened rather
      than showing the demo one's scenes under someone else's name. Their scenes
      have no items; opening one falls back to the written scene, which is what
-     the prototype did for every script before. */
+     the prototype did for every script before. Their line counts are stated
+     rather than counted — there is nothing to count — and are the one place in
+     the prototype where a figure is invented, so that the cards are not half
+     empty. The first script's are still read off its text. */
   const SCRIPTS = [
     { id:'s1', title:"I love you, you're fine, but change quickly", assigned:true },
     { id:'s2', title:"The Cherry Orchard", assigned:true, scenes:[
-      { title:"Act I — the nursery" },
-      { title:"Act II — the arrival" },
-      { title:"Act III — the sale" },
-      { title:"Act IV — leaving" }
+      { title:"Act I — the nursery",  lines: 96 },
+      { title:"Act II — the arrival", lines: 74 },
+      { title:"Act III — the sale",   lines: 118 },
+      { title:"Act IV — leaving",     lines: 63 }
     ] },
     { id:'s3', title:"Waiting for Godot", assigned:false, scenes:[
-      { title:"Act I" },
-      { title:"Act II" }
+      { title:"Act I",  lines: 212 },
+      { title:"Act II", lines: 188 }
     ] }
   ];
   const SCENES = [
@@ -3814,9 +3810,7 @@
     /* Lines are only known where there is text. Rather than a made-up number, the
        scripts without it simply do not claim one. */
     const lineCount = it => it && it.lines ? `<span class="meta-lines">${it.lines} lines</span>` : '';
-    const wholeLines = currentScript.scenes === SCENES
-      ? `<span class="meta-lines">${WHOLE_SCRIPT.filter(it => it.who).length} lines · all scenes</span>`
-      : '<span class="meta-lines">All scenes</span>';
+    const wholeLines = `<span class="meta-lines">${scenes.reduce((n, sc) => n + (sc.lines || 0), 0)} lines · all scenes</span>`;
     let html = `
       <div class="card featured mine" onclick="openScene('${last.title}')">
         <div class="card-main">
@@ -3975,7 +3969,38 @@
      screen yet, so for now it says where it would go. */
   function sendFeedback() { toast('Feedback'); }
 
-  function openAlert() {
+  /* One sheet, several messages. Exact strings — they become translation keys. */
+  const ALERTS = {
+    /* The ordinary shape: a question, what it costs, and the way out named as
+       plainly as the way on. */
+    delete: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this recording?',
+      text: 'The take for this line will be removed and the line will need recording again. This cannot be undone.',
+      primary: 'Delete recording', act: "sheetAction('Recording deleted')",
+      ghost: 'Keep it'
+    },
+    /* Android, after notifications have been refused twice. Not an error and not
+       a telling-off: the choice was made twice on purpose, and we cannot undo it
+       — only Settings can. So it says what is gone, says what still works so the
+       loss is not read as bigger than it is, and offers the one route there is.
+       Android only; on iOS this never appears. */
+    android: {
+      icon: 'ph ph-bell-slash',
+      title: 'Controls outside the app are off',
+      text: 'Notifications are turned off for rhrs, so there is no player in the notification shade or on the lock screen while you listen. Listening itself still works, and so do your headphone buttons and the controls in your car. Android only lets this be turned back on in Settings.',
+      primary: 'Open Settings', act: "sheetAction('Opening system settings')",
+      ghost: 'Not now'
+    }
+  };
+  function openAlert(key) {
+    const a = ALERTS[key] || ALERTS.delete;
+    document.getElementById('alertBody').innerHTML = `
+      <span class="alert-ic"><i class="${a.icon}"></i></span>
+      <div class="alert-title cap-trim">${a.title}</div>
+      <div class="alert-text">${a.text}</div>
+      <button class="alert-btn fill" onclick="${a.act}">${a.primary}</button>
+      <button class="alert-btn ghost" onclick="closeSheet()">${a.ghost}</button>`;
     document.getElementById('scrim').classList.add('open');
     document.getElementById('alertSheet').classList.add('open');
   }
@@ -4370,7 +4395,9 @@
     login:      { label:'Login',            group:'proto', screen:'loginScreen',
                   go: () => openLogin() },
     alert:      { label:'Alert',            group:'proto',
-                  go: () => { showScreen('dashboardScreen'); openAlert(); } }
+                  go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
+    androidalert: { label:'Alert — Android notifications', group:'proto',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
   };
   /* ============================================================
      PROTOTYPE PANEL
