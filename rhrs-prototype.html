@@ -362,6 +362,37 @@
   .panel-item.on .pi-status.wip         { color: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.5); }
   .panel-item.on .pi-status.prepared    { color: #FFFFFF; background: rgba(255, 255, 255, 0.25); }
   .panel-item.on .pi-status.implemented { color: #7A1E2D; background: #FFFFFF; }
+  /* The chip is a control now, so it looks like one when you are over it. */
+  .pi-status.set { cursor: pointer; }
+  .pi-status.set:hover { filter: brightness(0.94); }
+  .panel-item.on .pi-status.set:hover { filter: brightness(1.12); }
+  .status-menu {
+    position: fixed; z-index: 80; min-width: 190px;
+    background: #FFFFFF; border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px; padding: 5px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  }
+  .status-menu button {
+    display: block; width: 100%; text-align: left;
+    border: none; background: none; cursor: pointer;
+    border-radius: 8px; padding: 8px 10px;
+    font-family: inherit; font-size: 13px; font-weight: 600; color: #3A2A2E;
+  }
+  .status-menu button:hover { background: rgba(0, 0, 0, 0.06); }
+  .status-menu button.on { background: #7A1E2D; color: #FFFFFF; }
+  .status-menu button.sep { border-top: 1px solid rgba(0, 0, 0, 0.09); margin-top: 4px; padding-top: 10px; border-radius: 0 0 8px 8px; }
+  /* Where the statuses actually live, said once at the foot of the list rather
+     than left for someone to find out by reloading. */
+  .panel-note {
+    font-size: 11px; line-height: 1.5; color: rgba(58, 42, 46, 0.5);
+    padding: 16px 10px 6px; border-top: 1px solid rgba(0, 0, 0, 0.08); margin-top: 14px;
+  }
+  .panel-note button {
+    border: none; background: none; cursor: pointer; padding: 0;
+    font-family: inherit; font-size: 11px; font-weight: 700; color: #7A1E2D;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+
   .panel-links {
     display: flex; gap: 8px; padding: 12px 20px 18px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -616,6 +647,24 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .se-row .se-chev { color: var(--text-muted); flex: 0 0 auto; display: flex; }
+  /* Adding in the middle. A gap between two rows is where the new thing would
+     go, so that is where the control is — a small target in the space itself,
+     rather than a menu that asks you where afterwards. It is drawn in a
+     zero-height box so the rows keep their own rhythm: the drag arithmetic reads
+     a row's height and margin, and anything with a height of its own between
+     them would put the step out. */
+  #sceneEditList .se-list { padding-top: 20px; }
+  #sceneEditList .se-row { margin-bottom: 20px; }
+  .se-ins { position: relative; height: 0; }
+  .se-ins button {
+    position: absolute; left: 50%; top: -10px; transform: translate(-50%, -50%);
+    width: 26px; height: 26px; border-radius: 50%; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px dashed var(--wine-border); background: var(--mist);
+    color: var(--wine); cursor: pointer;
+  }
+  .se-ins button:active { transform: translate(-50%, -50%) scale(0.88); }
+
   .se-add {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; border: none; cursor: pointer;
@@ -887,6 +936,7 @@
   /* The glyph carries which kind it is. Coral when what is missing is mine,
      wine when it is the app talking about itself. */
   .notif .n-ic {
+    position: relative;
     flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
     width: 38px; height: 38px; border-radius: 50%;
   }
@@ -904,9 +954,46 @@
   .notif .n-where { display: block; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
   .notif .n-time { display: block; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
   .notif .n-right { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding-top: 9px; }
-  .notif .n-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+  /* Unread sits on the corner of the glyph, the way it does on the bell it came
+     from — a mark on the thing, not a column of its own down the right. */
+  .notif .n-dot {
+    position: absolute; top: -1px; right: -1px;
+    width: 10px; height: 10px; border-radius: 50%; background: var(--coral);
+    box-shadow: 0 0 0 2px var(--mist);
+  }
   .notif .chevron { color: var(--wine); display: flex; }
   .notif-empty { text-align: center; padding: 40px 20px 30px; color: var(--text-muted); font-size: 14px; }
+
+  /* ============ EVALUATION — a take that cannot be judged ============
+     Coral, because it is about your recording; a block rather than a sheet,
+     because it explains what is above it and interrupts nothing. */
+  .eval-warn {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--coral-tint); border-radius: var(--radius-note);
+    padding: 16px; margin-top: 22px;
+  }
+  /* The triangle is the ground and the microphone is what it is about — the
+     glyph says which of the two things went wrong without a word. Phosphor's
+     triangle carries its mass low, so the microphone sits below the middle of
+     the box or it reads as floating out of the top. */
+  .eval-warn .warn-ic {
+    position: relative; flex: 0 0 auto;
+    width: 42px; height: 42px; color: var(--coral);
+  }
+  .eval-warn .warn-ic .ph-triangle {
+    font-size: 42px !important; line-height: 1; display: block;
+  }
+  .eval-warn .warn-ic .ph-microphone {
+    position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
+    font-size: 15px !important; color: var(--on-mark);
+  }
+  .eval-warn .warn-main { display: block; flex: 1 1 auto; min-width: 0; }
+  .eval-warn .warn-title {
+    display: block;
+    font-family: var(--font-display); font-weight: 600; font-size: 16px;
+    color: var(--noir); margin-bottom: 5px;
+  }
+  .eval-warn .warn-text { display: block; font-size: 14px; line-height: 1.5; color: var(--text-body); }
 
   /* ============ LOGIN ============
      The first screens anyone sees, and the only ones in the app that are a form.
@@ -1188,7 +1275,8 @@
   /* The count carries the neutral body colour, not a paler coral: coral on the
      coral tint measured 2.4:1 and was the weakest text on the screen. Coral is
      left to the title and the glyph, which is where it says "these are mine". */
-  .rec-wizard .rw-meta { display: block; font-size: 13px; font-weight: 500; color: var(--text-body); }
+  .rec-wizard .rw-sub  { display: block; font-size: 13px; color: var(--text-body); margin-bottom: 3px; }
+  .rec-wizard .rw-meta { display: block; font-size: 13px; font-weight: 600; color: var(--text-body); }
   .rec-wizard .chevron { display: flex; flex: 0 0 auto; color: var(--coral); }
 
   /* ---------- Scroll area (mode screens) ---------- */
@@ -2264,6 +2352,8 @@
     </button>
   </div>
   <div class="panel-body" id="panelBody"></div>
+  <!-- Fixed, so it can hang off whichever chip was tapped. -->
+  <div class="status-menu" id="statusMenu" hidden></div>
   <div class="panel-links">
     <a href="sitemap.html"><i class="ph ph-graph ic-18"></i>Screen map</a>
     <a href="index.html"><i class="ph ph-swatches ic-18"></i>Design hub</a>
@@ -2874,6 +2964,21 @@
       </div>
       <div class="eval-label">Transcript</div>
       <div class="line-text" id="evalTranscript"></div>
+
+      <!-- When the take itself is the problem. It sits under the transcript
+           because that is what it explains — the words above may not be what you
+           said. Not an alert: nothing has gone wrong that should interrupt you,
+           and the thing it is about is right there to look at. -->
+      <div class="eval-warn" id="evalWarn" hidden>
+        <span class="warn-ic">
+          <i class="ph-fill ph-triangle"></i>
+          <i class="ph-fill ph-microphone"></i>
+        </span>
+        <span class="warn-main">
+          <span class="warn-title">This take is hard to hear</span>
+          <span class="warn-text">The recording came back quiet and muffled, so the words above may not be the ones you said. Put headphones on, keep your hand and your clothes off the microphone, and stay within arm's reach of the phone.</span>
+        </span>
+      </div>
     </div>
 
     <div class="transport">
@@ -2963,7 +3068,7 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Stage directions</div>
+            <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Directions</div>
             <div class="set-sub">Show when opening the scene</div>
           </div>
           <button class="toggle on" data-note="stage" onclick="toggleNoteDefault(this)"></button>
@@ -2988,7 +3093,7 @@
           </button>
           <div class="set-row">
             <div>
-              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
+              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read directions</div>
               <div class="set-sub">A narrator reads them between the lines</div>
             </div>
             <button class="toggle on" onclick="toggleNarrate('listen', 'stage', this)"></button>
@@ -3031,7 +3136,7 @@
           <div class="set-group-label">Rehearsal</div>
           <div class="set-row">
             <div>
-              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read stage directions</div>
+              <div class="set-label"><i class="ph-fill ph-note ic-18 lbl-ic stage"></i>Read directions</div>
               <div class="set-sub">A narrator reads them between the cues</div>
             </div>
             <button class="toggle on" onclick="toggleNarrate('rehearse', 'stage', this)"></button>
@@ -3353,7 +3458,10 @@
     edit:     '<i class="ph ph-pencil-simple ic-22"></i>',
     note:     '<i class="ph ph-note ic-22"></i>',
     record:   '<i class="ph ph-microphone ic-22"></i>',
-    trash:    '<i class="ph ph-trash ic-22"></i>'
+    trash:    '<i class="ph ph-trash ic-22"></i>',
+    /* A line of the script, as opposed to a direction — the two things you can
+       put between two rows of a scene. */
+    line:     '<i class="ph ph-quotes ic-22"></i>'
   };
   const FLAG_IC = '<i class="ph-fill ph-note ic-13"></i>';
   const EYE_OFF = '<i class="ph ph-eye-slash ic-16"></i>';
@@ -3607,7 +3715,7 @@
      SHARED LINE PIECES
      ============================================================ */
   function noteBlock(idx, type, text, hidden) {
-    const label = type === 'private' ? 'Your private note' : 'Stage directions';
+    const label = type === 'private' ? 'Your private note' : 'Directions';
     return `<div class="note ${type} ${hidden ? 'hidden' : ''}" data-idx="${idx}" data-type="${type}">
       <div class="note-head">
         <span class="flag ${type}">${FLAG_IC}</span>
@@ -3618,7 +3726,7 @@
     </div>`;
   }
   function flagBtn(idx, type) {
-    return `<button class="flag ${type}" onclick="showNote(${idx}, '${type}')" title="Show ${type === 'private' ? 'private note' : 'stage direction'}">${FLAG_IC}</button>`;
+    return `<button class="flag ${type}" onclick="showNote(${idx}, '${type}')" title="Show ${type === 'private' ? 'private note' : 'direction'}">${FLAG_IC}</button>`;
   }
   function flagsFor(line, idx) {
     let flags = '';
@@ -3645,9 +3753,9 @@
       <div class="note stage" data-idx="${idx}" data-type="stage">
         <div class="note-head">
           <span class="flag stage">${FLAG_IC}</span>
-          <span class="note-label">Stage directions</span>
+          <span class="note-label">Directions</span>
           ${play}
-          <button class="line-menu-btn" onclick="openStageSheet(${idx})" aria-label="Stage direction menu">${DOTS}</button>
+          <button class="line-menu-btn" onclick="openStageSheet(${idx})" aria-label="Direction menu">${DOTS}</button>
         </div>
         <div class="note-body">${text}</div>
       </div>
@@ -4164,9 +4272,12 @@
      take, so the way on is to keep it. The source says where Use and Retake go
      back to; the take itself is judged the same either way. */
   let evalMode = 'rehearse', evalSource = 'rehearse';
-  function openEvaluation(mode, source) {
+  /* `poor` is a state of the take, not of the screen: the app decides it from
+     what it heard. In the prototype the panel turns it on. */
+  function openEvaluation(mode, source, poor) {
     evalMode = mode || 'rehearse';
     evalSource = source || (evalMode === 'record' ? 'audio' : 'rehearse');
+    document.getElementById('evalWarn').hidden = !poor;
     const line = SCRIPT[activeIdx];
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
     evalTextShown = false;
@@ -4305,13 +4416,13 @@
   }
   function openStageSheet(idx) {
     document.getElementById('sheetContext').className = 'sheet-context others';
-    document.getElementById('ctxName').textContent = 'Stage directions';
+    document.getElementById('ctxName').textContent = 'Directions';
     document.getElementById('ctxLine').textContent = shorten(SCRIPT[idx].stage);
     document.getElementById('sheetItems').innerHTML =
-      item('edit', 'Edit stage direction', false, 'Edit stage direction') +
+      item('edit', 'Edit direction', false, 'Edit direction') +
       item('note', 'Add a private note', false, 'Private note') +
       '<div class="sheet-sep"></div>' +
-      item('trash', 'Delete', true, 'Delete stage direction');
+      item('trash', 'Delete', true, 'Delete direction');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -4444,6 +4555,7 @@
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Recording Wizard</span>
+          <span class="rw-sub">Record your lines for others to listen</span>
           <span class="rw-meta">${scriptMissing()} lines without audio</span>
         </span>
         <span class="chevron">${ICON.chevron}</span>
@@ -4609,7 +4721,7 @@
         /* Nothing left to record means nothing to say about it. */
         if (!count) return '';
         return `<button class="notif mine go" onclick="notifOpenWizard()">
-          <span class="n-ic"><i class="ph-fill ph-microphone ic-20"></i></span>
+          <span class="n-ic"><i class="ph-fill ph-microphone ic-20"></i>${n.read ? '' : '<span class="n-dot"></span>'}</span>
           <span class="n-main">
             <span class="n-title">Lines you still need to record</span>
             <span class="n-body">${count} of your lines have no audio yet.</span>
@@ -4617,19 +4729,17 @@
             <span class="n-time">${n.time}</span>
           </span>
           <span class="n-right">
-            ${n.read ? '' : '<span class="n-dot"></span>'}
             <span class="chevron">${ICON.chevron}</span>
           </span>
         </button>`;
       }
       return `<div class="notif app">
-        <span class="n-ic"><i class="ph ph-device-mobile-speaker ic-20"></i></span>
+        <span class="n-ic"><i class="ph ph-device-mobile-speaker ic-20"></i>${n.read ? '' : '<span class="n-dot"></span>'}</span>
         <span class="n-main">
           <span class="n-title">Shake to send feedback</span>
           <span class="n-body">Something looks wrong? Give your phone a shake and tell us.</span>
           <span class="n-time">${n.time}</span>
         </span>
-        <span class="n-right">${n.read ? '' : '<span class="n-dot"></span>'}</span>
       </div>`;
     }).join('') || '<div class="notif-empty">Nothing new.</div>';
     paintBellDot();
@@ -5323,6 +5433,16 @@
                     stepLine('rehearse', 1);          // cue line → your line
                     openEvaluation();
                   } },
+    /* The same screen with the take's own problem said under the transcript —
+       a state, so it carries no `screen` of its own and lets Evaluation keep the
+       highlight. */
+    evalpoor:   { label:'Evaluation — poor audio', group:'recording', st:'wip',
+                  go: () => {
+                    openScene(DEMO_SCENE);
+                    switchMode('rehearse');
+                    stepLine('rehearse', 1);
+                    openEvaluation('rehearse', null, true);
+                  } },
     audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'prepared',
                   /* Reached in the app from a line's menu — Audio — on any line
                      of yours, and from the wizard's tag on a recorded line. */
@@ -5348,9 +5468,11 @@
     linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen');
                               openSheet(lineIdx().find(i => SCRIPT[i].mine) ?? lineIdx()[0]); } },
-    stagemenu:  { label:'Stage direction menu', group:'sheets', ver:1, st:'prepared',
+    stagemenu:  { label:'Direction menu',    group:'sheets', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE);
                               openStageSheet(SCRIPT.findIndex(it => it.stage)); } },
+    addhere:    { label:'Add here',         group:'sheets', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddSheet(1); } },
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
     modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'prepared',
@@ -5496,13 +5618,18 @@
          in the same list and moves the same way — it just has no one to say it,
          and it carries the glyph the notes use so it is told apart at a glance. */
       const kind = it.who ? (it.mine ? 'mine' : 'others') : 'stage';
-      const who  = it.who || 'Stage direction';
       const text = it.who ? it.text : it.stage;
-      return `<div class="se-row ${kind}">
-        <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit stage direction')`}">
+      /* A direction carries no name: the glyph already says what it is, and
+         "Stage direction" written above every one of them was a label for the
+         kind rather than a heading for the row. */
+      return `<div class="se-ins"><button onclick="openAddSheet(${i})" aria-label="Add here">
+          <i class="ph-bold ph-plus ic-14"></i>
+        </button></div>
+      <div class="se-row ${kind}">
+        <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit direction')`}">
           ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
           <span class="se-body">
-            <span class="se-who cap-trim">${who}${it.who ? seFlags(it) : ''}</span>
+            ${it.who ? `<span class="se-who cap-trim">${it.who}${seFlags(it)}</span>` : ''}
             <span class="se-text">${text}</span>
           </span>
           <span class="se-chev"><i class="ph ph-pencil-simple ic-18"></i></span>
@@ -5513,8 +5640,8 @@
       `<button class="se-add" onclick="toast('Add line')">
         <i class="ph ph-plus ic-18"></i>Add line
       </button>
-      <button class="se-add" onclick="toast('Add stage direction')">
-        <i class="ph ph-plus ic-18"></i>Add stage direction
+      <button class="se-add" onclick="toast('Add direction')">
+        <i class="ph ph-plus ic-18"></i>Add direction
       </button>`;
   }
   /* ============================================================
@@ -5565,7 +5692,7 @@
 
       ${editSection('note', 'Private note', '<i class="ph-fill ph-note ic-16 lbl-ic private"></i>', line.note, 'Add private note')}
 
-      ${editSection('dir', 'Stage directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add stage direction')}
+      ${editSection('dir', 'Directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add direction')}
 
       <div class="le-label">Reference</div>
       <button class="le-row" onclick="copyLineId(${lineEditIdx})">
@@ -5658,6 +5785,24 @@
        alone instead. */
     if (!el.scrollHeight) { el.style.height = ''; return; }
     el.style.height = el.scrollHeight + 'px';
+  }
+
+  /* What goes in the gap: a line or a direction. Two answers, so it is a sheet
+     and not a screen — and it is the same sheet the line menu uses, because it
+     is the same kind of question asked in the same place. */
+  function openAddSheet(at) {
+    const items = sceneList()[sceneEditIdx].items || SCENE_1;
+    const next = items[at];
+    document.getElementById('sheetContext').className = 'sheet-context others';
+    document.getElementById('ctxName').textContent = 'Add here';
+    document.getElementById('ctxLine').textContent = next
+      ? 'Before ' + (next.who ? next.who + ' — ' + shorten(next.text) : shorten(next.stage))
+      : 'At the end of the scene';
+    document.getElementById('sheetItems').innerHTML =
+      item('line', 'Add a line',      false, 'Add line') +
+      item('note', 'Add a direction', false, 'Add direction');
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
   }
 
   /* The cast, as a sheet: it is one choice, not a place. */
@@ -5968,10 +6113,16 @@
   ];
   /* WIP until it is signed off; after that a version and whether it has been
      built. The words are the ones used in the design meetings. */
-  function statusChip(v) {
+  function statusText(v) {
     const st = v.st || 'wip';
-    const text = st === 'wip' ? 'WIP' : 'V' + (v.ver || 1) + ' · ' + st;
-    return `<span class="pi-status ${st}">${text}</span>`;
+    return st === 'wip' ? 'WIP' : 'V' + (v.ver || 1) + ' · ' + st;
+  }
+  /* A span, not a button: this sits inside the row's own button, and a button
+     inside a button is closed by the parser — the row came apart. */
+  function statusChip(key, v) {
+    return `<span class="pi-status set ${v.st || 'wip'}" role="button" tabindex="0"
+              onclick="openStatusMenu(event, '${key}')"
+              title="Set where this stands">${statusText(v)}</span>`;
   }
   function renderPanel() {
     const here = document.querySelector('.screen.active')?.id;
@@ -5982,10 +6133,74 @@
         <button class="panel-item ${v.screen && v.screen === here ? 'on' : ''}" onclick="panelGo('${key}')">
           <span class="pi-dot"></span>
           <span class="pi-name">${v.label}</span>
-          ${statusChip(v)}
+          ${statusChip(key, v)}
         </button>`).join('');
-    }).join('');
+    }).join('') + `
+      <div class="panel-note">
+        Statuses are kept in this browser, not in the file.
+        <button onclick="copyStatuses()">Copy for the file</button> ·
+        <button onclick="resetStatuses()">Reset</button>
+      </div>`;
   }
+
+  /* ---- where a screen stands ----
+     Set here rather than only in the file, because it is Lukas's call and it
+     changes between sessions. The file keeps the last agreed set; the browser
+     keeps what has been changed since, and Copy hands it back for the file so
+     the repo stays the one that everybody reads. */
+  const STATUS_KEY = 'rhrs-status';
+  function loadStatuses() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STATUS_KEY) || '{}');
+      Object.entries(saved).forEach(([k, v]) => {
+        if (SCREENS[k] && v && v.st) { SCREENS[k].st = v.st; SCREENS[k].ver = v.ver || 1; }
+      });
+    } catch (e) { /* a private window, or storage turned off — the file's set stands */ }
+  }
+  function saveStatuses() {
+    const out = {};
+    Object.entries(SCREENS).forEach(([k, v]) => { out[k] = { st: v.st || 'wip', ver: v.ver || 1 }; });
+    try { localStorage.setItem(STATUS_KEY, JSON.stringify(out)); } catch (e) {}
+  }
+  function openStatusMenu(ev, key) {
+    ev.stopPropagation();
+    const v = SCREENS[key], st = v.st || 'wip', ver = v.ver || 1;
+    const rows = [
+      ['wip', ver, 'WIP', ''],
+      ['prepared', ver, 'V' + ver + ' · prepared', ''],
+      ['implemented', ver, 'V' + ver + ' · implemented', ''],
+      /* A new iteration starts over: a version that is being worked on again is
+         not the one that was signed off. */
+      ['wip', ver + 1, 'Start V' + (ver + 1) + ' — back to WIP', 'sep']
+    ];
+    const m = document.getElementById('statusMenu');
+    m.innerHTML = rows.map(([nst, nver, label, cls]) =>
+      `<button class="${cls} ${nst === st && nver === ver ? 'on' : ''}"
+         onclick="setStatus('${key}', '${nst}', ${nver})">${label}</button>`).join('');
+    m.hidden = false;
+    const r = ev.currentTarget.getBoundingClientRect();
+    m.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+    m.style.top = Math.min(window.innerHeight - m.offsetHeight - 8, r.bottom + 6) + 'px';
+  }
+  function closeStatusMenu() { document.getElementById('statusMenu').hidden = true; }
+  function setStatus(key, st, ver) {
+    SCREENS[key].st = st;
+    SCREENS[key].ver = ver;
+    saveStatuses();
+    closeStatusMenu();
+    renderPanel();
+  }
+  function copyStatuses() {
+    const out = {};
+    Object.entries(SCREENS).forEach(([k, v]) => { out[k] = { st: v.st || 'wip', ver: v.ver || 1 }; });
+    navigator.clipboard?.writeText(JSON.stringify(out, null, 2));
+    toast('Statuses copied');
+  }
+  function resetStatuses() {
+    try { localStorage.removeItem(STATUS_KEY); } catch (e) {}
+    location.reload();
+  }
+  document.addEventListener('click', closeStatusMenu);
   function panelGo(key) {
     SCREENS[key].go();
     closePanel();          // no-op where the panel is always there
@@ -6000,6 +6215,7 @@
   window.addEventListener('hashchange', openFromHash);
   /* After SCREENS and PANEL_GROUPS exist, not with the other renderers further
      up — up there they are still in the dead zone and the call throws. */
+  loadStatuses();
   renderPanel();
   openFromHash();
 </script>
