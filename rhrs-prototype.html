@@ -3244,8 +3244,8 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Go through the whole scene</div>
-            <div class="set-sub">The arrows move one line at a time, cues and directions included, so you hear what you are answering. Off, they jump from one line of yours to the next.</div>
+            <div class="set-label">Step through every line</div>
+            <div class="set-sub">Like Rehearse: the arrows stop on the cues and the directions too, not only on yours</div>
           </div>
           <button class="toggle" onclick="wzToggle('walk', this)"></button>
         </div>
@@ -5506,7 +5506,7 @@
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
-    evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', st:'wip',
+    evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', ver:1, st:'prepared',
                   go: () => {
                     openScene(DEMO_SCENE);
                     switchMode('rehearse');
@@ -5516,7 +5516,7 @@
     /* The same screen with the take's own problem said under the transcript —
        a state, so it carries no `screen` of its own and lets Evaluation keep the
        highlight. */
-    evalpoor:   { label:'Evaluation — poor audio', group:'recording', st:'wip',
+    evalpoor:   { label:'Evaluation — poor audio', group:'recording', ver:1, st:'prepared',
                   go: () => {
                     openScene(DEMO_SCENE);
                     switchMode('rehearse');
