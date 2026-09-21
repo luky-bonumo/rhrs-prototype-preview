@@ -1067,9 +1067,6 @@
      column — left in the grid it would sit off to the left. */
   #wzRec .t-main { grid-template-columns: auto; justify-content: center; }
   .wz-hint { text-align: center; font-size: 13px; color: var(--text-muted); padding-top: 10px; }
-  /* Nothing left to record. The mic stays where it is and goes quiet, rather than
-     leaving and changing the shape of the screen under your thumb. */
-  #wzIdle.spent .big-btn, #wzIdle.spent .skip-btn { opacity: 0.3; pointer-events: none; }
   /* Nothing left to record. Not an empty list — a finished one. It sits above the
      scene rather than in place of it: the scene is still worth reading. */
   .wz-empty { text-align: center; padding: 20px 20px 34px; }
@@ -1093,7 +1090,11 @@
   /* Where the mode bar stands everywhere else. The wizard is not a mode you
      switch out of from here, so the bar names where you are and does nothing —
      same type, same place, no target. */
-  .modebar.wizardbar { justify-content: center; }
+  .modebar.wizardbar { justify-content: center; gap: 12px; }
+  /* How much is left rides with the name of the place, down on the bar, so the
+     transport above is nothing but controls. */
+  .wz-count { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+  .wz-count:empty { display: none; }
   .wizardbar .mode { color: var(--coral); cursor: default; }
   .wizardbar .mode:active { transform: none; }
 
@@ -2099,7 +2100,7 @@
     padding: 20px 0;
     border-bottom: 1px solid var(--divider);
   }
-  #listenScroll .stage-only, #rehearseScroll .stage-only {
+  #listenScroll .stage-only, #rehearseScroll .stage-only, #wizardScroll .stage-only {
     border-radius: var(--radius-lcard);
     padding: 20px;
     margin-bottom: 14px;
@@ -2114,7 +2115,8 @@
      unseen while the playhead never stopped on a direction; now that it opens the
      scene, it is the first thing you look at. */
   #listenScroll .stage-only.active::before,
-  #rehearseScroll .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
+  #rehearseScroll .stage-only.active::before,
+  #wizardScroll .stage-only.active::before { --glass-rim: 2.5px; background: var(--wine); }
   /* the narrator's play control sits with the label, before the menu */
   .stage-only .lc-btn { color: var(--wine); margin-left: auto; }
   .stage-only .lc-btn + .line-menu-btn { margin-left: 0; }
@@ -2143,7 +2145,7 @@
   .round-btn, .detail-header .back, .icon-btn,
   .card, .lcard, .edit-card, .next-scene, .auth-field, .otp-box, .ae-take,
   .le-row, .le-text, .se-row,
-  #listenScroll .stage-only, #rehearseScroll .stage-only,
+  #listenScroll .stage-only, #rehearseScroll .stage-only, #wizardScroll .stage-only,
   .mini, .skip-btn, .jump-btn,
   .settings-title .account-btn, .char-row .cr-edit, .font-stepper button,
   .speed-step, .speed-opt {
@@ -2157,6 +2159,7 @@
   .auth-field::before, .otp-box::before, .ae-take::before,
   .le-row::before, .le-text::before, .se-row::before,
   #listenScroll .stage-only::before, #rehearseScroll .stage-only::before,
+  #wizardScroll .stage-only::before,
   .dash-recent::before, .dash-shortcut::before,
   .gs-group::before, .gs-theme button::before,
   .sheet::before, .settings-sheet::before,
@@ -2286,7 +2289,7 @@
         <button class="dash-btn" onclick="showScreen('globalSettingsScreen')" aria-label="Settings">
           <i class="ph ph-gear-six ic-20"></i>
         </button>
-        <button class="dash-btn" onclick="toast('User account')" aria-label="Account">
+        <button class="dash-btn" onclick="openAccount()" aria-label="Account">
           <i class="ph ph-user ic-20"></i>
         </button>
       </div>
@@ -2517,17 +2520,35 @@
 
     <div class="transport" id="wzTransport">
       <div class="t-fold show">
-      <!-- state: idle — a line is selected, nothing recorded yet. The arrows step
-           between the lines the wizard is here for, never onto the ones between. -->
+      <!-- state: idle — the playhead is on a line of yours, so the microphone is
+           under your thumb. How many are left is said on the bar below, not here. -->
       <div class="expanded show" id="wzIdle">
         <div class="t-main">
-          <button class="skip-btn" onclick="wzStep(-1)" aria-label="Previous line to record"><i class="ph-bold ph-arrow-left ic-26"></i></button>
+          <button class="skip-btn" onclick="wzStep(-1)" aria-label="Previous"><i class="ph-bold ph-arrow-left ic-26"></i></button>
           <button class="big-btn" onclick="wzStart()" aria-label="Record this line">
             <i class="ph-fill ph-microphone ic-38"></i>
           </button>
-          <button class="skip-btn" onclick="wzStep(1)" aria-label="Next line to record"><i class="ph-bold ph-arrow-right ic-26"></i></button>
+          <button class="skip-btn" onclick="wzStep(1)" aria-label="Next"><i class="ph-bold ph-arrow-right ic-26"></i></button>
         </div>
-        <div class="wz-hint" id="wzHint">Record this line</div>
+      </div>
+
+      <!-- state: audio — a cue line or a stage direction. The same player as
+           Rehearse: you record an answer to something you have just heard, so the
+           wizard has to be able to play it. -->
+      <div class="expanded" id="wzAudio">
+        <div class="t-main">
+          <button class="skip-btn" onclick="wzStep(-1)" aria-label="Previous"><i class="ph-bold ph-arrow-left ic-26"></i></button>
+          <button class="big-btn" onclick="togglePlay('wizard')" aria-label="Play / pause">
+            <i class="ph-fill ph-pause ic-38" id="wzAudioIc"></i>
+          </button>
+          <button class="skip-btn" onclick="wzStep(1)" aria-label="Next"><i class="ph-bold ph-arrow-right ic-26"></i></button>
+        </div>
+        <div class="bar with-thumb" onclick="seek(event)"><div class="fill" style="width:42%"></div></div>
+        <div class="t-meta">
+          <span>00:59</span>
+          <button class="speed" onclick="openSpeedSheet()">1.0x</button>
+          <span>01:21</span>
+        </div>
       </div>
 
       <!-- state: recording -->
@@ -2553,6 +2574,7 @@
          nothing to press. -->
     <div class="modebar wizardbar">
       <span class="mode active"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Recording Wizard</span></span>
+      <span class="wz-count" id="wzCount"></span>
     </div>
   </div>
 
@@ -3064,10 +3086,10 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Countdown</div>
-            <div class="set-sub">Three beats before recording starts</div>
+            <div class="set-label">Step through every line</div>
+            <div class="set-sub">Like Rehearse: the arrows stop on the cues and the directions too, not only on yours</div>
           </div>
-          <button class="toggle" onclick="wzToggle('countdown', this)"></button>
+          <button class="toggle" onclick="wzToggle('walk', this)"></button>
         </div>
       </div>
     </div>
@@ -3345,7 +3367,7 @@
   }
 
   /* Playback / rehearsal state */
-  let currentMode = 'read';        // read | listen | rehearse
+  let currentMode = 'read';        // read | listen | rehearse | wizard
   let activeIdx   = 0;             // the line currently being played / rehearsed
   let playing     = true;
   let rehState    = 'audio';       // audio | talking | paused | success
@@ -3740,6 +3762,7 @@
     if (idx === activeIdx) { togglePlay(mode); return; }
     activeIdx = idx;
     playing = true;
+    if (mode === 'wizard') { wzGo(idx); return; }
     renderCards(mode);
     if (mode === 'rehearse') syncRehearse();
     refocusPlayer(mode);
@@ -3751,10 +3774,11 @@
   function togglePlay(mode) {
     playing = !playing;
     const ic = playing ? 'ph-pause' : 'ph-play';
-    ['listenBigIc','listenMiniIc','rehAudioIc','rehMiniIc'].forEach(id => {
+    ['listenBigIc','listenMiniIc','rehAudioIc','rehMiniIc','wzAudioIc'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.className = el.className.replace(/ph-(pause|play)/, ic);
     });
+    if (mode === 'wizard') { renderWizard(); return; }
     renderCards(mode);
   }
   function stepLine(mode, dir) {
@@ -3812,7 +3836,7 @@
     /* In Rehearse the app only ever reads the cues — your own lines are yours to
        say, so there is no speed to set for them. */
     document.getElementById('speedMineGroup').style.display =
-      currentMode === 'rehearse' ? 'none' : '';
+      (currentMode === 'rehearse' || currentMode === 'wizard') ? 'none' : '';
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('speedSheet').classList.add('open');
@@ -4154,11 +4178,13 @@
   /* ============================================================
      SHEETS
      ============================================================ */
-  function buildItems(isMine, fromEval) {
+  function buildItems(isMine, noJumps) {
     let html = '';
     /* Jumping into a mode from here makes no sense on Evaluation: you are already
-       in the middle of one line, not choosing where to start. */
-    if (!fromEval) {
+       in the middle of one line, not choosing where to start. Nor in the wizard,
+       which is a session you are in the middle of — leaving it for Listen is not
+       what the menu on a line is for. */
+    if (!noJumps) {
       html += item('listen', 'Listen from here', false, "Listen from this line");
       html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
       html += '<div class="sheet-sep"></div>';
@@ -4182,7 +4208,8 @@
     document.getElementById('sheetContext').className = 'sheet-context ' + (line.mine ? 'mine' : 'others');
     document.getElementById('ctxName').textContent = line.who;
     document.getElementById('ctxLine').textContent = shorten(line.text);
-    document.getElementById('sheetItems').innerHTML = buildItems(line.mine, fromEval);
+    document.getElementById('sheetItems').innerHTML =
+      buildItems(line.mine, fromEval || activeScreen().id === 'wizardScreen');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -4253,6 +4280,7 @@
   /* Re-render rather than reach into the DOM: what a line shows is state, and a
      class poked onto the current screen is lost the moment anything re-renders. */
   function rerenderCurrent() {
+    if (currentMode === 'wizard') { renderWizard(); return; }
     if (currentMode === 'read') { renderRead(); return; }
     renderCards(currentMode);
     updateTransport(currentMode);
@@ -4781,7 +4809,11 @@
      The playhead is the same `activeIdx` the modes use, so everything that
      reads it — the line menu, Evaluation — needs no second version here. */
   const wz = { filter: 'missing', scene: 0, state: 'idle',
-               autoAdvance: true, playCue: false, countdown: false };
+               autoAdvance: true, playCue: false,
+               /* Off: the arrows go from one line of yours to the next, which is
+                  what a recording session is. On: they walk the scene the way
+                  Rehearse does, stopping on the cues and the directions too. */
+               walk: false };
 
   /* Where the wizard may stop: lines of yours, and — unless you asked for all of
      them — only those still without audio. */
@@ -4840,10 +4872,14 @@
     currentScene = sc.title;
     document.getElementById('wizardTitle').textContent = sc.title;
     wz.filter = 'missing';
+    /* The wizard is a mode as far as the shared bits are concerned — the speed
+       sheet, the text settings, anything that asks what is on screen. */
+    currentMode = 'wizard';
+    playing = true;
     const targets = wzTargets();
-    activeIdx = targets[0] ?? lineIdx().find(i => isMine(SCRIPT[i])) ?? 0;
+    activeIdx = targets[0] ?? lineIdx().find(i => isMine(SCRIPT[i])) ?? firstPlayable('rehearse');
     renderWizard();
-    wzSetState(targets.length ? 'idle' : 'done');
+    wzSync();
     showScreen('wizardScreen');
     /* Jumped, not scrolled: you have only just arrived, so there is nothing to
        follow with your eye. */
@@ -4877,7 +4913,7 @@
        transport cannot act. */
     if (!targets.includes(activeIdx)) activeIdx = targets[0] ?? activeIdx;
     renderWizard();
-    wzSetState(targets.length ? 'idle' : 'done');
+    wzSync();
     wzScroll();
   }
 
@@ -4888,16 +4924,18 @@
       (targets.length ? '' : wzFinished()) +
       SCRIPT.map((line, idx) => {
         if (isSceneMark(line)) return sceneMark(line.scene);
-        /* Directions are here for the same reason the cue lines are: you record a
-           line the way the page tells you to say it. Nothing to play, though —
-           the only thing this screen plays is you. */
-        if (!line.who) return defaults.stage ? stageBlock(idx, line.stage) : '';
+        /* Directions and cue lines play here exactly as they do in Rehearse —
+           you record an answer to something you have just heard, so the wizard
+           has to be able to give you it. */
+        if (!line.who) return defaults.stage ? stageBlock(idx, line.stage, 'wizard') : '';
         if (!isMine(line)) return `
-      <div class="lcard others" data-idx="${idx}">
+      <div class="lcard others ${idx === activeIdx ? 'active' : ''}" data-idx="${idx}">
         <div class="line-head">
           <span class="char-name cap-trim">${line.who}</span>
           ${flagsFor(line, idx)}
-          <button class="line-menu-btn spring" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
+          <button class="lc-btn spring" onclick="cardControl('wizard', ${idx})" aria-label="Play line">${
+            idx === activeIdx && playing ? ICON.pause : ICON.play}</button>
+          <button class="line-menu-btn" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
         ${notesFor(line, idx)}
         ${lineBody(line, idx)}
@@ -4923,6 +4961,19 @@
       </div>`;
       }).join('');
     applyTextStyle();
+    applyAccent('wizard');
+    wzCount();
+  }
+
+  /* How much of the job is left, said on the bar beside the name of the place.
+     It was under the microphone; down here the transport is nothing but
+     controls, and the count sits where the mode bar's own words sit. */
+  function wzCount() {
+    const targets = wzTargets(), at = targets.indexOf(activeIdx);
+    document.getElementById('wzCount').textContent =
+      !targets.length ? ''
+      : at >= 0 ? (at + 1) + ' of ' + targets.length
+      : targets.length + ' to record';
   }
 
   /* Not an empty list but a finished one, and it sits above the scene rather than
@@ -4941,20 +4992,32 @@
       </div>`;
   }
 
+  /* One way to move the playhead: put it somewhere, redraw, let the transport
+     follow it, and bring it into view. */
+  function wzGo(idx) {
+    if (idx == null || !SCRIPT[idx]) return;
+    activeIdx = idx;
+    renderWizard();
+    wzSync();
+    wzScroll();
+  }
   function wzSelect(idx) {
     if (!isMine(SCRIPT[idx])) return;
-    activeIdx = idx;
-    wzSetState('idle');
-    renderWizard();
-    wzScroll();
+    wzGo(idx);
   }
   function wzRecordAt(idx) {
     wzSelect(idx);
     wzStart();
   }
-  /* The arrows move between the lines the wizard is here for, not between lines.
-     What lies in between is context, and you did not come to stop on it. */
+  /* By default the arrows move between the lines the wizard is here for: what
+     lies in between is context, and you did not come to stop on it. Switched to
+     walking, they step the scene the way Rehearse does — cue, direction, your
+     line — for when the wizard is how you are working through it. */
   function wzStep(dir) {
+    if (wz.walk) {
+      playing = true;
+      return wzGo(stepIdx(activeIdx, dir, 'rehearse'));
+    }
     const targets = wzTargets();
     if (!targets.length) return;
     const at = targets.indexOf(activeIdx);
@@ -4962,32 +5025,28 @@
       ? (dir > 0 ? targets.find(i => i > activeIdx) ?? targets[0]
                  : [...targets].reverse().find(i => i < activeIdx) ?? targets[targets.length - 1])
       : targets[at + dir] ?? targets[at];
-    wzSelect(next);
+    wzGo(next);
   }
   function wzScroll(behavior = 'smooth') {
     const sc = document.getElementById('wizardScroll');
-    const card = sc.querySelector('.lcard.active');
+    const card = sc.querySelector('.lcard.active, .stage-only.active');
     if (!card) return;
     const fade = parseFloat(getComputedStyle(sc).getPropertyValue('--fade-t')) || 0;
     sc.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior });
   }
 
-  const WZ_STATES = { idle:'wzIdle', rec:'wzRec', success:'wzSuccess', done:'wzIdle' };
+  const WZ_STATES = { idle:'wzIdle', audio:'wzAudio', rec:'wzRec', success:'wzSuccess' };
   function wzSetState(st) {
     wz.state = st;
     Object.values(WZ_STATES).forEach(id => document.getElementById(id).classList.remove('show'));
     document.getElementById(WZ_STATES[st]).classList.add('show');
-    if (st === 'rec' || st === 'success') return;
-    /* idle and done are the same furniture: when there is nothing left the mic
-       goes quiet where it stands rather than leaving, so the screen does not
-       change shape under your thumb as the last line lands. */
-    const targets = wzTargets(), at = targets.indexOf(activeIdx);
-    const spent = st === 'done' || !targets.length;
-    document.getElementById('wzIdle').classList.toggle('spent', spent);
-    document.getElementById('wzHint').textContent = spent
-      ? 'Nothing left to record'
-      : (needsAudio(SCRIPT[activeIdx]) ? 'Record this line' : 'Record a new take') +
-        (at >= 0 ? ' · ' + (at + 1) + ' of ' + targets.length : '');
+  }
+  /* The transport follows the playhead, the way Rehearse's does: your line puts
+     the microphone under your thumb, anyone else's — or a direction — puts the
+     player there. Nothing is ever taken away: a line of yours that already has
+     audio can always be said again. */
+  function wzSync() {
+    wzSetState(isMine(SCRIPT[activeIdx] || {}) ? 'idle' : 'audio');
   }
 
   /* The same microphone as Rehearse and as Audio edit, and the same bargain:
@@ -4997,6 +5056,7 @@
   function wzStart() {
     const line = SCRIPT[activeIdx];
     if (!line || !isMine(line)) return;
+    playing = false;
     wzSetState('rec');
     startRecording({ btn: 'wzRecBtn', time: 'wzRecTime', done: wzKeep });
   }
@@ -5009,7 +5069,7 @@
      the way: Use saves it, Retake throws it away and opens the mic again. */
   function wzStop() {
     stopRecording();
-    wzSetState('idle');
+    wzSync();
     openEvaluation('record', 'wizard');
   }
   /* A take has landed: the card says so, Script detail counts down, and the
@@ -5020,10 +5080,14 @@
     renderWizardScenes();
     wzSetState('success');
     setTimeout(() => {
+      if (!wz.autoAdvance) { renderWizard(); wzSync(); return; }
+      /* Walking, the next thing is the next thing — most likely a cue, which is
+         what you want to hear before you answer it. Otherwise it is the next
+         line the wizard is here for. */
+      if (wz.walk) { playing = true; return wzGo(stepIdx(activeIdx, 1, 'rehearse')); }
       const targets = wzTargets();
-      if (!targets.length) { renderWizard(); wzSetState('done'); return; }
-      if (wz.autoAdvance) wzSelect(targets.find(i => i > activeIdx) ?? targets[0]);
-      else wzSetState('idle');
+      if (!targets.length) { renderWizard(); wzSync(); return; }
+      wzGo(targets.find(i => i > activeIdx) ?? targets[0]);
     }, SUCCESS_MS);
   }
 
@@ -5695,7 +5759,7 @@
      ============================================================ */
   /* You, rather than a character: the name is what the rest of the cast sees
      against your lines, and the address is where the sign-in code goes. */
-  const ACCOUNT = { name: 'Tereza Valešová', email: 'nina@example.com' };
+  const ACCOUNT = { name: 'Luky Kuky', email: 'nina@example.com' };
 
   function openAccount() {
     editingKey = null;
