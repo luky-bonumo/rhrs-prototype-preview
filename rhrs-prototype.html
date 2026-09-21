@@ -687,6 +687,10 @@
     padding: 14px; margin-top: 26px;
     font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--coral);
   }
+  /* A line of explanation under a field, where the field itself cannot carry it.
+     Same size as a row's own sub-line, so the two read as one voice. */
+  .ac-note { font-size: 13px; color: var(--text-muted); padding: 8px 2px 0; line-height: 1.45; }
+
   #noteSheet textarea {
     width: 100%; border: none; background: none; outline: none; resize: none;
     font-family: var(--font-body); font-size: 15px; line-height: 1.5; color: var(--noir);
@@ -1026,38 +1030,49 @@
      A tick alone leaves you counting, a duration alone does not say it passed. */
   .wz-tag {
     display: inline-flex; align-items: center; gap: 5px;
+    background: none; font-family: var(--font-body); cursor: default;
     font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
     border-radius: 999px; padding: 2px 10px;
   }
   .wz-tag.missing { color: var(--coral); border: 1.5px solid var(--coral); }
+  /* A line with audio has a history, and this is the way into it. */
   .wz-tag.done    { color: var(--wine);  border: 1.5px solid var(--wine-border); }
+  button.wz-tag   { cursor: pointer; }
+  button.wz-tag:active { transform: scale(0.94); }
 
-  /* The cue, when it is switched on: the line you are answering, sitting above
-     your own. Wine and quiet — it is not yours to say and not yours to record. */
-  .wz-cue {
-    border-left: 2px solid var(--wine-border);
-    padding: 2px 0 2px 12px; margin-bottom: 12px;
+  /* Recording is a session with an end, and a scene is that end — so step one
+     is which scene, and the count each one carries is what it is still short. */
+  .wzs-head { padding: 4px 4px 18px; }
+  .wzs-count {
+    font-family: var(--font-display); font-weight: 600; font-size: 24px;
+    color: var(--coral); line-height: 1.2;
   }
-  .wz-cue .wc-who {
-    font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--wine);
+  .wzs-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  /* Done is wine, not coral: it is not what you came for, it is what is behind
+     you. Same words as the tag on a card, so the two lists agree. */
+  .wzs-done {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: var(--wine);
+    border: 1.5px solid var(--wine-border); border-radius: 999px; padding: 2px 10px;
   }
-  .wz-cue .wc-text { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+  /* A scene with none of your lines in it. Shown rather than hidden — the list is
+     the script, and a gap would read as a scene gone missing — but there is
+     nothing in it to open. */
+  .card.inert { cursor: default; opacity: 0.55; }
+  .card.inert:active { transform: none; box-shadow: var(--glass-shadow); }
 
-  /* The transport row is a 1fr auto 1fr grid built for skip / record / skip. The
-     wizard has only the record button, which would otherwise land in the first
-     column and sit off to the left. One column, centred. */
-  #wzIdle .t-main, #wzRec .t-main { grid-template-columns: auto; justify-content: center; }
+  /* The transport is the same 1fr auto 1fr grid as Rehearse: previous, record,
+     next. The arrows move between the lines the wizard is here for. Recording is
+     the one state with nothing beside the microphone, so that row is one centred
+     column — left in the grid it would sit off to the left. */
+  #wzRec .t-main { grid-template-columns: auto; justify-content: center; }
   .wz-hint { text-align: center; font-size: 13px; color: var(--text-muted); padding-top: 10px; }
-  .wz-check {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    color: var(--wine); font-size: 14px; font-weight: 600; padding: 18px 0;
-  }
-  .wz-fail-note {
-    text-align: center; font-size: 14px; color: var(--text-body);
-    padding: 4px 10px 14px;
-  }
-  /* Nothing left to record. Not an empty list — a finished one. */
-  .wz-empty { text-align: center; padding: 60px 20px; }
+  /* Nothing left to record. The mic stays where it is and goes quiet, rather than
+     leaving and changing the shape of the screen under your thumb. */
+  #wzIdle.spent .big-btn, #wzIdle.spent .skip-btn { opacity: 0.3; pointer-events: none; }
+  /* Nothing left to record. Not an empty list — a finished one. It sits above the
+     scene rather than in place of it: the scene is still worth reading. */
+  .wz-empty { text-align: center; padding: 20px 20px 34px; }
   .wz-empty .we-tick {
     display: inline-flex; align-items: center; justify-content: center;
     width: 64px; height: 64px; border-radius: 50%;
@@ -1067,6 +1082,20 @@
     font-family: var(--font-display); font-weight: 600; font-size: 20px; color: var(--noir);
   }
   .wz-empty .we-sub { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+  .wz-empty .we-back {
+    margin-top: 16px; background: none; border: 1.5px solid var(--coral);
+    border-radius: var(--radius-pill); padding: 9px 18px; cursor: pointer;
+    font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--coral);
+  }
+  .wz-empty .we-back::before { content: none; }
+  .wz-empty .we-back:active { transform: scale(0.97); }
+
+  /* Where the mode bar stands everywhere else. The wizard is not a mode you
+     switch out of from here, so the bar names where you are and does nothing —
+     same type, same place, no target. */
+  .modebar.wizardbar { justify-content: center; }
+  .wizardbar .mode { color: var(--coral); cursor: default; }
+  .wizardbar .mode:active { transform: none; }
 
   .list-sublabel {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
@@ -2418,6 +2447,18 @@
     <div class="scroll fades" id="lineScroll"></div>
   </div>
 
+  <!-- ============ SCREEN: ACCOUNT ============
+       Who you are to everyone else, where the sign-in code goes, and the way
+       out. Three things, so it is a screen and not a section. -->
+  <div class="screen" id="accountScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim">Account</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+    <div class="scroll fades" id="accountScroll"></div>
+  </div>
+
   <!-- ============ SCREEN: AUDIO EDIT ============
        One line's takes. The wizard adds them; this is where you look back and
        choose which one everybody hears. -->
@@ -2445,14 +2486,28 @@
     </div>
   </div>
 
+  <!-- ============ SCREEN: RECORDING WIZARD — SCENES ============
+       Step one of recording is which scene. Recording is a session with an end,
+       and a scene is that end, so the wizard opens by naming them and saying what
+       each one is still short. -->
+  <div class="screen" id="wizardScenesScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Recording Wizard</span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="list fades" id="wizardScenesList"></div>
+  </div>
+
   <!-- ============ SCREEN: RECORDING WIZARD ============
-       Rehearse narrowed to one job: the lines of mine that have no audio. Same
-       cards, same list, same recorder — a filter and a check on top, not a new
-       screen to learn. -->
+       Rehearse narrowed to one job: the lines of mine without audio. The list is
+       the whole scene, because a line is said in answer to something; the filter
+       decides where the wizard takes you, not what you are allowed to see. The
+       recorder is the one from Rehearse and the take is judged in Evaluation. -->
   <div class="screen" id="wizardScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title cap-trim">Recording Wizard</div>
+      <div class="header-title cap-trim" id="wizardTitle">Scene</div>
       <button class="icon-btn" onclick="openWizardSettings()" aria-label="Settings"><i class="ph ph-gear-six ic-22"></i></button>
     </div>
 
@@ -2462,12 +2517,15 @@
 
     <div class="transport" id="wzTransport">
       <div class="t-fold show">
-      <!-- state: idle — a line is selected, nothing recorded yet -->
+      <!-- state: idle — a line is selected, nothing recorded yet. The arrows step
+           between the lines the wizard is here for, never onto the ones between. -->
       <div class="expanded show" id="wzIdle">
         <div class="t-main">
+          <button class="skip-btn" onclick="wzStep(-1)" aria-label="Previous line to record"><i class="ph-bold ph-arrow-left ic-26"></i></button>
           <button class="big-btn" onclick="wzStart()" aria-label="Record this line">
             <i class="ph-fill ph-microphone ic-38"></i>
           </button>
+          <button class="skip-btn" onclick="wzStep(1)" aria-label="Next line to record"><i class="ph-bold ph-arrow-right ic-26"></i></button>
         </div>
         <div class="wz-hint" id="wzHint">Record this line</div>
       </div>
@@ -2475,37 +2533,26 @@
       <!-- state: recording -->
       <div class="expanded" id="wzRec">
         <div class="t-main">
-          <button class="big-btn recording" onclick="wzStop()" aria-label="Stop recording">
+          <button class="big-btn recording" id="wzRecBtn" onclick="wzStop()" aria-label="Stop recording">
             <i class="ph-fill ph-microphone ic-32"></i>
             <span class="btn-time" id="wzRecTime">0:00</span>
           </button>
         </div>
-        <div class="wz-hint">Tap to stop</div>
+        <div class="wz-hint">Tap to stop and hear it back</div>
       </div>
 
-      <!-- state: checking the take against the line -->
-      <div class="expanded" id="wzChecking">
-        <div class="wz-check"><i class="ph ph-waveform ic-28"></i><span>Checking the take…</span></div>
-      </div>
-
-      <!-- state: the check did not match -->
-      <div class="expanded" id="wzFailed">
-        <div class="wz-fail-note">That did not match the line. Nothing has been saved.</div>
-        <div class="reh-actions">
-          <button class="reh-action" onclick="wzStart()">
-            <i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake
-          </button>
-          <button class="reh-action" onclick="wzOverride()">
-            <i class="ph-bold ph-check ic-28"></i>It was correct
-          </button>
-        </div>
-      </div>
-
-      <!-- state: done with this line -->
+      <!-- state: the take has landed -->
       <div class="reh-success" id="wzSuccess">
         <span class="tick"><i class="ph-bold ph-check ic-38"></i></span>
       </div>
       </div>
+    </div>
+
+    <!-- Where the mode bar stands in Read, Listen and Rehearse. The wizard is not
+         a mode you switch out of from here, so the bar says where you are and has
+         nothing to press. -->
+    <div class="modebar wizardbar">
+      <span class="mode active"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Recording Wizard</span></span>
     </div>
   </div>
 
@@ -2527,7 +2574,16 @@
       <span style="width:46px;flex:0 0 auto;"></span>
     </div>
     <div class="gs-list fades">
-      <div class="gs-label">Appearance</div>
+      <div class="gs-label">Account</div>
+      <div class="gs-group">
+        <button class="edit-row" onclick="openAccount()">
+          <span class="er-ic"><i class="ph ph-user ic-20"></i></span>
+          <span class="er-label">Your name, email and sign out</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+      </div>
+
+      <div class="gs-label" style="margin-top:26px;">Appearance</div>
       <div class="gs-theme">
         <button id="gsSystem" onclick="setTheme('system')"><i class="ph-bold ph-circle-half ic-20"></i>System</button>
         <button id="gsLight"  onclick="setTheme('light')"><i class="ph-bold ph-sun ic-20"></i>Light</button>
@@ -2546,7 +2602,7 @@
       <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
       <div class="gs-todo">
         <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
-        <p>Account, Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
+        <p>Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
            Notifications, Recording &amp; storage, Subscription, About. Not drawn yet —
            the theme switch is here first so the prototype can be looked at on a
            phone in either mode.</p>
@@ -2788,7 +2844,7 @@
     <div class="transport">
       <div class="expanded show">
         <div class="t-main">
-          <button class="reh-action" onclick="toast('Retake')"><i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake</button>
+          <button class="reh-action" onclick="evalRetake()"><i class="ph-bold ph-arrow-counter-clockwise ic-28"></i>Retake</button>
           <button class="big-btn" onclick="toast('Play / pause take')" aria-label="Play / pause"><i class="ph-fill ph-pause ic-38"></i></button>
           <button class="reh-action" id="evalRight" onclick="evalRightAction()"></button>
         </div>
@@ -2818,7 +2874,7 @@
     <div class="sheet-grabber"></div>
     <div class="settings-title">
       <span class="cap-trim" id="settingsTitle">Read Settings</span>
-      <button class="account-btn" onclick="sheetAction('User account')" aria-label="User account">
+      <button class="account-btn" onclick="closeSheet(); openAccount()" aria-label="User account">
         <i class="ph ph-user ic-22"></i>
       </button>
     </div>
@@ -3001,13 +3057,6 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Show the cue</div>
-            <div class="set-sub">The line you are answering, above your own</div>
-          </div>
-          <button class="toggle" onclick="wzToggle('showCue', this)"></button>
-        </div>
-        <div class="set-row">
-          <div>
             <div class="set-label">Play the cue first</div>
             <div class="set-sub">Hear it, then the mic opens</div>
           </div>
@@ -3096,7 +3145,7 @@
 
     { who:'Nina',    mine:true,  text:"You're eating." },
     { who:'Michael', mine:false, text:"I'm eating." },
-    { who:'Nina',    mine:true,  rec:false, text:"It's ten past two." },
+    { who:'Nina',    mine:true,  text:"It's ten past two." },
     { who:'Michael', mine:false, text:"I'm aware. I looked at the clock on the way in. And I thought, well — if I'm going to be awake, I may as well be awake somewhere that has food in it." },
     { who:'Nina',    mine:true,  text:"Michael." },
     { who:'Michael', mine:false, text:"What." },
@@ -3104,18 +3153,18 @@
       dir:"She does not raise her voice at any point in this.",
       note:"Not angry. She's exhausted. The anger in this scene is all his — if I play it too, we've nowhere to go by the end." },
     { who:'Michael', mine:false, text:"It's not a light. It's the extractor fan." },
-    { who:'Nina',    mine:true,  rec:false, text:"Then say it with the extractor fan on." },
+    { who:'Nina',    mine:true,  text:"Then say it with the extractor fan on." },
 
     { stage: "A pause. He puts the bowl down. He does not say it." },
 
     { who:'Michael', mine:false, text:"She's been on that sofa nine weeks." },
-    { who:'Nina',    mine:true,  text:"I know how long she's been on the sofa. I change the sheets." },
+    { who:'Nina',    mine:true,  rec:false, text:"I know how long she's been on the sofa. I change the sheets." },
     { who:'Michael', mine:false, text:"I know you do. That's — I know. And I keep meaning to say something, and then she makes that face, the one where she's already apologising before you've opened your mouth, and I think, one more week won't kill anybody. And then it's nine weeks, and I'm standing in my own kitchen at two in the morning eating dry cereal so I don't have to lie next to you not saying it." },
-    { who:'Nina',    mine:true,  text:"So say it to her." },
+    { who:'Nina',    mine:true,  rec:false, text:"So say it to her." },
     { who:'Michael', mine:false, text:"She's my sister." },
     { who:'Nina',    mine:true,  rec:false, text:"She's my sofa." },
     { who:'Michael', mine:false, text:"That's not fair and you know it isn't." },
-    { who:'Nina',    mine:true,  text:"It's completely fair. It's just not kind. Those are different things, and you have never once been able to tell them apart.",
+    { who:'Nina',    mine:true,  rec:false, text:"It's completely fair. It's just not kind. Those are different things, and you have never once been able to tell them apart.",
       note:"Land on 'kind'. Everything after it is throwaway." },
 
     { stage: "ANNA is in the doorway, wrapped in a duvet. Neither of them knows how long she has been there." },
@@ -3129,12 +3178,12 @@
     { who:'Anna',    mine:false, text:"I heard my name. I'm not going to pretend I didn't, because then we all do the thing where we talk about the weather for nine minutes and I go back to the sofa and lie there working out exactly what you said. So say it again. To me this time." },
     { who:'Michael', mine:false, text:"Anna —" },
     { who:'Anna',    mine:false, text:"To me, Michael." },
-    { who:'Nina',    mine:true,  text:"He's been trying to ask you to leave since the third week. He is very bad at it. It is one of the things I love about him and it is, tonight, the single most annoying thing about him.",
+    { who:'Nina',    mine:true,  rec:false, text:"He's been trying to ask you to leave since the third week. He is very bad at it. It is one of the things I love about him and it is, tonight, the single most annoying thing about him.",
       dir:"To Anna, not to him." },
     { who:'Anna',    mine:false, text:"Oh." },
     { who:'Anna',    mine:false, text:"Is that all?" },
     { who:'Anna',    mine:false, text:"I thought one of you was ill." },
-    { who:'Nina',    mine:true,  text:"We thought you would take it badly. There was a whole plan. He was going to do it on Sunday, over a roast, so you would have to be polite about it." },
+    { who:'Nina',    mine:true,  rec:false, text:"We thought you would take it badly. There was a whole plan. He was going to do it on Sunday, over a roast, so you would have to be polite about it." },
     { who:'Anna',    mine:false, text:"I'll go Thursday. I've had a room since October. I just liked it here." },
     { who:'Michael', mine:false, text:"Since October?" },
     { who:'Anna',    mine:false, text:"Goodnight." }
@@ -3147,9 +3196,9 @@
     { stage:"A car park outside the theatre. NINA has the phone against her ear and her coat over one arm." },
     { who:'Nina',    mine:true,  text:"I know what time it is." },
     { who:'Michael', mine:false, text:"Then why are you calling?" },
-    { who:'Nina',    mine:true,  text:"Because you'd have worried if I didn't." },
+    { who:'Nina',    mine:true,  rec:false, text:"Because you'd have worried if I didn't." },
     { who:'Michael', mine:false, text:"I'd have slept." },
-    { who:'Nina',    mine:true,  text:"You'd have worried, and then not slept, and in the morning you'd have told me you slept fine.",
+    { who:'Nina',    mine:true,  rec:false, text:"You'd have worried, and then not slept, and in the morning you'd have told me you slept fine.",
       note:"Say it flat. It is a thing she has said before." },
     { stage:"A long pause. Somewhere a car door." },
     { who:'Michael', mine:false, text:"Come home." }
@@ -3165,12 +3214,14 @@
     { who:'Nina',    mine:true,  text:"I know." }
   ];
   /* This one opens straight on a line, with no stage direction under the scene
-     mark — the other case the mark has to sit above. */
+     mark — the other case the mark has to sit above. It is also the one scene
+     Nina is not in, which is why Script detail marks it unassigned: the wizard
+     has a scene with nothing of yours in it, and that is a state of its own. */
   const SCENE_4 = [
     { who:'Michael', mine:false, text:"There's coffee." },
-    { who:'Nina',    mine:true,  text:"Thank you." },
+    { who:'Anna',    mine:false, text:"Thank you." },
     { who:'Michael', mine:false, text:"I'm not going to ask." },
-    { who:'Nina',    mine:true,  text:"You are.", dir:"Not unkindly." },
+    { who:'Anna',    mine:false, text:"You are.", dir:"Not unkindly." },
     { who:'Michael', mine:false, text:"Not yet." }
   ];
   const SCENE_5 = [
@@ -3178,7 +3229,7 @@
     { who:'Michael', mine:false, text:"You'll call when you get there." },
     { who:'Nina',    mine:true,  text:"I'll call when I get there." },
     { who:'Michael', mine:false, text:"You won't." },
-    { who:'Nina',    mine:true,  text:"No." },
+    { who:'Nina',    mine:true,  rec:false, text:"No." },
     { stage:"She goes. He does not watch her go." }
   ];
 
@@ -3190,6 +3241,13 @@
      switch does not hide it. */
   const SCENE_LISTS = [SCENE_1, SCENE_2, SCENE_3, SCENE_4, SCENE_5];
   SCENES.forEach((sc, i) => { sc.items = SCENE_LISTS[i]; });
+  /* Every line gets a key saying where it lives, so what hangs off a line — its
+     takes — is stored by the line and not by its position in whichever list is
+     on screen. Two scenes both have a third line; they do not share recordings.
+     The whole-script list holds the same objects, so a key travels with it. */
+  SCENE_LISTS.forEach((list, s) => list.forEach((it, i) => {
+    if (it.who) it.key = (s + 1) + '-' + (i + 1);
+  }));
   SCRIPTS[0].scenes = SCENES;
   /* Whichever script's scenes Script detail and the scene steps are working on. */
   const sceneList = () => currentScript.scenes;
@@ -3296,8 +3354,15 @@
      and the filter all read the same list. */
   const isMine    = it => !!it.who && !!it.mine;
   const needsAudio = it => isMine(it) && it.rec === false;
-  const myLines   = () => SCENE_1.filter(isMine);
-  const missingLines = () => SCENE_1.filter(needsAudio);
+  /* Asked of a list, because the same question is asked of different ones: what
+     this scene still needs, what the whole script still needs, and what the
+     wizard is walking through right now. */
+  const myLines      = (list = SCRIPT) => list.filter(isMine);
+  const missingLines = (list = SCRIPT) => list.filter(needsAudio);
+  /* Every scene of the open script, so Script detail and the notification can
+     say how much is left without opening anything. */
+  const sceneMissing  = sc => missingLines(sc.items || []).length;
+  const scriptMissing = (s = currentScript) => (s.scenes || []).reduce((n, sc) => n + sceneMissing(sc), 0);
   /* Fake durations, so a recorded line can show how long its take is. Stable per
      line rather than random, or the list would reshuffle on every render. */
   const takeLen = it => 2 + (it.text.length % 7);
@@ -3310,26 +3375,30 @@
      one is a tap, not a re-record. */
   const TAKES = {};
   const WHEN = ['Just now', '2 hours ago', 'Yesterday', 'Tuesday', 'Last week'];
-  function takesFor(idx) {
-    if (!TAKES[idx]) {
-      const line = SCENE_1[idx];
-      const n = 1 + (line.text.length % 3);        // one to three, stable per line
-      TAKES[idx] = Array.from({ length: n }, (_, i) => ({
-        id: idx + '-' + i,
+  function takesFor(line) {
+    if (!TAKES[line.key]) {
+      /* A line still waiting for audio has no history to invent. */
+      const n = line.rec === false ? 0 : 1 + (line.text.length % 3);
+      TAKES[line.key] = Array.from({ length: n }, (_, i) => ({
+        id: line.key + '-' + i,
         len: Math.max(2, takeLen(line) - i),
         when: WHEN[i] || 'Earlier',
         use: i === 0
       }));
     }
-    return TAKES[idx];
+    return TAKES[line.key];
   }
-  /* Recording is what creates a take, so the wizard goes through here too. */
-  function addTake(idx) {
-    const t = takesFor(idx);
+  /* Recording is what creates a take, so the wizard goes through here too — and
+     a line with a take is a line with audio, which is why the flag is set here
+     rather than by each caller in turn. */
+  function addTake(line) {
+    const t = takesFor(line);
     t.forEach(x => { x.use = false; });
-    t.unshift({ id: idx + '-' + Date.now(), len: takeLen(SCENE_1[idx]), when: 'Just now', use: true });
+    t.unshift({ id: line.key + '-' + Date.now(), len: takeLen(line), when: 'Just now', use: true });
+    line.rec = true;
+    return t[0];
   }
-  const takeInUse = idx => takesFor(idx).find(t => t.use);
+  const takeInUse = line => takesFor(line).find(t => t.use);
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
   const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
   /* Speeds are numbers, not labels: the presets and the stepper are two ways at
@@ -3357,7 +3426,7 @@
     document.getElementById(id).classList.add('active');
     if (document.getElementById('panelBody')) renderPanel();
     document.getElementById('statusbar').classList.toggle('on-wine', id === 'dashboardScreen');
-    if (id !== 'rehearseScreen') stopRecording();
+    if (id !== 'rehearseScreen' && id !== 'wizardScreen') stopRecording();
   }
   function showScreen(id) {
     paint(id);
@@ -3921,28 +3990,35 @@
     }, SUCCESS_MS);
   }
 
-  /* ---- Recording: running clock + level rings ---- */
-  let recRAF = null, recTick = null, recDone = null, recStart = 0;
+  /* ---- Recording: running clock + level rings ----
+     One microphone, three screens. Rehearse, the wizard and Audio edit all end a
+     take the same way and all draw the same rings; what differs is only which
+     button wears them and what happens when the take runs out. */
+  let recRAF = null, recTick = null, recDone = null, recStart = 0, recBtn = 'rehRecBtn';
 
   function clock(seconds) {
     return Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
   }
 
-  function startRecording() {
+  function startRecording(opts = {}) {
     stopRecording();
+    recBtn = opts.btn || 'rehRecBtn';
     recStart = Date.now();
-    const time = document.getElementById('rehRecTime');
-    time.textContent = '0:00';
-    recTick = setInterval(() => { time.textContent = clock((Date.now() - recStart) / 1000); }, 200);
+    const time = document.getElementById(opts.time || 'rehRecTime');
+    if (time) time.textContent = '0:00';
+    recTick = setInterval(() => {
+      if (time) time.textContent = clock((Date.now() - recStart) / 1000);
+    }, 200);
     /* A real take ends when you stop talking. Here it ends on the clock. */
-    recDone = setTimeout(rehComplete, TAKE_MS);
+    recDone = setTimeout(opts.done || rehComplete, TAKE_MS);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     /* Two rings sized from a level that jumps to a fresh target every few frames
        and eases toward it — the shape of speech rather than a metronome pulse.
        Wiring a real mic means replacing `target` with the analyser reading. */
-    const btn = document.getElementById('rehRecBtn');
+    const btn = document.getElementById(recBtn);
+    if (!btn) return;
     let level = 0, target = 0.5, frame = 0;
     (function step() {
       if (frame++ % 7 === 0) target = 0.12 + Math.random() * 0.88;
@@ -3959,7 +4035,7 @@
     if (recRAF)  { cancelAnimationFrame(recRAF); recRAF = null; }
     if (recTick) { clearInterval(recTick); recTick = null; }
     if (recDone) { clearTimeout(recDone); recDone = null; }
-    const btn = document.getElementById('rehRecBtn');
+    const btn = document.getElementById(recBtn);
     if (btn) btn.style.boxShadow = '';
   }
   /* Evaluation is the line as written against the line as spoken, so it needs the
@@ -3970,11 +4046,13 @@
      two identical sentences and there is nothing to evaluate. */
   const DEMO_TRANSCRIPT = 'You are drinking.';
   /* Two ways here. From Rehearse you are working through a scene, so the way on
-     is Skip. From a recording you have just made a take, so the way on is to keep
-     it — the wizard will come through here too. */
-  let evalMode = 'rehearse';
-  function openEvaluation(mode) {
+     is Skip. From a recorder — Audio edit or the wizard — you have just made a
+     take, so the way on is to keep it. The source says where Use and Retake go
+     back to; the take itself is judged the same either way. */
+  let evalMode = 'rehearse', evalSource = 'rehearse';
+  function openEvaluation(mode, source) {
     evalMode = mode || 'rehearse';
+    evalSource = source || (evalMode === 'record' ? 'audio' : 'rehearse');
     const line = SCRIPT[activeIdx];
     document.querySelector('.eval-head').className = 'eval-head ' + (line.mine ? 'mine' : 'others');
     evalTextShown = false;
@@ -3987,12 +4065,20 @@
   }
   function evalRightAction() {
     if (evalMode !== 'record') return toast('Skip');
-    addTake(audioIdx);
-    SCENE_1[audioIdx].rec = true;
+    addTake(SCRIPT[activeIdx]);
+    goBack();
+    if (evalSource === 'wizard') return wzSaved();
     renderAudioEdit();
     renderScenes();
-    goBack();
     toast('Take saved and in use');
+  }
+  /* The take being questioned was never saved, so Retake has nothing to undo —
+     it goes back to where the microphone is and opens it again, rather than
+     leaving you to find it. */
+  function evalRetake() {
+    if (evalMode !== 'record') return toast('Retake');
+    goBack();
+    if (evalSource === 'wizard') wzStart(); else aeStartRec();
   }
 
   function renderEvalHead() {
@@ -4235,12 +4321,12 @@
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
-      ${missingLines().length ? `
-      <button class="rec-wizard" onclick="openWizard()">
+      ${scriptMissing() ? `
+      <button class="rec-wizard" onclick="openWizardScenes()">
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Recording Wizard</span>
-          <span class="rw-meta">${missingLines().length} lines without audio</span>
+          <span class="rw-meta">${scriptMissing()} lines without audio</span>
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
@@ -4387,6 +4473,12 @@
     { id:'n2', kind:'shake',   read:false, time:'Yesterday' }
   ];
 
+  /* Which scenes the missing audio is in. One scene can be named; more than one
+     is a number, because a list of four titles in a notification is a wall. */
+  function notifWhere() {
+    const left = (SCRIPTS[0].scenes || []).filter(sc => sceneMissing(sc));
+    return left.length === 1 ? left[0].title : left.length + ' scenes';
+  }
   function renderNotifications() {
     const list = document.getElementById('notifList');
     if (!NOTIFS.length) {
@@ -4395,7 +4487,7 @@
     }
     list.innerHTML = NOTIFS.map(n => {
       if (n.kind === 'missing') {
-        const count = missingLines().length;
+        const count = scriptMissing(SCRIPTS[0]);
         /* Nothing left to record means nothing to say about it. */
         if (!count) return '';
         return `<button class="notif mine go" onclick="notifOpenWizard()">
@@ -4403,7 +4495,7 @@
           <span class="n-main">
             <span class="n-title">Lines you still need to record</span>
             <span class="n-body">${count} of your lines have no audio yet.</span>
-            <span class="n-where">${SCENES[0].title} · ${SCRIPTS[0].title}</span>
+            <span class="n-where">${notifWhere()} · ${SCRIPTS[0].title}</span>
             <span class="n-time">${n.time}</span>
           </span>
           <span class="n-right">
@@ -4466,6 +4558,26 @@
       primary: 'Delete take', act: 'confirmDeleteTake()',
       ghost: 'Keep it'
     },
+    /* Leaving. Not a warning — nothing is lost — so it says where the work
+       actually lives and what getting back in costs. */
+    signOut: {
+      icon: 'ph ph-sign-out',
+      title: 'Sign out?',
+      text: 'Your scripts, notes and recordings stay on your account. Getting back in means another code in your email.',
+      primary: 'Sign out', act: 'signOutNow()',
+      ghost: 'Stay signed in'
+    },
+    /* Widening the wizard from what is missing to everything of yours. Less a
+       filter than a plan for the next twenty minutes, and it has a consequence
+       worth saying out loud before it starts: what you already recorded stops
+       being what the others hear. */
+    wizardAll: {
+      icon: 'ph ph-list-checks',
+      title: 'Go through all your lines?',
+      text: 'The wizard will stop on every line of yours in this scene, including the ones that already have audio. Each new take becomes the one everyone hears, and the take it replaces stays in that line\u2019s history.',
+      primary: 'Record all my lines', act: 'wzConfirmAll()',
+      ghost: 'Only the unrecorded ones'
+    },
     /* Android, after notifications have been refused twice. Not an error and not
        a telling-off: the choice was made twice on purpose, and we cannot undo it
        — only Settings can. So it says what is gone, says what still works so the
@@ -4513,7 +4625,7 @@
     markNotificationsRead();
     closeSheet();
     openScript('s1');
-    openWizard();
+    openWizardScenes();
   }
 
   /* ============================================================
@@ -4658,97 +4770,261 @@
   /* ============================================================
      RECORDING WIZARD
      ============================================================ */
-  /* Defaults. The cue is off to start with: most of the time you know your own
-     lines and the extra block between every card is noise. It earns its place
-     when you are recording out of order, which is why it can be switched on. */
-  const wz = { filter: 'missing', idx: -1, state: 'idle', autoAdvance: true,
-               showCue: false, playCue: false, countdown: false };
-  let wzTimer;
+  /* Rehearse narrowed to one job: the lines of yours without audio.
 
-  const wzList = () => (wz.filter === 'missing' ? missingLines() : myLines());
+     The list is the whole scene — cue lines, stage directions, private notes —
+     because a line is said in answer to something and read the way the page
+     tells you to read it. The filter decides where the wizard takes you, not
+     what you are allowed to see. That is the difference from the first version,
+     which showed the lines it was going to record and nothing else.
 
-  function openWizard() {
+     The playhead is the same `activeIdx` the modes use, so everything that
+     reads it — the line menu, Evaluation — needs no second version here. */
+  const wz = { filter: 'missing', scene: 0, state: 'idle',
+               autoAdvance: true, playCue: false, countdown: false };
+
+  /* Where the wizard may stop: lines of yours, and — unless you asked for all of
+     them — only those still without audio. */
+  const wzTargets = () =>
+    lineIdx().filter(i => isMine(SCRIPT[i]) && (wz.filter === 'all' || needsAudio(SCRIPT[i])));
+
+  /* ---- step one: which scene ---- */
+  function openWizardScenes() {
+    renderWizardScenes();
+    showScreen('wizardScenesScreen');
+  }
+  function renderWizardScenes() {
+    const scenes = sceneList(), left = scriptMissing();
+    document.getElementById('wizardScenesList').innerHTML = `
+      <div class="wzs-head">
+        <div class="wzs-count">${left ? left + ' line' + (left === 1 ? '' : 's') + ' to record' : 'Nothing left to record'}</div>
+        <div class="wzs-sub">${currentScript.title}</div>
+      </div>
+      <div class="list-sublabel">Scenes</div>` +
+      scenes.map((sc, i) => {
+        const mine = myLines(sc.items || []).length;
+        const miss = sceneMissing(sc);
+        /* A scene you are not in stays on the list: the list is the script, and a
+           gap in it would read as a scene gone missing. There is just nothing in
+           it to open. */
+        if (!mine) return `
+      <div class="card inert">
+        <div class="card-main">
+          <div class="card-title">${sc.title}</div>
+          <div class="card-meta"><span class="meta-lines">No lines of yours</span></div>
+        </div>
+      </div>`;
+        return `
+      <div class="card" onclick="openWizard(${i})">
+        <div class="card-main">
+          <div class="card-title">${sc.title}</div>
+          <div class="card-meta">
+            ${miss ? `<span class="badge">${miss} to record</span>`
+                   : '<span class="wzs-done"><i class="ph-bold ph-check ic-14"></i>All recorded</span>'}
+            <span class="meta-lines">${mine} of your lines</span>
+          </div>
+        </div>
+        <span class="chevron">${ICON.chevron}</span>
+      </div>`;
+      }).join('');
+  }
+
+  /* ---- step two: the scene, with the mic at the foot of it ---- */
+  function openWizard(sceneIdx = 0) {
+    stopRecording();
+    const sc = sceneList()[sceneIdx] || sceneList()[0];
+    wz.scene = sceneList().indexOf(sc);
+    /* The wizard is a view on a scene the way the modes are, so it moves the same
+       SCRIPT: the line menu, Line edit, Audio edit and Evaluation all read it. */
+    SCRIPT = sc.items || SCENE_1;
+    currentScene = sc.title;
+    document.getElementById('wizardTitle').textContent = sc.title;
     wz.filter = 'missing';
-    wz.idx = -1;
+    const targets = wzTargets();
+    activeIdx = targets[0] ?? lineIdx().find(i => isMine(SCRIPT[i])) ?? 0;
     renderWizard();
-    wzSetState('idle');
+    wzSetState(targets.length ? 'idle' : 'done');
     showScreen('wizardScreen');
-    /* Land on the first line that needs one, so the recorder has something to
-       point at the moment the screen opens. */
-    const first = SCENE_1.indexOf(missingLines()[0]);
-    if (first >= 0) wzSelect(first);
+    /* Jumped, not scrolled: you have only just arrived, so there is nothing to
+       follow with your eye. */
+    requestAnimationFrame(() => wzScroll('auto'));
   }
 
   function renderWizardFilter() {
     const miss = missingLines().length, all = myLines().length;
     document.getElementById('wzFilter').innerHTML = `
-      <button class="${wz.filter === 'missing' ? 'on' : ''}" onclick="wzSetFilter('missing')">Missing audio (${miss})</button>
-      <button class="${wz.filter === 'all' ? 'on' : ''}" onclick="wzSetFilter('all')">All lines (${all})</button>`;
+      <button class="${wz.filter === 'missing' ? 'on' : ''}" onclick="wzSetFilter('missing')">Unrecorded (${miss})</button>
+      <button class="${wz.filter === 'all' ? 'on' : ''}" onclick="wzSetFilter('all')">All my lines (${all})</button>`;
   }
-  function wzSetFilter(f) { wz.filter = f; renderWizard(); }
-
-  /* The line before this one, whoever holds it — what you are answering. */
-  function wzCueFor(idx) {
-    for (let i = idx - 1; i >= 0; i--) if (SCENE_1[i].who) return SCENE_1[i];
-    return null;
+  /* Going wider is a decision with a consequence — what you already recorded
+     stops being what the others hear — so it is asked before it happens. Going
+     back to the unrecorded ones takes nothing away, so it just happens. */
+  function wzSetFilter(f) {
+    if (f === wz.filter) return;
+    if (f === 'all') return openAlert('wizardAll');
+    wz.filter = f;
+    wzAfterFilter();
+  }
+  function wzConfirmAll() {
+    closeSheet();
+    wz.filter = 'all';
+    wzAfterFilter();
+  }
+  function wzAfterFilter() {
+    const targets = wzTargets();
+    /* Narrowing can leave the playhead on a line the wizard no longer stops on.
+       It moves to the first one it does, rather than sitting somewhere the
+       transport cannot act. */
+    if (!targets.includes(activeIdx)) activeIdx = targets[0] ?? activeIdx;
+    renderWizard();
+    wzSetState(targets.length ? 'idle' : 'done');
+    wzScroll();
   }
 
   function renderWizard() {
     renderWizardFilter();
-    const scroll = document.getElementById('wizardScroll');
-    const list = wzList();
-    if (!list.length) {
-      scroll.innerHTML = `
-        <div class="wz-empty">
-          <span class="we-tick"><i class="ph-bold ph-check ic-38"></i></span>
-          <div class="we-title">All lines recorded</div>
-          <div class="we-sub">Every line of yours in this scene has audio.</div>
-        </div>`;
-      wzSetState('done');
-      return;
-    }
-    scroll.innerHTML = list.map(line => {
-      const idx = SCENE_1.indexOf(line);
-      const active = idx === wz.idx;
-      const missing = needsAudio(line);
-      const cue = (wz.showCue && active) ? wzCueFor(idx) : null;
-      const tag = missing
-        ? '<span class="wz-tag missing">No audio</span>'
-        : `<span class="wz-tag done"><i class="ph-bold ph-check ic-14"></i>${fmtLen(takeLen(line))}</span>`;
-      return `<div class="lcard mine ${active ? 'active' : ''}" data-idx="${idx}" onclick="wzSelect(${idx})">
-        ${cue ? `<div class="wz-cue"><div class="wc-who">${cue.who}</div><div class="wc-text">${cue.text}</div></div>` : ''}
+    const targets = wzTargets();
+    document.getElementById('wizardScroll').innerHTML =
+      (targets.length ? '' : wzFinished()) +
+      SCRIPT.map((line, idx) => {
+        if (isSceneMark(line)) return sceneMark(line.scene);
+        /* Directions are here for the same reason the cue lines are: you record a
+           line the way the page tells you to say it. Nothing to play, though —
+           the only thing this screen plays is you. */
+        if (!line.who) return defaults.stage ? stageBlock(idx, line.stage) : '';
+        if (!isMine(line)) return `
+      <div class="lcard others" data-idx="${idx}">
         <div class="line-head">
           <span class="char-name cap-trim">${line.who}</span>
-          ${tag}
-          <button class="lc-btn spring" onclick="event.stopPropagation(); wzSelect(${idx})" aria-label="${missing ? 'Record line' : 'Play take'}">
-            ${missing ? ICON.mic : ICON.play}
-          </button>
+          ${flagsFor(line, idx)}
+          <button class="line-menu-btn spring" onclick="openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
         </div>
+        ${notesFor(line, idx)}
         ${lineBody(line, idx)}
       </div>`;
-    }).join('');
+        const inUse = needsAudio(line) ? null : takeInUse(line);
+        /* The tag says both things at once — whether there is audio and how long
+           it is — and where there is, it is the way into the takes. */
+        const tag = inUse
+          ? `<button class="wz-tag done spring" onclick="event.stopPropagation(); openAudioEdit(${idx})" aria-label="Takes for this line">
+               <i class="ph-bold ph-check ic-14"></i>${fmtLen(inUse.len)}</button>`
+          : '<span class="wz-tag missing spring">No audio</span>';
+        return `
+      <div class="lcard mine ${idx === activeIdx ? 'active' : ''}" data-idx="${idx}" onclick="wzSelect(${idx})">
+        <div class="line-head">
+          <span class="char-name cap-trim">${line.who}</span>
+          ${flagsFor(line, idx)}
+          ${tag}
+          <button class="lc-btn" onclick="event.stopPropagation(); wzRecordAt(${idx})" aria-label="Record this line">${ICON.mic}</button>
+          <button class="line-menu-btn" onclick="event.stopPropagation(); openSheet(${idx})" aria-label="Line menu">${DOTS}</button>
+        </div>
+        ${notesFor(line, idx)}
+        ${lineBody(line, idx)}
+      </div>`;
+      }).join('');
     applyTextStyle();
   }
 
-  function wzSelect(idx) {
-    wz.idx = idx;
-    wzSetState('idle');
-    renderWizard();
-    const card = document.querySelector('#wizardScroll .lcard.active');
-    if (card) {
-      const sc = document.getElementById('wizardScroll');
-      const fade = parseFloat(getComputedStyle(sc).getPropertyValue('--fade-t')) || 0;
-      sc.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior: 'smooth' });
-    }
+  /* Not an empty list but a finished one, and it sits above the scene rather than
+     in place of it — there is nothing left to record here, which is not a reason
+     to take the scene away. */
+  function wzFinished() {
+    const none = !myLines().length;
+    return `
+      <div class="wz-empty">
+        <span class="we-tick"><i class="ph-bold ph-check ic-38"></i></span>
+        <div class="we-title">${none ? 'None of this scene is yours' : 'All your lines have audio'}</div>
+        <div class="we-sub">${none
+          ? 'There is nothing here for you to record.'
+          : 'Every line of yours in this scene has been recorded.'}</div>
+        <button class="we-back" onclick="goBack()">Back to scenes</button>
+      </div>`;
   }
 
-  const WZ_STATES = { idle:'wzIdle', rec:'wzRec', checking:'wzChecking', failed:'wzFailed', success:'wzSuccess', done:'wzIdle' };
+  function wzSelect(idx) {
+    if (!isMine(SCRIPT[idx])) return;
+    activeIdx = idx;
+    wzSetState('idle');
+    renderWizard();
+    wzScroll();
+  }
+  function wzRecordAt(idx) {
+    wzSelect(idx);
+    wzStart();
+  }
+  /* The arrows move between the lines the wizard is here for, not between lines.
+     What lies in between is context, and you did not come to stop on it. */
+  function wzStep(dir) {
+    const targets = wzTargets();
+    if (!targets.length) return;
+    const at = targets.indexOf(activeIdx);
+    const next = at === -1
+      ? (dir > 0 ? targets.find(i => i > activeIdx) ?? targets[0]
+                 : [...targets].reverse().find(i => i < activeIdx) ?? targets[targets.length - 1])
+      : targets[at + dir] ?? targets[at];
+    wzSelect(next);
+  }
+  function wzScroll(behavior = 'smooth') {
+    const sc = document.getElementById('wizardScroll');
+    const card = sc.querySelector('.lcard.active');
+    if (!card) return;
+    const fade = parseFloat(getComputedStyle(sc).getPropertyValue('--fade-t')) || 0;
+    sc.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior });
+  }
+
+  const WZ_STATES = { idle:'wzIdle', rec:'wzRec', success:'wzSuccess', done:'wzIdle' };
   function wzSetState(st) {
     wz.state = st;
     Object.values(WZ_STATES).forEach(id => document.getElementById(id).classList.remove('show'));
-    if (st === 'done') { document.getElementById('wzIdle').classList.add('show'); document.getElementById('wzHint').textContent = 'Nothing left to record'; return; }
     document.getElementById(WZ_STATES[st]).classList.add('show');
-    if (st === 'idle') document.getElementById('wzHint').textContent = wz.idx >= 0 ? 'Record this line' : 'Pick a line';
+    if (st === 'rec' || st === 'success') return;
+    /* idle and done are the same furniture: when there is nothing left the mic
+       goes quiet where it stands rather than leaving, so the screen does not
+       change shape under your thumb as the last line lands. */
+    const targets = wzTargets(), at = targets.indexOf(activeIdx);
+    const spent = st === 'done' || !targets.length;
+    document.getElementById('wzIdle').classList.toggle('spent', spent);
+    document.getElementById('wzHint').textContent = spent
+      ? 'Nothing left to record'
+      : (needsAudio(SCRIPT[activeIdx]) ? 'Record this line' : 'Record a new take') +
+        (at >= 0 ? ' · ' + (at + 1) + ' of ' + targets.length : '');
+  }
+
+  /* The same microphone as Rehearse and as Audio edit, and the same bargain:
+     left to run it keeps the take, stopped by hand it goes to Evaluation, which
+     is where a take is judged. The wizard has no check of its own — it had one
+     before Evaluation existed, and two places to judge a take is one too many. */
+  function wzStart() {
+    const line = SCRIPT[activeIdx];
+    if (!line || !isMine(line)) return;
+    wzSetState('rec');
+    startRecording({ btn: 'wzRecBtn', time: 'wzRecTime', done: wzKeep });
+  }
+  function wzKeep() {
+    stopRecording();
+    addTake(SCRIPT[activeIdx]);
+    wzSaved();
+  }
+  /* Stopping is asking about the take, so it hands it over. Nothing is saved on
+     the way: Use saves it, Retake throws it away and opens the mic again. */
+  function wzStop() {
+    stopRecording();
+    wzSetState('idle');
+    openEvaluation('record', 'wizard');
+  }
+  /* A take has landed: the card says so, Script detail counts down, and the
+     wizard moves on if it was told to. */
+  function wzSaved() {
+    renderWizard();
+    renderScenes();
+    renderWizardScenes();
+    wzSetState('success');
+    setTimeout(() => {
+      const targets = wzTargets();
+      if (!targets.length) { renderWizard(); wzSetState('done'); return; }
+      if (wz.autoAdvance) wzSelect(targets.find(i => i > activeIdx) ?? targets[0]);
+      else wzSetState('idle');
+    }, SUCCESS_MS);
   }
 
   function openWizardSettings() {
@@ -4758,51 +5034,6 @@
   function wzToggle(key, btn) {
     wz[key] = !wz[key];
     btn.classList.toggle('on', wz[key]);
-    if (key === 'showCue') renderWizard();
-  }
-
-  /* The same simulation as Rehearse: a take runs TAKE_MS and then ends itself.
-     The prototype cannot hear, so it uses how the take ended to decide how the
-     check comes out — both results have to be reachable by hand:
-       left to finish on its own   recorded, and the check passes
-       stopped with a tap          the check fails
-     That is a rule of the demo, not of the app: in the real one a take ends when
-     you stop talking, and the check listens to what you said. */
-  let wzDone;
-  function wzStart() {
-    if (wz.idx < 0) return;
-    wzSetState('rec');
-    const started = Date.now(), time = document.getElementById('wzRecTime');
-    time.textContent = '0:00';
-    clearInterval(wzTimer); clearTimeout(wzDone);
-    wzTimer = setInterval(() => { time.textContent = clock((Date.now() - started) / 1000); }, 200);
-    wzDone = setTimeout(() => wzFinish(true), TAKE_MS);
-  }
-  function wzStop() { wzFinish(false); }
-  function wzFinish(passed) {
-    /* A take still running when you leave the screen must not land later on
-       whatever line is selected by then. */
-    if (wz.state !== 'rec') return;
-    clearInterval(wzTimer); clearTimeout(wzDone);
-    wzSetState('checking');
-    setTimeout(() => (passed ? wzPass() : wzSetState('failed')), 900);
-  }
-
-  /* The take failed the check and is gone — nothing to overwrite, so Retake just
-     records again. Saying so is the point: it is the one thing the user cannot
-     see for themselves. */
-  function wzOverride() { wzPass(); }
-
-  function wzPass() {
-    SCENE_1[wz.idx].rec = true;
-    addTake(wz.idx);
-    wzSetState('success');
-    setTimeout(() => {
-      const next = missingLines()[0];
-      renderScenes();                      // the row on Script detail counts down
-      if (wz.autoAdvance && next) { wzSelect(SCENE_1.indexOf(next)); }
-      else { renderWizard(); wzSetState('idle'); }
-    }, SUCCESS_MS);
   }
 
   /* ============================================================
@@ -4872,6 +5103,13 @@
        screen the element it lands on, used to mark where you are. Notifications
               is a sheet over the dashboard, so it has none. */
   const DEMO_SCENE = 'Opening — the kitchen argument';
+  /* The panel jumps straight into an editor, and the editors read the list the
+     app is on. Point it at the written scene first. */
+  function demoScene() {
+    openScript('s1');
+    SCRIPT = SCENE_1;
+    currentScene = SCENES[0].title;
+  }
   const SCREENS = {
     dashboard:  { label:'Dashboard',        group:'app', screen:'dashboardScreen',
                   go: () => showScreen('dashboardScreen') },
@@ -4883,8 +5121,12 @@
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'app', screen:'sceneEditScreen',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
+    wizscenes:  { label:'Wizard — scenes',  group:'app', screen:'wizardScenesScreen',
+                  go: () => { openScript('s1'); openWizardScenes(); } },
     wizard:     { label:'Recording Wizard', group:'app', screen:'wizardScreen',
-                  go: () => { openScript('s1'); openWizard(); } },
+                  /* Through the scene list, because that is the way in — and it
+                     is what Back should find behind the wizard. */
+                  go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
     read:       { label:'Read',             group:'app', screen:'readScreen',
                   go: () => openScene(DEMO_SCENE) },
     listen:     { label:'Listen',           group:'app', screen:'listenScreen',
@@ -4898,6 +5140,8 @@
                     stepLine('rehearse', 1);          // cue line → your line
                     openEvaluation();
                   } },
+    account:    { label:'Account',          group:'app', screen:'accountScreen',
+                  go: () => openAccount() },
     settings:   { label:'Settings',         group:'app', screen:'globalSettingsScreen',
                   go: () => showScreen('globalSettingsScreen') },
     notifications: { label:'Notifications', group:'app',
@@ -4907,8 +5151,8 @@
     alert:      { label:'Alert',            group:'proto',
                   go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
     line:       { label:'Line edit',        group:'app', screen:'lineScreen',
-                  go: () => { openScript('s1');
-                              openLineEdit(lineIdx().find(i => SCENE_1[i].mine && SCENE_1[i].note)
+                  go: () => { demoScene();
+                              openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
     audio:      { label:'Audio edit',       group:'app', screen:'audioScreen',
                   /* Reached in the app from a line's menu — Audio — on any line
@@ -4917,9 +5161,9 @@
                      hear, so the demo lands on a line that has that question. */
                   /* One of mine, and one carrying a note, so the demo shows both
                      what In use is for and what the notes toggle reveals. */
-                  go: () => { openScript('s1');
-                              openAudioEdit(lineIdx().find(i => SCENE_1[i].mine && (SCENE_1[i].note || SCENE_1[i].dir))
-                                         ?? lineIdx().find(i => SCENE_1[i].mine)); } },
+                  go: () => { demoScene();
+                              openAudioEdit(lineIdx().find(i => SCRIPT[i].mine && (SCRIPT[i].note || SCRIPT[i].dir))
+                                         ?? lineIdx().find(i => SCRIPT[i].mine)); } },
     lineempty:  { label:'Line edit — empty',  group:'proto',
                   go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
     audioempty: { label:'Audio edit — empty', group:'proto',
@@ -5022,6 +5266,10 @@
   function openSceneEdit(i) {
     sceneEditIdx = i;
     const sc = sceneList()[i];
+    /* The rows here hand their index to Line edit, which reads the list the app
+       is on — so opening a scene for editing is opening that list. */
+    SCRIPT = sc.items || SCENE_1;
+    currentScene = sc.title;
     document.getElementById('sceneEditTitle').textContent = sc.title;
     renderSceneEdit();
     showScreen('sceneEditScreen');
@@ -5068,8 +5316,8 @@
     showScreen('lineScreen');
   }
   function renderLineEdit() {
-    const line = SCENE_1[lineEditIdx];
-    const takes = line.rec === false ? [] : takesFor(lineEditIdx);
+    const line = SCRIPT[lineEditIdx];
+    const takes = takesFor(line);
     const take = takes.find(t => t.use);
     document.getElementById('lineScroll').innerHTML = `
       <div class="le-scene cap-trim">${currentScene}</div>
@@ -5131,9 +5379,13 @@
      looks like text. Where there is nothing yet, the add button is that trigger. */
   let editingKey = null, editRender = () => {};
   const EDIT_SAVE = {
-    text: v => { if (v) SCENE_1[lineEditIdx].text = v; },
-    note: v => { SCENE_1[lineEditIdx].note = v || undefined; },
-    dir:  v => { SCENE_1[lineEditIdx].dir  = v || undefined; },
+    text: v => { if (v) SCRIPT[lineEditIdx].text = v; },
+    note: v => { SCRIPT[lineEditIdx].note = v || undefined; },
+    dir:  v => { SCRIPT[lineEditIdx].dir  = v || undefined; },
+    accountname: v => {
+      if (!v) return toast('A name is how the others find you');
+      ACCOUNT.name = v;
+    },
     charname: v => {
       if (!v) return toast('Give the character a name');
       const ch = CHARACTERS.find(x => x.name === charEditing);
@@ -5198,9 +5450,9 @@
   /* The cast, as a sheet: it is one choice, not a place. */
   function openCharacterPick() {
     document.getElementById('sheetContext').className = 'sheet-context ' +
-      (SCENE_1[lineEditIdx].mine ? 'mine' : 'others');
+      (SCRIPT[lineEditIdx].mine ? 'mine' : 'others');
     document.getElementById('ctxName').textContent = 'Change character';
-    document.getElementById('ctxLine').textContent = shorten(SCENE_1[lineEditIdx].text);
+    document.getElementById('ctxLine').textContent = shorten(SCRIPT[lineEditIdx].text);
     document.getElementById('sheetItems').innerHTML = CHARACTERS.map(c =>
       `<button class="sheet-item ${c.mine ? 'accent' : ''}" onclick="closeSheet(); setCharacter('${c.name}', ${c.mine})">
         <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${c.name}${c.mine ? ' · you' : ''}
@@ -5209,7 +5461,7 @@
     document.getElementById('sheet').classList.add('open');
   }
   function setCharacter(name, mine) {
-    const line = SCENE_1[lineEditIdx];
+    const line = SCRIPT[lineEditIdx];
     line.who = name; line.mine = mine;
     renderLineEdit();
     toast('Character changed');
@@ -5221,9 +5473,14 @@
   /* Scene and line, padded — a handle that survives being pasted somewhere else
      and read back out loud. Derived from position, so it cannot drift from it. */
   function lineId(idx) {
-    const scene = String(SCENES.findIndex(sc => sc.items === SCENE_1) + 1).padStart(3, '0');
-    const line  = String(lineIdx().indexOf(idx) + 1).padStart(4, '0');
-    return '#' + scene + '-' + line;
+    const line = SCRIPT[idx];
+    if (!line || !line.key) return '#000-0000';
+    /* Read off the line's own key rather than off the list in front of you, so
+       it says the same thing whether you came from the scene or the whole
+       script. */
+    const [sc, at] = line.key.split('-').map(Number);
+    const n = SCENE_LISTS[sc - 1].slice(0, at).filter(it => it.who).length;
+    return '#' + String(sc).padStart(3, '0') + '-' + String(n).padStart(4, '0');
   }
   function openAudioEdit(idx) {
     audioIdx = idx;
@@ -5231,7 +5488,7 @@
     showScreen('audioScreen');
   }
   function renderAudioEdit() {
-    const line = SCENE_1[audioIdx], takes = takesFor(audioIdx);
+    const line = SCRIPT[audioIdx], takes = takesFor(line);
     document.getElementById('audioScroll').innerHTML = `
       <div class="ae-line">
         <div class="ae-who">${line.who}</div>
@@ -5345,7 +5602,7 @@
   /* Choosing is exclusive: this is which one everybody hears, so there is exactly
      one and picking another releases the last. */
   function useTake(id) {
-    const takes = takesFor(audioIdx);
+    const takes = takesFor(SCRIPT[audioIdx]);
     takes.forEach(t => { t.use = t.id === id; });
     renderAudioEdit();
     toast('This take is now in use');
@@ -5360,12 +5617,13 @@
     toast('Take deleted');
   }
   function deleteTake(id) {
-    const takes = takesFor(audioIdx);
+    const takes = takesFor(SCRIPT[audioIdx]);
     const gone = takes.find(t => t.id === id);
     if (!gone) return;
-    TAKES[audioIdx] = takes.filter(t => t.id !== id);
-    if (gone.use && TAKES[audioIdx][0]) TAKES[audioIdx][0].use = true;
-    if (!TAKES[audioIdx].length) SCENE_1[audioIdx].rec = false;
+    const key = SCRIPT[audioIdx].key;
+    TAKES[key] = takes.filter(t => t.id !== id);
+    if (gone.use && TAKES[key][0]) TAKES[key][0].use = true;
+    if (!TAKES[key].length) SCRIPT[audioIdx].rec = false;
     renderAudioEdit();
     renderScenes();
   }
@@ -5389,8 +5647,7 @@
     aeRecDone = setTimeout(() => {
       if (!aeRec) return;
       aeEndRec();
-      addTake(audioIdx);
-      SCENE_1[audioIdx].rec = true;
+      addTake(SCRIPT[audioIdx]);
       renderAudioEdit();
       renderScenes();
       toast('Take saved and in use');
@@ -5424,12 +5681,61 @@
      found, so the empty states can be looked at whatever has been recorded in
      this session. */
   function emptyLine() {
-    const idx = lineIdx().find(i => SCENE_1[i].mine && !SCENE_1[i].note && !SCENE_1[i].dir)
+    SCRIPT = SCENE_1;
+    const idx = lineIdx().find(i => SCRIPT[i].mine && !SCRIPT[i].note && !SCRIPT[i].dir)
              ?? lineIdx()[0];
-    const line = SCENE_1[idx];
+    const line = SCRIPT[idx];
     line.note = undefined; line.dir = undefined; line.rec = false;
-    TAKES[idx] = [];
+    TAKES[line.key] = [];
     return idx;
+  }
+
+  /* ============================================================
+     ACCOUNT
+     ============================================================ */
+  /* You, rather than a character: the name is what the rest of the cast sees
+     against your lines, and the address is where the sign-in code goes. */
+  const ACCOUNT = { name: 'Tereza Valešová', email: 'nina@example.com' };
+
+  function openAccount() {
+    editingKey = null;
+    editRender = renderAccount;
+    renderAccount();
+    showScreen('accountScreen');
+  }
+  function renderAccount() {
+    document.getElementById('accountScroll').innerHTML =
+      /* The same editable field as everything else that is written in this app —
+         a line, a note, a character's name. Naming who sees it is the whole
+         point of the field, so it says so underneath. */
+      editSection('accountname', 'Your name', '', ACCOUNT.name, 'Add your name') + `
+      <div class="ac-note">This is the name everyone else in the cast sees against your lines.</div>
+
+      <div class="le-label">Email</div>
+      <button class="le-row" onclick="copyEmail()">
+        <span class="le-main">
+          <span class="le-top">${ACCOUNT.email}</span>
+          <span class="le-sub">Where your sign-in code is sent. Tap to copy.</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
+      </button>
+
+      <button class="le-danger" onclick="openAlert('signOut')">
+        <i class="ph ph-sign-out ic-20"></i>Sign out
+      </button>`;
+    growTextarea(document.getElementById('leInput'));
+  }
+  function copyEmail() {
+    navigator.clipboard?.writeText(ACCOUNT.email);
+    toast('Email copied');
+  }
+  /* Signing out is not a place you come back from with Back, so the stack starts
+     again at the login the way signing in starts it again at the dashboard. */
+  function signOutNow() {
+    closeSheet();
+    openLogin();
+    navStack.length = 0;
+    navStack.push('loginScreen');
   }
 
   /* ============================================================

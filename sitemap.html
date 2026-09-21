@@ -266,7 +266,7 @@
 
   <section>
     <div class="map">
-      <svg viewBox="0 -78 1040 698" role="img" aria-label="Map of the rhrs app screens and the routes between them">
+      <svg viewBox="0 -78 1040 750" role="img" aria-label="Map of the rhrs app screens and the routes between them">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
@@ -333,10 +333,16 @@
           <text class="n-sub"   x="140" y="455" text-anchor="middle">Characters · scenes</text>
         </a>
 
-        <a class="node" href="rhrs-prototype.html#wizard">
+        <a class="node" href="rhrs-prototype.html#wizscenes">
           <rect x="40" y="500" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
-          <text class="n-title" x="140" y="528" text-anchor="middle">Recording Wizard</text>
-          <text class="n-sub"   x="140" y="547" text-anchor="middle">My lines without audio</text>
+          <text class="n-title" x="140" y="528" text-anchor="middle">Wizard — scenes</text>
+          <text class="n-sub"   x="140" y="547" text-anchor="middle">Which scene to record</text>
+        </a>
+        <path class="edge" d="M140,564 L140,596" marker-end="url(#arrow)"/>
+        <a class="node" href="rhrs-prototype.html#wizard">
+          <rect x="40" y="602" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="140" y="630" text-anchor="middle">Recording Wizard</text>
+          <text class="n-sub"   x="140" y="649" text-anchor="middle">One scene, line by line</text>
         </a>
 
         <!-- A sheet, and one you can open: it has a link of its own. Sits above the
@@ -358,6 +364,12 @@
         <a class="node" href="rhrs-prototype.html#settings">
           <rect x="294" y="116" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="389" y="141" text-anchor="middle">Global settings</text>
+        </a>
+        <!-- also reached from the account button on any mode's settings sheet -->
+        <path class="edge" d="M484,136 L512,136" marker-end="url(#arrow)"/>
+        <a class="node" href="rhrs-prototype.html#account">
+          <rect x="518" y="116" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="613" y="141" text-anchor="middle">Account</text>
         </a>
 
         <!-- ===== modes ===== -->
@@ -442,8 +454,13 @@
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
+        <span class="r-name cap-trim">Wizard — scenes</span>
+        <span class="r-what">Step one of recording: which scene. Every scene of the script with what it is still short, a scene you are not in shown but inert, and a finished one marked as recorded rather than hidden.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
         <span class="r-name cap-trim">Recording Wizard</span>
-        <span class="r-what">Your lines that have no audio yet. Filter between the missing ones and all of them, record one at a time, and a check says whether the take matched — with an override when it did and the check was wrong.</span>
+        <span class="r-what">Rehearse narrowed to one job. The list is the whole scene — cue lines, stage directions and private notes included — and the filter (Unrecorded / All my lines) decides where the wizard takes you, not what you can see. The recorder is the one from Rehearse: left to run it keeps the take, stopped by hand it goes to Evaluation, where Use keeps it and Retake throws it away. A line that already has audio opens its takes in Audio edit.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
@@ -497,10 +514,16 @@
         <span class="r-state st-todo">To design</span>
       </div>
       <div class="row">
+        <span class="r-name cap-trim">Account</span>
+        <span class="r-what">You, rather than a character: the name the rest of the cast sees against your lines, edited in the same field as everything else that is written in the app, the address your sign-in code goes to, and the way out. From Global settings or from the account button on any mode's settings sheet.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
         <span class="r-name cap-trim">Global settings</span>
-        <span class="r-what">Appearance is drawn — the light / dark switch, so the prototype can be looked at
-          on a phone in either mode. Account, voices, rehearsal defaults, notifications, storage
-          and subscription are still to come, and the screen says so.</span>
+        <span class="r-what">Account and Appearance are drawn — the way into your account, and the light / dark
+          switch so the prototype can be looked at on a phone in either mode. Voices, rehearsal
+          defaults, notifications, storage and subscription are still to come, and the screen
+          says so.</span>
         <span class="r-state st-built">Part drawn</span>
       </div>
     </div>
