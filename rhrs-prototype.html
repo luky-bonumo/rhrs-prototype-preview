@@ -336,7 +336,7 @@
   .panel-item {
     display: flex; align-items: center; gap: 10px;
     width: 100%; text-align: left; border: none; background: none; cursor: pointer;
-    border-radius: 10px; padding: 9px 10px;
+    border-radius: 10px; padding: 7px 10px;
     font-family: inherit; font-size: 14px; font-weight: 500; color: #3A2A2E;
   }
   .panel-item:hover { background: rgba(0, 0, 0, 0.05); }
@@ -347,6 +347,21 @@
     background: rgba(58, 42, 46, 0.3);
   }
   .panel-item.on .pi-dot { background: rgba(255, 255, 255, 0.7); }
+  .pi-name { flex: 1 1 auto; min-width: 0; }
+  /* Where a screen stands, said in the panel's own greys — it is a note to the
+     two of us, not a thing in the app. Signed off is filled in, being worked on
+     is only outlined: the finished ones should be the ones you can count. */
+  .pi-status {
+    flex: 0 0 auto; white-space: nowrap;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    border-radius: 999px; padding: 2px 7px;
+  }
+  .pi-status.wip         { color: rgba(58, 42, 46, 0.5); border: 1px solid rgba(58, 42, 46, 0.25); }
+  .pi-status.prepared    { color: #3A2A2E; background: rgba(0, 0, 0, 0.09); }
+  .pi-status.implemented { color: #FFFFFF; background: #7A1E2D; }
+  .panel-item.on .pi-status.wip         { color: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.5); }
+  .panel-item.on .pi-status.prepared    { color: #FFFFFF; background: rgba(255, 255, 255, 0.25); }
+  .panel-item.on .pi-status.implemented { color: #7A1E2D; background: #FFFFFF; }
   .panel-links {
     display: flex; gap: 8px; padding: 12px 20px 18px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -1066,7 +1081,6 @@
      the one state with nothing beside the microphone, so that row is one centred
      column — left in the grid it would sit off to the left. */
   #wzRec .t-main { grid-template-columns: auto; justify-content: center; }
-  .wz-hint { text-align: center; font-size: 13px; color: var(--text-muted); padding-top: 10px; }
   /* Nothing left to record. Not an empty list — a finished one. It sits above the
      scene rather than in place of it: the scene is still worth reading. */
   .wz-empty { text-align: center; padding: 20px 20px 34px; }
@@ -2559,7 +2573,6 @@
             <span class="btn-time" id="wzRecTime">0:00</span>
           </button>
         </div>
-        <div class="wz-hint">Tap to stop and hear it back</div>
       </div>
 
       <!-- state: the take has landed -->
@@ -3441,7 +3454,74 @@
      NAVIGATION
      ============================================================ */
   const MODE_SCREENS = { read:'readScreen', listen:'listenScreen', rehearse:'rehearseScreen' };
-  const navStack = ['dashboardScreen'];
+
+  /* ---- Back ----
+     Not the browser's back. A phone app has a shape, and Back walks up it: from
+     a scene to the script it belongs to, from the script to the library, from
+     the library home. Where you happened to come from does not change what a
+     screen is underneath.
+
+     Two screens are not places in that shape, though. An editor and an
+     evaluation are detours: the same Line edit is opened from a mode, from
+     Scene edit and from the wizard, and there is no honest parent to send it
+     to — so those remember the screen that opened them and go back to it.
+
+     Each entry is either the parent screen or 'origin'. No entry means the
+     floor: the dashboard has nothing above it, and Back there does nothing. */
+  const BACK = {
+    scriptsScreen:        'dashboardScreen',
+    detailScreen:         'scriptsScreen',
+    globalSettingsScreen: 'dashboardScreen',
+
+    readScreen:           'detailScreen',
+    listenScreen:         'detailScreen',
+    rehearseScreen:       'detailScreen',
+
+    wizardScenesScreen:   'detailScreen',
+    wizardScreen:         'wizardScenesScreen',
+
+    editScriptScreen:     'detailScreen',
+    sceneEditScreen:      'editScriptScreen',
+    characterScreen:      'editScriptScreen',
+
+    /* The detours. */
+    lineScreen:           'origin',
+    audioScreen:          'origin',
+    evaluationScreen:     'origin',
+    accountScreen:        'origin',
+
+    /* Signing in is a flow of its own: it goes back a step, not up a tree. The
+       prototype can leave it altogether, which the app cannot — there is no
+       dashboard behind the login until you are through it. */
+    codeScreen:           'loginScreen',
+    nameScreen:           'codeScreen',
+    loginScreen:          'dashboardScreen'
+  };
+  /* Where a detour lands when nothing opened it — jumped to from the panel or a
+     hash, where there is no 'came from' to return to. */
+  const BACK_HOME = {
+    lineScreen:       'detailScreen',
+    audioScreen:      'detailScreen',
+    evaluationScreen: 'rehearseScreen',
+    accountScreen:    'globalSettingsScreen'
+  };
+  /* Landing on a screen again is not the same as never having left it: counts
+     move, takes are added, a name is changed. Each place says how to redraw. */
+  const REDRAW = {
+    dashboardScreen:    () => { renderContinue(); renderRecent(); paintBellDot(); },
+    scriptsScreen:      () => renderScripts(),
+    detailScreen:       () => renderScenes(),
+    editScriptScreen:   () => { renderCharacters(); renderEditScenes(); },
+    sceneEditScreen:    () => renderSceneEdit(),
+    characterScreen:    () => { editRender = renderCharacter; renderCharacter(); },
+    wizardScenesScreen: () => renderWizardScenes(),
+    wizardScreen:       () => { renderWizard(); wzSync(); },
+    lineScreen:         () => { editRender = renderLineEdit; renderLineEdit(); },
+    audioScreen:        () => renderAudioEdit(),
+    accountScreen:      () => { editRender = renderAccount; renderAccount(); }
+  };
+  /* Which screen sent you into a detour. */
+  const cameFrom = {};
 
   function paint(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -3451,14 +3531,25 @@
     if (id !== 'rehearseScreen' && id !== 'wizardScreen') stopRecording();
   }
   function showScreen(id) {
+    const from = activeScreen()?.id;
+    if (from && from !== id && BACK[id] === 'origin') cameFrom[id] = from;
     paint(id);
-    if (navStack[navStack.length - 1] !== id) navStack.push(id);
+  }
+  function backTarget(id) {
+    const up = BACK[id];
+    if (!up) return null;
+    if (up !== 'origin') return up;
+    return cameFrom[id] || BACK_HOME[id] || 'dashboardScreen';
   }
   function goBack() {
-    if (navStack.length > 1) {
-      navStack.pop();
-      paint(navStack[navStack.length - 1]);
-    }
+    const here = activeScreen()?.id;
+    const to = backTarget(here);
+    if (!to || to === here) return;
+    /* Editing is left behind with the screen it was on, rather than being
+       waiting in a field when you come back to something else. */
+    editingKey = null;
+    paint(to);
+    REDRAW[to]?.();
   }
   function openScript(id) {
     const s = SCRIPTS.find(x => x.id === id);
@@ -3489,15 +3580,14 @@
     rs.scrollTop = sceneStart(rs);
   }
 
-  /* Switching mode replaces the current mode screen instead of stacking it,
-     so Back always returns to the scene list. */
+  /* Switching mode replaces the current mode screen. Back from any of the three
+     goes up to the script's scenes, never to the mode you were in before —
+     moving between Read, Listen and Rehearse is not travelling. */
   function switchMode(m) {
     currentMode = m;
     /* Arriving in a mode is arriving at a line, so both modes' players open. */
     playerOpen.listen = playerOpen.rehearse = true;
     forcedOpen.listen = forcedOpen.rehearse = false;
-    const cur = navStack[navStack.length - 1];
-    if (Object.values(MODE_SCREENS).includes(cur)) navStack.pop();
     if (m === 'read')     renderRead();
     /* Whatever the playhead sat on may not be playable here — a stage direction
        this mode does not narrate, or the very top of the scene. Snap it forward. */
@@ -4788,11 +4878,7 @@
     document.getElementById('nameBtn').disabled = !document.getElementById('nameInput').value.trim();
   }
   function authFinish() {
-    /* Signing in is not a place you go back to, so the stack starts again here. */
-    navStack.length = 0;
     showScreen('dashboardScreen');
-    navStack.length = 0;
-    navStack.push('dashboardScreen');
   }
 
   /* ============================================================
@@ -5174,66 +5260,129 @@
     SCRIPT = SCENE_1;
     currentScene = SCENES[0].title;
   }
+  /* Every screen, sheet and alert the prototype has, in clusters, because a flat
+     list of forty rows is a list you scan rather than read. The hash routes read
+     this table and so does the panel: add one here and it exists in both.
+
+     `st` is where the screen stands, and it is Lukas's to set, not the file's:
+       wip          being worked on, not signed off
+       prepared     signed off at version `ver` — ready to be built
+       implemented  signed off and built
+     Anything without `st` counts as wip. */
   const SCREENS = {
-    dashboard:  { label:'Dashboard',        group:'app', screen:'dashboardScreen',
+    /* ---- getting in ---- */
+    login:      { label:'Login',            group:'entry', screen:'loginScreen', ver:1, st:'prepared',
+                  go: () => openLogin() },
+    code:       { label:'Verification code', group:'entry', screen:'codeScreen', ver:1, st:'prepared',
+                  go: () => { openLogin();
+                              document.getElementById('emailInput').value = KNOWN_EMAIL;
+                              authEmailTyped(); authSubmitEmail(); } },
+    newname:    { label:'Your name (new account)', group:'entry', screen:'nameScreen', ver:1, st:'prepared',
+                  /* A new address, so the code step hands on to the name step. */
+                  go: () => { openLogin();
+                              document.getElementById('emailInput').value = 'new@example.com';
+                              authEmailTyped(); authSubmitEmail();
+                              for (let i = 0; i < 6; i++) document.getElementById('otp' + i).value = '2';
+                              otpSync(); authSubmitCode(); } },
+
+    /* ---- home ---- */
+    dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'prepared',
                   go: () => showScreen('dashboardScreen') },
-    scripts:    { label:'All scripts',      group:'app', screen:'scriptsScreen',
+    notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
+                  go: () => { showScreen('dashboardScreen'); openNotifications(); } },
+    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', st:'wip',
+                  go: () => showScreen('globalSettingsScreen') },
+    account:    { label:'Account',          group:'home', screen:'accountScreen', st:'wip',
+                  go: () => openAccount() },
+
+    /* ---- the scripts ---- */
+    scripts:    { label:'All scripts',      group:'library', screen:'scriptsScreen', ver:1, st:'prepared',
                   go: () => showScreen('scriptsScreen') },
-    detail:     { label:'Script detail',    group:'app', screen:'detailScreen',
+    detail:     { label:'Script detail',    group:'library', screen:'detailScreen', ver:1, st:'prepared',
                   go: () => openScript('s1') },
-    edit:       { label:'Edit script',      group:'app', screen:'editScriptScreen',
-                  go: () => { openScript('s1'); openEditScript(); } },
-    sceneedit:  { label:'Scene edit',       group:'app', screen:'sceneEditScreen',
-                  go: () => { openScript('s1'); openSceneEdit(0); } },
-    wizscenes:  { label:'Wizard — scenes',  group:'app', screen:'wizardScenesScreen',
+
+    /* ---- one scene, three modes ---- */
+    read:       { label:'Read',             group:'scene', screen:'readScreen', ver:1, st:'prepared',
+                  go: () => openScene(DEMO_SCENE) },
+    listen:     { label:'Listen',           group:'scene', screen:'listenScreen', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); } },
+    rehearse:   { label:'Rehearse',         group:'scene', screen:'rehearseScreen', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); } },
+
+    /* ---- recording ---- */
+    wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
                   go: () => { openScript('s1'); openWizardScenes(); } },
-    wizard:     { label:'Recording Wizard', group:'app', screen:'wizardScreen',
+    wizard:     { label:'Recording Wizard', group:'recording', screen:'wizardScreen', st:'wip',
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
-    read:       { label:'Read',             group:'app', screen:'readScreen',
-                  go: () => openScene(DEMO_SCENE) },
-    listen:     { label:'Listen',           group:'app', screen:'listenScreen',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); } },
-    rehearse:   { label:'Rehearse',         group:'app', screen:'rehearseScreen',
-                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); } },
-    evaluation: { label:'Evaluation',       group:'app', screen:'evaluationScreen',
+    evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', st:'wip',
                   go: () => {
                     openScene(DEMO_SCENE);
                     switchMode('rehearse');
                     stepLine('rehearse', 1);          // cue line → your line
                     openEvaluation();
                   } },
-    account:    { label:'Account',          group:'app', screen:'accountScreen',
-                  go: () => openAccount() },
-    settings:   { label:'Settings',         group:'app', screen:'globalSettingsScreen',
-                  go: () => showScreen('globalSettingsScreen') },
-    notifications: { label:'Notifications', group:'app',
-                  go: () => { showScreen('dashboardScreen'); openNotifications(); } },
-    login:      { label:'Login',            group:'proto', screen:'loginScreen',
-                  go: () => openLogin() },
-    alert:      { label:'Alert',            group:'proto',
-                  go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
-    line:       { label:'Line edit',        group:'app', screen:'lineScreen',
-                  go: () => { demoScene();
-                              openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
-                                        ?? lineIdx()[0]); } },
-    audio:      { label:'Audio edit',       group:'app', screen:'audioScreen',
+    audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'prepared',
                   /* Reached in the app from a line's menu — Audio — on any line
-                     of yours. */
-                  /* One of mine: In use is about which take of yours the others
-                     hear, so the demo lands on a line that has that question. */
+                     of yours, and from the wizard's tag on a recorded line. */
                   /* One of mine, and one carrying a note, so the demo shows both
                      what In use is for and what the notes toggle reveals. */
                   go: () => { demoScene();
                               openAudioEdit(lineIdx().find(i => SCRIPT[i].mine && (SCRIPT[i].note || SCRIPT[i].dir))
                                          ?? lineIdx().find(i => SCRIPT[i].mine)); } },
-    lineempty:  { label:'Line edit — empty',  group:'proto',
+
+    /* ---- writing and editing ---- */
+    edit:       { label:'Edit script',      group:'editing', screen:'editScriptScreen', ver:1, st:'prepared',
+                  go: () => { openScript('s1'); openEditScript(); } },
+    sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
+                  go: () => { openScript('s1'); openSceneEdit(0); } },
+    character:  { label:'Edit character',   group:'editing', screen:'characterScreen', ver:1, st:'prepared',
+                  go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
+    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
+                  go: () => { demoScene();
+                              openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
+                                        ?? lineIdx()[0]); } },
+
+    /* ---- sheets: they slide over whatever you are on ---- */
+    linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen');
+                              openSheet(lineIdx().find(i => SCRIPT[i].mine) ?? lineIdx()[0]); } },
+    stagemenu:  { label:'Stage direction menu', group:'sheets', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE);
+                              openStageSheet(SCRIPT.findIndex(it => it.stage)); } },
+    castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
+                  go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
+    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); openSettings('rehearse'); } },
+    speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'prepared',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
+    wizardset:  { label:'Wizard settings',  group:'sheets', st:'wip',
+                  go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardSettings(); } },
+
+    /* ---- alerts: one sheet, one table of words ---- */
+    alertrec:   { label:'Delete recording', group:'alerts', ver:1, st:'prepared',
+                  go: () => { showScreen('dashboardScreen'); openAlert('delete'); } },
+    alerttake:  { label:'Delete take',      group:'alerts', ver:1, st:'prepared',
+                  go: () => { demoScene();
+                              openAudioEdit(lineIdx().find(i => SCRIPT[i].mine));
+                              openAlert('deleteTake'); } },
+    alertline:  { label:'Delete line',      group:'alerts', ver:1, st:'prepared',
+                  go: () => { demoScene(); openLineEdit(lineIdx()[0]); openAlert('deleteLine'); } },
+    alertscript:{ label:'Delete script',    group:'alerts', ver:1, st:'prepared',
+                  go: () => { openScript('s1'); openEditScript(); openAlert('deleteScript'); } },
+    alertall:   { label:'Record all my lines', group:'alerts', st:'wip',
+                  go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openAlert('wizardAll'); } },
+    alertsignout:{ label:'Sign out',        group:'alerts', st:'wip',
+                  go: () => { openAccount(); openAlert('signOut'); } },
+    androidalert: { label:'Android playback', group:'alerts', st:'wip',
+                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
+
+    /* ---- states the app has no route to ---- */
+    lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
-    audioempty: { label:'Audio edit — empty', group:'proto',
-                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } },
-    androidalert: { label:'Alert – Android BG play', group:'proto',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } }
+    audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'prepared',
+                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } }
   };
   /* ============================================================
      SCRIPT EDIT / SCENE EDIT
@@ -5793,22 +5942,37 @@
     navigator.clipboard?.writeText(ACCOUNT.email);
     toast('Email copied');
   }
-  /* Signing out is not a place you come back from with Back, so the stack starts
-     again at the login the way signing in starts it again at the dashboard. */
+  /* Back from the login is the one piece of the prototype that the app will not
+     have: there, signing out leaves nothing behind it. */
   function signOutNow() {
     closeSheet();
     openLogin();
-    navStack.length = 0;
-    navStack.push('loginScreen');
   }
 
   /* ============================================================
      PROTOTYPE PANEL
      ============================================================ */
+  /* The clusters, in the order you meet them: how you get in, where you land,
+     what you open, what you do with it, and then the things that slide over the
+     top of all of it. */
   const PANEL_GROUPS = [
-    ['In the app',     'app'],
-    ['Prototype only', 'proto']
+    ['Getting in',          'entry'],
+    ['Home',                'home'],
+    ['Scripts',             'library'],
+    ['One scene, three modes', 'scene'],
+    ['Recording',           'recording'],
+    ['Writing and editing', 'editing'],
+    ['Sheets',              'sheets'],
+    ['Alerts',              'alerts'],
+    ['Prototype only',      'proto']
   ];
+  /* WIP until it is signed off; after that a version and whether it has been
+     built. The words are the ones used in the design meetings. */
+  function statusChip(v) {
+    const st = v.st || 'wip';
+    const text = st === 'wip' ? 'WIP' : 'V' + (v.ver || 1) + ' · ' + st;
+    return `<span class="pi-status ${st}">${text}</span>`;
+  }
   function renderPanel() {
     const here = document.querySelector('.screen.active')?.id;
     document.getElementById('panelBody').innerHTML = PANEL_GROUPS.map(([label, group]) => {
@@ -5816,7 +5980,9 @@
       if (!rows.length) return '';
       return `<div class="panel-label">${label}</div>` + rows.map(([key, v]) => `
         <button class="panel-item ${v.screen && v.screen === here ? 'on' : ''}" onclick="panelGo('${key}')">
-          <span class="pi-dot"></span>${v.label}
+          <span class="pi-dot"></span>
+          <span class="pi-name">${v.label}</span>
+          ${statusChip(v)}
         </button>`).join('');
     }).join('');
   }
