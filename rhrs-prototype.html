@@ -899,7 +899,7 @@
   /* ============ ALERT ============
      Centred, unlike every other sheet: an alert is one thing said once, and a
      left edge would start it reading like a list of settings. */
-  .alert-body { padding: 26px 26px 6px; text-align: center; }
+  .alert-body { padding: calc(var(--sheet-gap) + 8px) 26px 6px; text-align: center; }
   /* The glyph alone. A tinted disc behind it made it a badge, and an alert is
      not something you tap. */
   .alert-ic {
@@ -975,6 +975,7 @@
   /* ============ EVALUATION — a take that cannot be judged ============
      Coral, because it is about your recording; a block rather than a sheet,
      because it explains what is above it and interrupts nothing. */
+  .eval-warn[hidden] { display: none; }
   .eval-warn {
     display: flex; align-items: flex-start; gap: 14px;
     background: var(--coral-tint); border-radius: var(--radius-note);
@@ -1158,6 +1159,9 @@
     color: var(--coral); line-height: 1.2;
   }
   .wzs-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  /* What it is, which script it is, and only then how much is left — the same
+     three lines as the card on Script detail that leads here. */
+  .wzs-left { font-size: 14px; font-weight: 600; color: var(--text-body); margin-top: 8px; }
   /* Done is wine, not coral: it is not what you came for, it is what is behind
      you. Same words as the tag on a card, so the two lists agree. */
   .wzs-done {
@@ -1715,12 +1719,15 @@
   .settings-sheet { padding-bottom: calc(20px + env(safe-area-inset-bottom)); max-height: 86%; }
   .sheet.open, .settings-sheet.open { transform: translateY(0); }
 
+  /* One clearance under the grabber, whatever a sheet opens with — a title, a
+     context line, an alert's icon. It had been set three different ways in three
+     places and every sheet started at a different height. */
   .sheet-grabber {
     width: 40px; height: 5px; border-radius: 3px;
-    background: var(--stone); margin: 10px auto 4px; flex: 0 0 auto;
+    background: var(--stone); margin: 10px auto 0; flex: 0 0 auto;
   }
 
-  .sheet-context { padding: 10px 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto; }
+  .sheet-context { padding: var(--sheet-gap) 24px 16px; border-bottom: 1px solid var(--divider); flex: 0 0 auto; }
   .sheet-context .ctx-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; margin-bottom: 3px; }
   .sheet-context.mine   .ctx-name { color: var(--coral); }
   .sheet-context.others .ctx-name { color: var(--wine); }
@@ -1751,7 +1758,7 @@
   /* ---------- Settings sheet ---------- */
   .settings-title {
     font-family: var(--font-display); font-weight: 700; font-size: 22px;
-    color: var(--noir); padding: 6px 24px 4px;
+    color: var(--noir); padding: var(--sheet-gap) 24px 6px;
     display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto;
   }
   .settings-title .account-btn {
@@ -1862,7 +1869,7 @@
   .speed-title {
     font-family: var(--font-display); font-weight: 700; font-size: 22px;
     color: var(--noir); text-align: center;
-    padding: 20px 24px 22px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
+    padding: var(--sheet-gap) 24px 22px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
   }
   .speed-group { padding: 20px 20px 24px; }
   .speed-group + .speed-group { border-top: 1px solid var(--divider); }
@@ -2253,6 +2260,9 @@
     --glass-shadow: 2px 2px 8px rgba(var(--stone-rgb), 0.5);
     --glass-edge:   linear-gradient(135deg, rgba(var(--glass-edge-rgb),1) 20%, rgba(var(--glass-edge-rgb),0) 50%, rgba(var(--glass-edge-rgb),1) 81%);
     --glass-rim:    1.5px;
+    /* How far a sheet's first line sits below its grabber. One number, because
+       the answer is the same for all of them. */
+    --sheet-gap:    18px;
   }
 
   .round-btn, .detail-header .back, .icon-btn,
@@ -2647,6 +2657,12 @@
     <div class="scroll fades fade-b" id="wizardScroll"></div>
 
     <div class="transport" id="wzTransport">
+      <!-- Scroll away from the line you are on and the way back appears, the
+           same chevron Listen and Rehearse use. -->
+      <button class="jump-btn" id="wizardJump" onclick="wzScroll()" aria-label="Go to the line you are on">
+        <i class="ph-bold ph-caret-up ic-24" id="wizardJumpIc"></i>
+      </button>
+
       <div class="t-fold show">
       <!-- state: idle — the playhead is on a line of yours, so the microphone is
            under your thumb. How many are left is said on the bar below, not here. -->
@@ -3228,8 +3244,8 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label">Step through every line</div>
-            <div class="set-sub">Like Rehearse: the arrows stop on the cues and the directions too, not only on yours</div>
+            <div class="set-label">Go through the whole scene</div>
+            <div class="set-sub">The arrows move one line at a time, cues and directions included, so you hear what you are answering. Off, they jump from one line of yours to the next.</div>
           </div>
           <button class="toggle" onclick="wzToggle('walk', this)"></button>
         </div>
@@ -4593,7 +4609,7 @@
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Recording wizard</span>
-          <span class="rw-sub">Record your lines for others to listen</span>
+          <span class="rw-sub">Record your lines for others</span>
           <span class="rw-meta">${scriptMissing()} lines without audio</span>
         </span>
         <span class="chevron">${ICON.chevron}</span>
@@ -5070,8 +5086,9 @@
     const scenes = sceneList(), left = scriptMissing();
     document.getElementById('wizardScenesList').innerHTML = `
       <div class="wzs-head">
-        <div class="wzs-count">${left ? left + ' line' + (left === 1 ? '' : 's') + ' to record' : 'Nothing left to record'}</div>
+        <div class="wzs-count">Record your lines for others</div>
         <div class="wzs-sub">${currentScript.title}</div>
+        <div class="wzs-left">${left ? left + ' line' + (left === 1 ? '' : 's') + ' to record' : 'Nothing left to record'}</div>
       </div>
       <div class="list-sublabel">Scenes</div>` +
       scenes.map((sc, i) => {
@@ -5274,6 +5291,23 @@
     if (!card) return;
     const fade = parseFloat(getComputedStyle(sc).getPropertyValue('--fade-t')) || 0;
     sc.scrollTo({ top: Math.max(0, card.offsetTop - fade - 12), behavior });
+    setTimeout(wzJump, 450);
+  }
+  /* The same way back as in Listen: leave the line you are on and a chevron
+     appears pointing after it, up or down, whichever way it went. */
+  function wzJump() {
+    const sc = document.getElementById('wizardScroll');
+    const btn = document.getElementById('wizardJump');
+    const card = sc.querySelector('.lcard.active, .stage-only.active');
+    if (!card) { btn.classList.remove('show'); return; }
+    const cr = card.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+    /* The scroller reaches under the transport so the script can fade behind it;
+       a card back there is not in view. */
+    const over = -parseFloat(getComputedStyle(sc).marginBottom) || 0;
+    const atLine = cr.bottom > sr.top + 40 && cr.top < sr.bottom - 60 - over;
+    btn.classList.toggle('show', !atLine);
+    document.getElementById('wizardJumpIc').className =
+      'ph-bold ' + (cr.top < sr.top ? 'ph-caret-up' : 'ph-caret-down') + ' ic-24';
   }
 
   const WZ_STATES = { idle:'wzIdle', audio:'wzAudio', rec:'wzRec', success:'wzSuccess' };
@@ -5358,6 +5392,7 @@
      ============================================================ */
   document.getElementById('listenScroll').addEventListener('scroll', () => updateTransport('listen', true));
   document.getElementById('rehearseScroll').addEventListener('scroll', () => updateTransport('rehearse', true));
+  document.getElementById('wizardScroll').addEventListener('scroll', wzJump);
 
   /* ---- Theme ----
      The attribute is always written, seeded from the system preference, so the
@@ -5467,7 +5502,7 @@
     /* ---- recording ---- */
     wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
                   go: () => { openScript('s1'); openWizardScenes(); } },
-    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', st:'wip',
+    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', ver:1, st:'prepared',
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
@@ -5502,16 +5537,16 @@
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
-    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', st:'wip',
+    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0);
                               openDirEdit(SCRIPT.findIndex(it => it.stage)); } },
-    addline:    { label:'Add line',         group:'editing', st:'wip',
+    addline:    { label:'Add line',         group:'editing', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddLine(1); } },
-    adddir:     { label:'Add direction',    group:'editing', st:'wip',
+    adddir:     { label:'Add direction',    group:'editing', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddDirection(1); } },
     character:  { label:'Edit character',   group:'editing', screen:'characterScreen', ver:1, st:'prepared',
                   go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
-    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', st:'wip',
+    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
                   go: () => { demoScene();
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
@@ -5523,7 +5558,7 @@
     stagemenu:  { label:'Direction menu',    group:'sheets', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE);
                               openStageSheet(SCRIPT.findIndex(it => it.stage)); } },
-    addhere:    { label:'Add here',         group:'sheets', st:'wip',
+    addhere:    { label:'Add here',         group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddSheet(1); } },
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
