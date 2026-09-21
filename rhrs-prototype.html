@@ -653,12 +653,12 @@
      zero-height box so the rows keep their own rhythm: the drag arithmetic reads
      a row's height and margin, and anything with a height of its own between
      them would put the step out. */
-  #sceneEditList .se-list { padding-top: 20px; }
-  #sceneEditList .se-row { margin-bottom: 20px; }
+  #sceneEditList .se-list { padding-top: 30px; }
+  #sceneEditList .se-row { margin-bottom: 30px; }
   .se-ins { position: relative; height: 0; }
   .se-ins button {
-    position: absolute; left: 50%; top: -10px; transform: translate(-50%, -50%);
-    width: 26px; height: 26px; border-radius: 50%; padding: 0;
+    position: absolute; left: 50%; top: -15px; transform: translate(-50%, -50%);
+    width: 22px; height: 22px; border-radius: 50%; padding: 0;
     display: flex; align-items: center; justify-content: center;
     border: 1.5px dashed var(--wine-border); background: var(--mist);
     color: var(--wine); cursor: pointer;
@@ -854,6 +854,14 @@
      fact about the list, not a warning about any one take. */
   /* Not an error and not a gap in the page: a line simply has no takes until it
      has one, and the list says that rather than showing nothing at all. */
+  /* The generated one is the ground the takes stand on, so it is quieter than
+     they are: wine where a take of yours is coral, and no delete to reach for.
+     Coral in this app means you — and this one is not you. */
+  .ae-take.gen.inuse { background: var(--wine-tint); }
+  .ae-take.gen.inuse::before { background: var(--wine); }
+  .ae-take.gen.inuse .ae-play { background: var(--wine); color: var(--on-mark); }
+  .ae-take.gen.inuse .ae-use.on { background: var(--wine); color: var(--on-mark); }
+  .ae-take.gen .ae-when { color: var(--wine); }
   .ae-empty {
     text-align: center; padding: 26px 20px;
     font-size: 14px; color: var(--text-muted);
@@ -1249,7 +1257,7 @@
   .card.featured .badge { color: var(--on-mark-tint); border-color: var(--on-mark-line); }
   .card.featured .chevron { color: var(--on-mark); }
 
-  /* Recording Wizard — the way into recording the lines that have no audio yet.
+  /* Recording wizard — the way into recording the lines that have no audio yet.
      It follows the Whole script card rather than standing beside it, so it is
      tinted rather than filled: a follow-on, not a rival to the primary action.
      Coral because the lines it is missing are mine. Carrying coral, it drops the
@@ -1735,6 +1743,9 @@
     display: flex; align-items: center; justify-content: center; color: var(--wine);
   }
   .sheet-item.accent, .sheet-item.accent .item-ic { color: var(--coral); }
+  /* Not the group separator — that one parts two kinds of thing. This one runs
+     between items of one kind, so it is a hairline and keeps the row's padding. */
+  .sheet-rule { height: 1px; background: var(--divider); margin: 0 18px; }
   .sheet-sep { height: 1px; background: var(--divider); margin: 6px 24px; }
 
   /* ---------- Settings sheet ---------- */
@@ -2449,7 +2460,7 @@
   <div class="screen" id="scriptsScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">All Scripts</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">All scripts</span>
       <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
     </div>
     <div class="list fades" id="scriptsList"></div>
@@ -2548,10 +2559,23 @@
   <div class="screen" id="lineScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title cap-trim">Edit line</div>
+      <div class="header-title cap-trim" id="lineTitle">Edit line</div>
       <span style="width:42px;flex:0 0 auto;"></span>
     </div>
     <div class="scroll fades" id="lineScroll"></div>
+  </div>
+
+  <!-- ============ SCREEN: DIRECTION EDIT ============
+       A standalone direction, written the same way everything else in this app
+       is written. It had no screen of its own: the row in Scene edit and the
+       item in its menu both led to a toast. -->
+  <div class="screen" id="dirScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim" id="dirTitle">Edit direction</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+    <div class="scroll fades" id="dirScroll"></div>
   </div>
 
   <!-- ============ SCREEN: ACCOUNT ============
@@ -2600,7 +2624,7 @@
   <div class="screen" id="wizardScenesScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Recording Wizard</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Recording wizard</span>
       <span style="width:46px;flex:0 0 auto;"></span>
     </div>
     <div class="list fades" id="wizardScenesList"></div>
@@ -2676,7 +2700,7 @@
          a mode you switch out of from here, so the bar says where you are and has
          nothing to press. -->
     <div class="modebar wizardbar">
-      <span class="mode active"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Recording Wizard</span></span>
+      <span class="mode active"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Recording wizard</span></span>
       <span class="wz-count" id="wzCount"></span>
     </div>
   </div>
@@ -3013,7 +3037,7 @@
   <div class="settings-sheet" id="settingsSheet">
     <div class="sheet-grabber"></div>
     <div class="settings-title">
-      <span class="cap-trim" id="settingsTitle">Read Settings</span>
+      <span class="cap-trim" id="settingsTitle">Read settings</span>
       <button class="account-btn" onclick="closeSheet(); openAccount()" aria-label="User account">
         <i class="ph ph-user ic-22"></i>
       </button>
@@ -3178,13 +3202,13 @@
     <div class="notif-list" id="notifList"></div>
   </div>
 
-  <!-- Recording Wizard settings. Only what changes how recording behaves; the
+  <!-- Recording wizard settings. Only what changes how recording behaves; the
        live check is not here on purpose — it is the point of the screen, and
        switching it off would leave the override with nothing to override. -->
   <div class="settings-sheet" id="wizardSettingsSheet">
     <div class="sheet-grabber"></div>
     <div class="settings-title">
-      <span class="h-title cap-trim" id="wzSetTitle">Wizard Settings</span>
+      <span class="h-title cap-trim" id="wzSetTitle">Recording wizard settings</span>
     </div>
     <div class="set-scroll">
       <div class="set-group">
@@ -3542,6 +3566,15 @@
     return t[0];
   }
   const takeInUse = line => takesFor(line).find(t => t.use);
+  /* No line is ever silent. Until somebody records one, what everyone hears is
+     the line read by the app — so Listen works on a script nobody has touched,
+     and a line has something to play the moment it exists.
+
+     It is not a take and is never counted as one: it cannot be deleted, it is
+     not chosen over anything, and it does not stop the line counting as
+     unrecorded. A take is a performance; this is only the words. */
+  const genLen = line => Math.max(2, Math.round(line.text.length / 14) + 1);
+  const isGenerated = line => !takesFor(line).length;
   const SUCCESS_MS = 700;          // the tick now carries the handover, so it has to be seen
   const TAKE_MS    = 10000;        // simulated take: runs 10s, then finishes itself
   /* Speeds are numbers, not labels: the presets and the stepper are two ways at
@@ -3594,6 +3627,7 @@
 
     /* The detours. */
     lineScreen:           'origin',
+    dirScreen:            'origin',
     audioScreen:          'origin',
     evaluationScreen:     'origin',
     accountScreen:        'origin',
@@ -3609,6 +3643,7 @@
      hash, where there is no 'came from' to return to. */
   const BACK_HOME = {
     lineScreen:       'detailScreen',
+    dirScreen:        'sceneEditScreen',
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen'
@@ -3625,6 +3660,7 @@
     wizardScenesScreen: () => renderWizardScenes(),
     wizardScreen:       () => { renderWizard(); wzSync(); },
     lineScreen:         () => { editRender = renderLineEdit; renderLineEdit(); },
+    dirScreen:          () => { editRender = renderDirEdit; renderDirEdit(); },
     audioScreen:        () => renderAudioEdit(),
     accountScreen:      () => { editRender = renderAccount; renderAccount(); }
   };
@@ -3639,6 +3675,7 @@
     if (id !== 'rehearseScreen' && id !== 'wizardScreen') stopRecording();
   }
   function showScreen(id) {
+    if (!panelGoing) panelHere = null;
     const from = activeScreen()?.id;
     if (from && from !== id && BACK[id] === 'origin') cameFrom[id] = from;
     paint(id);
@@ -3650,6 +3687,7 @@
     return cameFrom[id] || BACK_HOME[id] || 'dashboardScreen';
   }
   function goBack() {
+    panelHere = null;
     const here = activeScreen()?.id;
     const to = backTarget(here);
     if (!to || to === here) return;
@@ -4419,10 +4457,10 @@
     document.getElementById('ctxName').textContent = 'Directions';
     document.getElementById('ctxLine').textContent = shorten(SCRIPT[idx].stage);
     document.getElementById('sheetItems').innerHTML =
-      item('edit', 'Edit direction', false, 'Edit direction') +
+      item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`) +
       item('note', 'Add a private note', false, 'Private note') +
       '<div class="sheet-sep"></div>' +
-      item('trash', 'Delete', true, 'Delete direction');
+      item('trash', 'Delete', true, null, `openDirEdit(${idx}); openAlert('deleteDirection')`);
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -4437,7 +4475,7 @@
     document.getElementById('alertSheet').classList.remove('open');
   }
   function openSettings(mode) {
-    const label = { read:'Read Settings', listen:'Listen Settings', rehearse:'Rehearse Settings' }[mode];
+    const label = { read:'Read settings', listen:'Listen settings', rehearse:'Rehearse settings' }[mode];
     document.getElementById('settingsTitle').textContent = label;
     document.getElementById('setListen').style.display   = mode === 'listen'   ? '' : 'none';
     document.getElementById('setRehearse').style.display = mode === 'rehearse' ? '' : 'none';
@@ -4554,7 +4592,7 @@
       <button class="rec-wizard" onclick="openWizardScenes()">
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
-          <span class="rw-title">Recording Wizard</span>
+          <span class="rw-title">Recording wizard</span>
           <span class="rw-sub">Record your lines for others to listen</span>
           <span class="rw-meta">${scriptMissing()} lines without audio</span>
         </span>
@@ -4779,6 +4817,13 @@
       primary: 'Delete line', act: "closeSheet(); toast('Line deleted')",
       ghost: 'Keep it'
     },
+    deleteDirection: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this direction?',
+      text: 'It goes from the scene for everyone in the cast. This cannot be undone.',
+      primary: 'Delete direction', act: 'deleteDirection()',
+      ghost: 'Keep it'
+    },
     deleteTake: {
       icon: 'ph-fill ph-warning',
       title: 'Delete this take?',
@@ -4822,7 +4867,7 @@
          promising something that was never taken. */
       title: 'Turn on notifications for playback controls on your lock screen',
       text: 'Notifications are off, so rhrs has no player in the shade or on the lock screen. Playback, headphone buttons and car controls work either way — only Settings can switch the player back on.',
-      primary: 'Open Settings', act: "sheetAction('Opening system settings')",
+      primary: 'Open settings', act: "sheetAction('Opening system settings')",
       ghost: 'Not now'
     }
   };
@@ -5422,7 +5467,7 @@
     /* ---- recording ---- */
     wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
                   go: () => { openScript('s1'); openWizardScenes(); } },
-    wizard:     { label:'Recording Wizard', group:'recording', screen:'wizardScreen', st:'wip',
+    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', st:'wip',
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
@@ -5457,9 +5502,16 @@
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
+    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openSceneEdit(0);
+                              openDirEdit(SCRIPT.findIndex(it => it.stage)); } },
+    addline:    { label:'Add line',         group:'editing', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddLine(1); } },
+    adddir:     { label:'Add direction',    group:'editing', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddDirection(1); } },
     character:  { label:'Edit character',   group:'editing', screen:'characterScreen', ver:1, st:'prepared',
                   go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
-    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
+    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', st:'wip',
                   go: () => { demoScene();
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
@@ -5626,7 +5678,7 @@
           <i class="ph-bold ph-plus ic-14"></i>
         </button></div>
       <div class="se-row ${kind}">
-        <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `toast('Edit direction')`}">
+        <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `openDirEdit(${i})`}">
           ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
           <span class="se-body">
             ${it.who ? `<span class="se-who cap-trim">${it.who}${seFlags(it)}</span>` : ''}
@@ -5637,26 +5689,65 @@
         ${grip('item')}
       </div>`;
     }).join('') + `</div>` +
-      `<button class="se-add" onclick="toast('Add line')">
+      `<button class="se-add" onclick="openAddLine(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add line
       </button>
-      <button class="se-add" onclick="toast('Add direction')">
+      <button class="se-add" onclick="openAddDirection(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add direction
       </button>`;
   }
   /* ============================================================
      LINE EDIT
      ============================================================ */
-  let lineEditIdx = 0;
+  /* Adding and editing are the same screen, because they are the same act on the
+     same thing — only the title differs, and what a line that does not exist yet
+     cannot carry. A new line is held as a draft until its text is saved: leaving
+     halfway should leave the scene as it was, not an empty row in it. */
+  let lineEditIdx = 0, lineDraft = null, lineAddAt = 0;
+  const lineItem = () => lineDraft || SCRIPT[lineEditIdx];
+
   function openLineEdit(idx) {
     lineEditIdx = idx;
+    lineDraft = null;
     editingKey = null;
     editRender = renderLineEdit;
     renderLineEdit();
     showScreen('lineScreen');
   }
+  /* Where the new line goes is decided before you get here — in the gap you
+     pressed — so this screen only has to ask who says it and what they say. */
+  function openAddLine(at) {
+    closeSheet();
+    lineAddAt = at;
+    const me = CHARACTERS.find(c => c.mine) || CHARACTERS[0];
+    lineDraft = { who: me.name, mine: !!me.mine, text: '' };
+    editRender = renderLineEdit;
+    editingKey = 'text';
+    renderLineEdit();
+    showScreen('lineScreen');
+    setTimeout(() => document.getElementById('leInput')?.focus(), 60);
+  }
+  /* Keys are opaque and they are what takes hang off, so a new line gets one of
+     its own rather than a number that says where it happens to sit. */
+  let keySeq = 0;
+  function commitLine(text) {
+    const sc = SCENE_LISTS.indexOf(SCRIPT) + 1;
+    const line = lineDraft;
+    line.text = text;
+    line.key = (sc || 1) + '-n' + (++keySeq);
+    line.rec = false;                       // nothing recorded, so the wizard wants it
+    SCRIPT.splice(lineAddAt, 0, line);
+    lineEditIdx = SCRIPT.indexOf(line);
+    lineDraft = null;
+    SCENES.forEach(x => { x.lines = x.items.filter(it => it.who).length; });
+    renderSceneEdit();
+    renderScenes();
+    toast('Line added');
+  }
   function renderLineEdit() {
-    const line = SCRIPT[lineEditIdx];
+    const line = lineItem();
+    const adding = !!lineDraft;
+    document.getElementById('lineTitle').textContent = adding ? 'Add line' : 'Edit line';
     const takes = takesFor(line);
     const take = takes.find(t => t.use);
     document.getElementById('lineScroll').innerHTML = `
@@ -5672,16 +5763,18 @@
       </button>
 
       ${editSection('text', 'Line', '', line.text, 'Add the line')}
-
+      ${adding ? `
+      <div class="ac-note">Until somebody records it, everyone hears this line
+        read by the app — so it is in the scene the moment you save it.</div>` : `
       <div class="le-label">Audio</div>
-      <div class="ae-take">
+      <div class="ae-take ${take ? '' : 'gen'}">
         <div style="display:flex;align-items:center;gap:12px;width:100%;">
-          <button class="ae-play" onclick="toast('${take ? 'Playing take' : 'No audio yet'}')" aria-label="Play line">
+          <button class="ae-play" onclick="toast('${take ? 'Playing take' : 'Playing the generated voice'}')" aria-label="Play line">
             <i class="ph-fill ph-play ic-16"></i>
           </button>
           <div class="ae-main">
-            <div class="ae-when">${take ? 'In use' : 'No audio yet'}</div>
-            <div class="ae-len">${take ? fmtLen(take.len) : 'Record one in Audio'}</div>
+            <div class="ae-when">${take ? 'In use' : 'Generated voice'}</div>
+            <div class="ae-len">${take ? fmtLen(take.len) : fmtLen(genLen(line)) + ' · until you record one'}</div>
           </div>
           <button class="le-takes" onclick="openAudioEdit(${lineEditIdx})">
             ${takes.length} take${takes.length === 1 ? '' : 's'}
@@ -5690,10 +5783,12 @@
         </div>
       </div>
 
+      `}
       ${editSection('note', 'Private note', '<i class="ph-fill ph-note ic-16 lbl-ic private"></i>', line.note, 'Add private note')}
 
       ${editSection('dir', 'Directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add direction')}
 
+      ${adding ? '' : `
       <div class="le-label">Reference</div>
       <button class="le-row" onclick="copyLineId(${lineEditIdx})">
         <span class="le-main">
@@ -5705,7 +5800,7 @@
 
       <button class="le-danger" onclick="openAlert('deleteLine')">
         <i class="ph ph-trash ic-20"></i>Delete line
-      </button>`;
+      </button>`}`;
     applyTextStyle();
     growTextarea(document.getElementById('leInput'));
   }
@@ -5719,9 +5814,23 @@
      looks like text. Where there is nothing yet, the add button is that trigger. */
   let editingKey = null, editRender = () => {};
   const EDIT_SAVE = {
-    text: v => { if (v) SCRIPT[lineEditIdx].text = v; },
-    note: v => { SCRIPT[lineEditIdx].note = v || undefined; },
-    dir:  v => { SCRIPT[lineEditIdx].dir  = v || undefined; },
+    /* Saving the text of a line that does not exist yet is what brings it into
+       the scene — there is nothing else to press, and an empty line is not a
+       line. */
+    text: v => {
+      if (!v) return toast(lineDraft ? 'A line needs something to say' : 'Saved');
+      if (lineDraft) return commitLine(v);
+      lineItem().text = v;
+    },
+    note: v => { lineItem().note = v || undefined; },
+    dir:  v => { lineItem().dir  = v || undefined; },
+    /* A standalone direction, on its own screen. */
+    stage: v => {
+      if (!v) return toast('A direction needs something in it');
+      if (dirDraft) return commitDirection(v);
+      SCRIPT[dirIdx].stage = v;
+      renderSceneEdit();
+    },
     accountname: v => {
       if (!v) return toast('A name is how the others find you');
       ACCOUNT.name = v;
@@ -5799,8 +5908,8 @@
       ? 'Before ' + (next.who ? next.who + ' — ' + shorten(next.text) : shorten(next.stage))
       : 'At the end of the scene';
     document.getElementById('sheetItems').innerHTML =
-      item('line', 'Add a line',      false, 'Add line') +
-      item('note', 'Add a direction', false, 'Add direction');
+      item('line', 'Add a line',      false, null, `openAddLine(${at})`) +
+      item('note', 'Add a direction', false, null, `openAddDirection(${at})`);
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -5808,18 +5917,21 @@
   /* The cast, as a sheet: it is one choice, not a place. */
   function openCharacterPick() {
     document.getElementById('sheetContext').className = 'sheet-context ' +
-      (SCRIPT[lineEditIdx].mine ? 'mine' : 'others');
+      (lineItem().mine ? 'mine' : 'others');
     document.getElementById('ctxName').textContent = 'Change character';
-    document.getElementById('ctxLine').textContent = shorten(SCRIPT[lineEditIdx].text);
+    document.getElementById('ctxLine').textContent = shorten(lineItem().text || 'New line');
+    /* A rule between the names: the line menu's items are different things to
+       do, these are the same thing said of different people, and without it the
+       list runs together. */
     document.getElementById('sheetItems').innerHTML = CHARACTERS.map(c =>
       `<button class="sheet-item ${c.mine ? 'accent' : ''}" onclick="closeSheet(); setCharacter('${c.name}', ${c.mine})">
         <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${c.name}${c.mine ? ' · you' : ''}
-      </button>`).join('');
+      </button>`).join('<div class="sheet-rule"></div>');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
   function setCharacter(name, mine) {
-    const line = SCRIPT[lineEditIdx];
+    const line = lineItem();
     line.who = name; line.mine = mine;
     renderLineEdit();
     toast('Character changed');
@@ -5836,8 +5948,12 @@
     /* Read off the line's own key rather than off the list in front of you, so
        it says the same thing whether you came from the scene or the whole
        script. */
-    const [sc, at] = line.key.split('-').map(Number);
-    const n = SCENE_LISTS[sc - 1].slice(0, at).filter(it => it.who).length;
+    /* Read off the scene in the key and the line's place in that scene as it
+       stands now, so a line that was added or moved still says where it is. */
+    const sc = Number(line.key.split('-')[0]);
+    const items = SCENE_LISTS[sc - 1] || [];
+    const at = items.indexOf(line);
+    const n = at < 0 ? 0 : items.slice(0, at + 1).filter(it => it.who).length;
     return '#' + String(sc).padStart(3, '0') + '-' + String(n).padStart(4, '0');
   }
   function openAudioEdit(idx) {
@@ -5864,12 +5980,33 @@
         ${takes.length
           ? takes.map(t => aeTake(t)).join('') +
             `<div class="ae-keep">We will store only last ${KEEP_TAKES} takes, the rest might be deleted.</div>`
-          : '<div class="ae-empty">No audio recorded yet</div>'}`}`;
+          : '<div class="ae-empty">No audio recorded yet</div>'}
+        <div class="list-sublabel">Default</div>
+        ${aeGenerated(line, takes.length)}`}`;
     document.getElementById('aeTransport').hidden = !aeRec;
     document.getElementById('audioScroll').classList.toggle('fade-b', aeRec);
     applyTextStyle();
   }
   const KEEP_TAKES = 5;
+  /* The line as the app reads it. It sits under the takes because that is what
+     it is — the thing underneath them — and it carries In use when there is no
+     take above it to carry it. No delete: there is nothing to delete, it is made
+     from the words. */
+  function aeGenerated(line, hasTakes) {
+    return `<div class="ae-take gen ${hasTakes ? '' : 'inuse'}">
+      <div style="display:flex;align-items:center;gap:12px;width:100%;">
+        <button class="ae-play" onclick="toast('Playing the generated voice')" aria-label="Play the generated voice">
+          <i class="ph-fill ph-play ic-16"></i>
+        </button>
+        <div class="ae-main">
+          <div class="ae-when">Generated voice</div>
+          <div class="ae-len">${fmtLen(genLen(line))}</div>
+        </div>
+        ${hasTakes ? '' : '<button class="ae-use on" disabled>In use</button>'}
+      </div>
+    </div>
+    <div class="ae-keep">Made from the text, so the line is never silent. It cannot be deleted and it does not count as a take — record one and it takes over.</div>`;
+  }
   /* The same notes as in Read, and off to begin with: you came to listen to a
      take, not to read. They are here at all because a note often says why the
      reading was the way it was. */
@@ -6049,6 +6186,65 @@
   }
 
   /* ============================================================
+     DIRECTION EDIT
+     ============================================================ */
+  /* The same shape as Line edit, because it is the same act: one thing that is
+     written, on a screen that says which scene it is in. A direction has no
+     character, no takes and no private note — a note is yours and a direction is
+     everybody's. */
+  let dirIdx = 0, dirDraft = null, dirAddAt = 0;
+  function openDirEdit(idx) {
+    dirIdx = idx;
+    dirDraft = null;
+    editingKey = null;
+    editRender = renderDirEdit;
+    renderDirEdit();
+    showScreen('dirScreen');
+  }
+  function openAddDirection(at) {
+    closeSheet();
+    dirAddAt = at;
+    dirDraft = { stage: '' };
+    editRender = renderDirEdit;
+    editingKey = 'stage';
+    renderDirEdit();
+    showScreen('dirScreen');
+    setTimeout(() => document.getElementById('leInput')?.focus(), 60);
+  }
+  function commitDirection(text) {
+    const it = dirDraft;
+    it.stage = text;
+    SCRIPT.splice(dirAddAt, 0, it);
+    dirIdx = SCRIPT.indexOf(it);
+    dirDraft = null;
+    renderSceneEdit();
+    toast('Direction added');
+  }
+  function renderDirEdit() {
+    const it = dirDraft || SCRIPT[dirIdx];
+    const adding = !!dirDraft;
+    document.getElementById('dirTitle').textContent = adding ? 'Add direction' : 'Edit direction';
+    document.getElementById('dirScroll').innerHTML = `
+      <div class="le-scene cap-trim">${currentScene}</div>
+      ${editSection('stage', 'Direction', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', it.stage, 'Add the direction')}
+      <div class="ac-note">A direction belongs to the scene, not to a line, and
+        everybody in the cast reads the same one.</div>
+      ${adding ? '' : `
+      <button class="le-danger" onclick="openAlert('deleteDirection')">
+        <i class="ph ph-trash ic-20"></i>Delete direction
+      </button>`}`;
+    applyTextStyle();
+    growTextarea(document.getElementById('leInput'));
+  }
+  function deleteDirection() {
+    closeSheet();
+    SCRIPT.splice(dirIdx, 1);
+    renderSceneEdit();
+    goBack();
+    toast('Direction deleted');
+  }
+
+  /* ============================================================
      ACCOUNT
      ============================================================ */
   /* You, rather than a character: the name is what the rest of the cast sees
@@ -6126,11 +6322,12 @@
   }
   function renderPanel() {
     const here = document.querySelector('.screen.active')?.id;
+    const stuck = panelHere && panelAt === here ? panelHere : null;
     document.getElementById('panelBody').innerHTML = PANEL_GROUPS.map(([label, group]) => {
       const rows = Object.entries(SCREENS).filter(([, v]) => v.group === group);
       if (!rows.length) return '';
       return `<div class="panel-label">${label}</div>` + rows.map(([key, v]) => `
-        <button class="panel-item ${v.screen && v.screen === here ? 'on' : ''}" onclick="panelGo('${key}')">
+        <button class="panel-item ${(stuck ? key === stuck : v.screen && v.screen === here) ? 'on' : ''}" onclick="panelGo('${key}')">
           <span class="pi-dot"></span>
           <span class="pi-name">${v.label}</span>
           ${statusChip(key, v)}
@@ -6201,8 +6398,19 @@
     location.reload();
   }
   document.addEventListener('click', closeStatusMenu);
+  /* Which row you came in by. Two rows can land on the same screen — Evaluation
+     and the poor-audio state it can be in — and the one you pressed is the one
+     that should light up, or the panel says you are looking at the other. Any
+     step taken inside the app forgets it and the highlight goes back to matching
+     the screen. */
+  let panelHere = null, panelAt = null, panelGoing = false;
   function panelGo(key) {
+    panelGoing = true;
     SCREENS[key].go();
+    panelGoing = false;
+    panelHere = key;
+    panelAt = activeScreen()?.id;
+    renderPanel();
     closePanel();          // no-op where the panel is always there
   }
   function openPanel()  { renderPanel(); document.getElementById('panel').classList.add('open'); }
