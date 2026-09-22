@@ -338,6 +338,18 @@
   .panel-close { display: none; }
   .panel-body { flex: 1 1 auto; overflow-y: auto; padding: 0 12px 10px; }
   .panel-body::-webkit-scrollbar { width: 0; }
+  /* Who is looking, above the list of screens: everything below is drawn for
+     the one chosen. The panel's own greys, like the rest of it. */
+  .panel-viewer { flex: 0 0 auto; padding: 4px 12px 8px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+  .pv-member {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; border: none; background: none; cursor: pointer;
+    border-radius: 10px; padding: 6px 10px;
+    font-family: inherit; font-size: 13.5px; font-weight: 500; color: #3A2A2E;
+  }
+  .pv-member:hover { background: rgba(0, 0, 0, 0.05); }
+  .pv-member.on { background: #3A2A2E; color: #FFFFFF; font-weight: 600; }
+  .pv-member .pv-sub { flex: 0 0 auto; font-size: 11px; opacity: 0.7; white-space: nowrap; }
   .panel-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
     color: rgba(58, 42, 46, 0.45); padding: 14px 8px 6px;
@@ -2467,6 +2479,9 @@
       <i class="ph-bold ph-x ic-18"></i>
     </button>
   </div>
+  <!-- Who is looking. A tool, not the app: the app never lets you be somebody
+       else, but the prototype has to show every member's version of it. -->
+  <div class="panel-viewer" id="panelViewer"></div>
   <div class="panel-body" id="panelBody"></div>
   <!-- Fixed, so it can hang off whichever chip was tapped. -->
   <div class="status-menu" id="statusMenu" hidden></div>
@@ -2900,7 +2915,7 @@
       <!-- The scenes themselves, not three buttons that talk about them: each one
            moves with its own handles and opens into its lines. -->
       <div id="editScenes"></div>
-      <button class="le-danger" style="margin-top:22px;" onclick="openAlert('deleteScript')">
+      <button class="le-danger" id="deleteScriptBtn" style="margin-top:22px;" onclick="openAlert('deleteScript')">
         <i class="ph ph-trash ic-20"></i>Delete script
       </button>
     </div>
@@ -3721,20 +3736,62 @@
     editor: { label: 'Editor', line: 'The whole script, except casting.' },
     admin:  { label: 'Admin',  line: 'Everything, including people.' }
   };
-  const ME = 'me';
+  /* Who is looking. The app never lets you be somebody else; the prototype has
+     to show every member's version of it, so the panel can make you any of
+     these, and everything below reads ME rather than assuming Luky. */
+  let ME = 'me';
   const MEMBERS = [
-    { id: ME,   name: 'Luky Kuky',          role: 'admin',  when: 'Joined 3 September', you: true },
+    { id: 'me', name: 'Luky Kuky',          role: 'admin',  when: 'Joined 3 September', email: 'nina@example.com' },
     { id: 'ls', name: 'Luděk Sobota',       role: 'reader', when: 'Joined 12 September' },
     { id: 'pn', name: 'Petr Novák',         role: 'reader', when: 'Joined 14 September' },
-    { id: 'jk', name: 'Jana Kratochvílová', role: 'editor', when: 'Invited 20 September', invited: true }
+    { id: 'jk', name: 'Jana Kratochvílová', role: 'editor', when: 'Invited 20 September', invited: true },
+    /* A reader who holds nothing: the fourth of the four you can be. */
+    { id: 'td', name: 'Tomas Dvorak',       role: 'reader', when: 'Joined 18 September' }
   ];
+  /* "You" turns over with ME, so it is read, never written. */
+  MEMBERS.forEach(m => Object.defineProperty(m, 'you', { get() { return m.id === ME; } }));
   const member = id => MEMBERS.find(m => m.id === id);
   /* A part can be held by more than one person — the alternation a theatre runs
      on — and a person can hold more than one part. Both directions are read from
      this one table rather than kept twice. */
-  const CAST = { Nina: [ME], Michael: ['ls', 'pn'], Anna: [] };
+  const CAST = { Nina: ['me'], Michael: ['ls', 'pn'], Anna: [] };
   const castOf  = name => (CAST[name] || []).map(member).filter(Boolean);
   const partsOf = id => Object.keys(CAST).filter(n => (CAST[n] || []).includes(id));
+  /* Whose line it is, read from the cast rather than written on the line: it
+     turns over with ME and with casting. The mine flags in the demo data were
+     the starting cast and nothing more, so they go. */
+  function ownLine(it) {
+    if (it.who) {
+      delete it.mine;
+      Object.defineProperty(it, 'mine', { get() { return (CAST[it.who] || []).includes(ME); }, configurable: true });
+    }
+    return it;
+  }
+  SCENE_LISTS.forEach(list => list.forEach(ownLine));
+
+  /* ---- what the member looking may do ----
+     The permission table from the wireframes, as four questions. Everything
+     that differs by role or by casting asks one of them, and nothing else knows
+     who is looking. Controls disappear; facts stay; where silence would
+     confuse, a sentence says who does it. */
+  const me = () => member(ME) || MEMBERS[0];
+  const RANK = { reader: 0, editor: 1, admin: 2 };
+  const can = {
+    /* The whole script: any line's text, directions, adding and deleting
+       lines, renaming and adding characters. Editor and admin. */
+    edit:  () => RANK[me().role] >= 1,
+    /* People, casting, voices, deleting the script. Admin. */
+    admin: () => me().role === 'admin',
+    /* Rehearse, the wizard, the audio of your own lines. Comes with a part,
+       whatever the role — and nobody without one has any of it. */
+    act:   () => partsOf(ME).length > 0,
+    /* One line's text: the whole script, or your own line when you hold the part. */
+    line:  it => RANK[me().role] >= 1 || !!it.mine
+  };
+  /* Assigned means you hold a part in it: on the script, and on a scene that
+     has a line of yours. Read, never written. */
+  Object.defineProperty(SCRIPTS[0], 'assigned', { get: () => can.act() });
+  SCENES.forEach(sc => Object.defineProperty(sc, 'assigned', { get: () => (sc.items || []).some(it => it.mine) }));
   /* Who holds a part, said in a line: you first, because that is the thing you
      are looking for, and "Not cast" rather than an empty space. */
   const castLine = name => {
@@ -3788,26 +3845,19 @@
     const who = castOf(name);
     return who.find(m => m.id === HEAR[name]) || who[0] || null;
   }
-  /* Which of a part's lines each actor has recorded. Yours are on the lines
-     themselves (`rec`); the others' are here, because a second actor in a part
-     can be part-way through. In the demo Luděk has all of Michael's, Petr the
-     first two. */
-  const OTHERS_REC = { ls: 'all', pn: 2 };
-  function recordedCount(id, name) {
-    const lines = WHOLE_SCRIPT.filter(it => it.who === name);
-    if (id === ME) return lines.filter(it => it.rec !== false).length;
-    const has = OTHERS_REC[id];
-    return has === 'all' ? lines.length : Math.min(lines.length, has || 0);
-  }
-  /* Whether one actor has recorded one line. Yours is on the line's takes; the
-     others' come from OTHERS_REC, counted from the top of the part. */
-  function recordedBy(id, line) {
-    if (id === ME) return !!takesFor(line).length;
-    const has = OTHERS_REC[id];
-    if (has === 'all') return true;
-    return WHOLE_SCRIPT.filter(it => it.who === line.who)
-                       .findIndex(it => it.key === line.key) < (has || 0);
-  }
+  /* What each member has recorded, by line key. A take belongs to whoever
+     recorded it, so this is per member and not on the line. Luky's come from
+     the demo's rec flags on Nina's lines; Ludek has all of Michael's, Petr the
+     first two, because a second actor in a part can be part-way through. */
+  const RECORDED = {};
+  const recSet = id => RECORDED[id] || (RECORDED[id] = new Set());
+  WHOLE_SCRIPT.forEach(it => { if (it.who === 'Nina' && it.rec !== false) recSet('me').add(it.key); });
+  WHOLE_SCRIPT.filter(it => it.who === 'Michael').forEach((it, i) => {
+    recSet('ls').add(it.key);
+    if (i < 2) recSet('pn').add(it.key);
+  });
+  const recordedBy = (id, line) => recSet(id).has(line.key);
+  const recordedCount = (id, name) => WHOLE_SCRIPT.filter(it => it.who === name && recordedBy(id, it)).length;
   /* What plays on this line for you, said in a sentence: the take of the actor
      you hear, or the part's voice and whose take it is standing in for. It sits
      in the line's menu — under the three dots, where a question about this one
@@ -3890,7 +3940,7 @@
      flag is recorded. Counted, never typed — the wizard, the row on Script detail
      and the filter all read the same list. */
   const isMine    = it => !!it.who && !!it.mine;
-  const needsAudio = it => isMine(it) && it.rec === false;
+  const needsAudio = it => isMine(it) && !recordedBy(ME, it);
   /* Asked of a list, because the same question is asked of different ones: what
      this scene still needs, what the whole script still needs, and what the
      wizard is walking through right now. */
@@ -3912,30 +3962,33 @@
      one is a tap, not a re-record. */
   const TAKES = {};
   const WHEN = ['Just now', '2 hours ago', 'Yesterday', 'Tuesday', 'Last week'];
-  function takesFor(line) {
-    if (!TAKES[line.key]) {
-      /* A line still waiting for audio has no history to invent. */
-      const n = line.rec === false ? 0 : 1 + (line.text.length % 3);
-      TAKES[line.key] = Array.from({ length: n }, (_, i) => ({
-        id: line.key + '-' + i,
+  /* Keyed by member and line: two actors in one part each have their own. */
+  const takeKey = (line, id = ME) => id + ':' + line.key;
+  function takesFor(line, id = ME) {
+    const k = takeKey(line, id);
+    if (!TAKES[k]) {
+      /* A line this member has not recorded has no history to invent. */
+      const n = recordedBy(id, line) ? 1 + (line.text.length % 3) : 0;
+      TAKES[k] = Array.from({ length: n }, (_, i) => ({
+        id: k + '-' + i,
         len: Math.max(2, takeLen(line) - i),
         when: WHEN[i] || 'Earlier',
         use: i === 0
       }));
     }
-    return TAKES[line.key];
+    return TAKES[k];
   }
   /* Recording is what creates a take, so the wizard goes through here too — and
-     a line with a take is a line with audio, which is why the flag is set here
-     rather than by each caller in turn. */
+     a line with a take is a line this member has recorded, which is why that is
+     marked here rather than by each caller in turn. */
   function addTake(line) {
     const t = takesFor(line);
     t.forEach(x => { x.use = false; });
-    t.unshift({ id: line.key + '-' + Date.now(), len: takeLen(line), when: 'Just now', use: true });
-    line.rec = true;
+    t.unshift({ id: takeKey(line) + '-' + Date.now(), len: takeLen(line), when: 'Just now', use: true });
+    recSet(ME).add(line.key);
     return t[0];
   }
-  const takeInUse = line => takesFor(line).find(t => t.use);
+  const takeInUse = (line, id = ME) => takesFor(line, id).find(t => t.use);
   /* No line is ever silent. Until somebody records one, what everyone hears is
      the line read by the app — so Listen works on a script nobody has touched,
      and a line has something to play the moment it exists.
@@ -4059,6 +4112,7 @@
   function paint(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    paintViewer();
     if (document.getElementById('panelBody')) renderPanel();
     document.getElementById('statusbar').classList.toggle('on-wine', id === 'dashboardScreen');
     if (id !== 'rehearseScreen' && id !== 'wizardScreen') stopRecording();
@@ -4086,29 +4140,24 @@
     paint(to);
     REDRAW[to]?.();
   }
-  /* Whose Script detail this is. The app is drawn for an admin — the pencil —
-     and, for the panel only, as a member sees it: nothing to edit from here, so
-     the corner carries the alternation glyph and opens Who you hear, and the
-     Cast card opens the member's Cast — the list, with the one choice that is
-     theirs. */
-  let detailView = 'admin';
-  function openScript(id, view = 'admin') {
+  function openScript(id) {
     const s = SCRIPTS.find(x => x.id === id);
     currentScript = s;
-    detailView = view;
     document.getElementById('detailTitle').textContent = s.title;
-    paintDetailCorner();
     renderScenes();
     showScreen('detailScreen');
   }
+  /* The corner: the pencil for whoever may edit the script, and for everyone
+     else — who has nothing to edit from here — the alternation glyph, opening
+     Who you hear. Painted with the list, so it follows who is looking. */
   function paintDetailCorner() {
-    const admin = detailView === 'admin';
+    const edits = can.edit();
     const b = document.getElementById('detailAction');
-    b.innerHTML = admin ? '<i class="ph ph-pencil-simple ic-21"></i>' : '<i class="ph ph-users-three ic-22"></i>';
-    b.setAttribute('aria-label', admin ? 'Edit script' : 'Who you hear');
+    b.innerHTML = edits ? '<i class="ph ph-pencil-simple ic-21"></i>' : '<i class="ph ph-users-three ic-22"></i>';
+    b.setAttribute('aria-label', edits ? 'Edit script' : 'Who you hear');
   }
   function detailAction() {
-    if (detailView === 'admin') openEditScript(); else openWhoYouHear();
+    if (can.edit()) openEditScript(); else openWhoYouHear();
   }
   function openScene(name) {
     /* Whole script is a scene name like any other as far as the header is
@@ -4118,7 +4167,6 @@
        that is written. Whole script is the only name that is not a scene. */
     SCRIPT = sc ? (sc.items || SCENE_1) : WHOLE_SCRIPT;
     currentScene = name;
-    setUncastView(false);
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
     /* The top of the scene, whatever it is. A leading stage direction used to be
@@ -4133,21 +4181,19 @@
     rs.scrollTop = sceneStart(rs);
   }
 
-  /* A scene as somebody who is not cast sees it: two modes, not three, because
-     Rehearse is nothing to say. The wizard, the microphone on a line and the
-     missing-audio notification go with it in the app; the prototype draws the
-     admin's version and this takes away what is on this screen — the mode and
-     the jump to it in a line's menu. Panel-only; opening a scene clears it. */
-  let uncastView = false;
-  function setUncastView(on) {
-    uncastView = on;
-    document.querySelector('.phone').classList.toggle('uncast', on);
+  /* What follows from who is looking and is not drawn by a renderer: the mode
+     bar loses Rehearse for anybody who holds no part — there is nothing for
+     them to say. Painted on every screen change, so casting changes reach it. */
+  function paintViewer() {
+    document.querySelector('.phone').classList.toggle('uncast', !can.act());
   }
 
   /* Switching mode replaces the current mode screen. Back from any of the three
      goes up to the script's scenes, never to the mode you were in before —
      moving between Read, Listen and Rehearse is not travelling. */
   function switchMode(m) {
+    /* Nobody without a part has Rehearse; asked for it anyway, Listen is nearest. */
+    if (m === 'rehearse' && !can.act()) m = 'listen';
     currentMode = m;
     /* Arriving in a mode is arriving at a line, so both modes' players open. */
     playerOpen.listen = playerOpen.rehearse = true;
@@ -4843,13 +4889,15 @@
        what the menu on a line is for. */
     if (!noJumps) {
       html += item('listen', 'Listen from here', false, "Listen from this line");
-      if (!uncastView) html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
+      if (can.act()) html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
       /* Where the part has two actors, the question the context line answers
          can be changed right here. */
       if (castOf(SCRIPT[sheetIdx].who).length > 1) html += item('hear', 'Who you hear', false, null, 'openWhoYouHear()');
       html += '<div class="sheet-sep"></div>';
     }
-    html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
+    /* The text is the script's, or yours when you hold the part; the note is
+       anybody's, on any line. */
+    if (can.line(SCRIPT[sheetIdx])) html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
     html += item('note', 'Add / edit private note', false, null, `openLineEdit(${sheetIdx}); editOpen('note')`);
     if (isMine) html += item('record', 'Audio', true, null, `openAudioEdit(${sheetIdx})`);
     return html;
@@ -4879,11 +4927,13 @@
     document.getElementById('ctxName').textContent = 'Directions';
     document.getElementById('ctxLine').textContent = shorten(SCRIPT[idx].stage);
     document.getElementById('ctxSource').innerHTML = ICON.source + 'Read by the narrator \u00b7 ' + voiceOf(null).name;
+    /* A direction of its own is the script's, so only an editor or admin has
+       the edit and the delete; the note is anybody's. */
     document.getElementById('sheetItems').innerHTML =
-      item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`) +
+      (can.edit() ? item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`) : '') +
       item('note', 'Add a private note', false, 'Private note') +
-      '<div class="sheet-sep"></div>' +
-      item('trash', 'Delete', true, null, `openDirEdit(${idx}); openAlert('deleteDirection')`);
+      (can.edit() ? '<div class="sheet-sep"></div>' +
+        item('trash', 'Delete', true, null, `openDirEdit(${idx}); openAlert('deleteDirection')`) : '');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -5020,7 +5070,7 @@
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
-      ${scriptMissing() ? `
+      ${can.act() && scriptMissing() ? `
       <button class="rec-wizard" onclick="openWizardScenes()">
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
@@ -5030,7 +5080,7 @@
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
-      <button class="rec-wizard cast" onclick="${detailView === 'admin' ? 'openCast()' : "openCast('member')"}">
+      <button class="rec-wizard cast" onclick="openCast()">
         <i class="ph ph-users-three ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Cast</span>
@@ -5055,6 +5105,7 @@
         <span class="chevron">${ICON.chevron}</span>
       </div>`).join('');
     document.getElementById('scenesList').innerHTML = html;
+    paintDetailCorner();
   }
   /* Where each script was left off. The dashboard says it twice — once in the
      continue button and once under the script it belongs to — so it is written
@@ -5109,10 +5160,17 @@
   function renderCharacter() {
     const c = CHARACTERS.find(x => x.name === charEditing);
     document.getElementById('charTitle').textContent = charEditing ? 'Edit character' : 'Add character';
+    const admin = can.admin(), edits = can.edit();
     const actors = c ? castOf(c.name) : [];
     const heard = c ? hearIn(c.name) : null;
+    const chev = '<span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>';
+    const voiceMain = `
+        <span class="le-main">
+          <span class="le-top">${c ? voiceOf(c.name).name : ''}</span>
+          <span class="le-sub">Set by the admin, heard by everyone</span>
+        </span>`;
     document.getElementById('charBody').innerHTML =
-      editSection('charname', 'Name', '', charEditing, 'Name this character') + (!c ? '' : `
+      editSection('charname', 'Name', '', charEditing, 'Name this character', !edits) + (!c ? '' : `
 
       <div class="le-label">Cast</div>
       ${actors.map(m => `
@@ -5121,14 +5179,15 @@
             <span class="le-top">${m.you ? 'You' : m.name}</span>
             <span class="le-sub">${recordedCount(m.id, c.name)} of ${c.lines} lines recorded</span>
           </span>
-          <button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
+          ${admin ? `<button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
-          </button>
+          </button>` : ''}
         </div>`).join('')}
       ${actors.length ? '' : '<div class="ae-empty">Not cast</div>'}
+      ${admin ? `
       <button class="se-add" onclick="openCastPick('${c.name}')">
         <i class="ph ph-plus ic-18"></i>Cast someone${actors.length ? ' else' : ''}
-      </button>
+      </button>` : ''}
 
       ${actors.length > 1 ? `
       <div class="le-label">You hear</div>
@@ -5137,21 +5196,18 @@
           <span class="le-top">${heard.you ? 'You' : heard.name}</span>
           <span class="le-sub">Only you — everyone chooses their own</span>
         </span>
-        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+        ${chev}
       </button>` : ''}
 
       <div class="le-label">Voice, until it is recorded</div>
-      <button class="le-row" onclick="openVoicePicker('${c.name}')">
-        <span class="le-main">
-          <span class="le-top">${voiceOf(c.name).name}</span>
-          <span class="le-sub">Set by the admin, heard by everyone</span>
-        </span>
-        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>
+      ${admin
+        ? `<button class="le-row" onclick="openVoicePicker('${c.name}')">${voiceMain}${chev}</button>`
+        : `<div class="le-row" style="cursor:default;">${voiceMain}</div>`}
 
+      ${edits ? `
       <button class="le-danger" onclick="toast('Character deleted')">
         <i class="ph ph-trash ic-20"></i>Delete character
-      </button>`);
+      </button>` : ''}`);
     growTextarea(document.getElementById('leInput'));
   }
   /* One part is yours at a time, so taking one releases the other. It applies on
@@ -5179,6 +5235,7 @@
   /* The two rows above the scenes count what is behind them, so the screen says
      how big the job is before you open it. */
   function renderEditMeta() {
+    document.getElementById('deleteScriptBtn').hidden = !can.admin();
     const left = MEMBERS.filter(m => m.invited).length;
     document.getElementById('peopleMeta').textContent =
       MEMBERS.length + ' on this script' + (left ? ' · ' + left + ' invited' : '');
@@ -5196,21 +5253,28 @@
     showScreen('peopleScreen');
   }
   function renderPeople() {
+    /* Everyone sees the same rows. Only an admin opens one, or invites: for
+       anybody else the chevrons and the button are gone and a sentence says who
+       does it. */
+    const admin = can.admin();
     document.getElementById('peopleList').innerHTML = MEMBERS.map(m => {
       const parts = partsOf(m.id);
-      return `
-      <button class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openPerson('${m.id}')">
+      const body = `
         <span class="le-main">
           <span class="le-top">${m.name}</span>
           <span class="le-sub">${ROLES[m.role].label} · ${parts.length ? 'cast as ' + parts.join(', ') : 'not cast'}</span>
         </span>
-        ${m.you ? '<span class="badge">you</span>' : m.invited ? '<span class="badge quiet">invited</span>' : ''}
+        ${m.you ? '<span class="badge">you</span>' : m.invited ? '<span class="badge quiet">invited</span>' : ''}`;
+      return admin ? `
+      <button class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openPerson('${m.id}')">${body}
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>`;
-    }).join('') + `
+      </button>` : `
+      <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">${body}</div>`;
+    }).join('') + (admin ? `
       <button class="se-add" style="margin-top:6px;" onclick="openInvite()">
         <i class="ph ph-plus ic-18"></i>Invite someone
-      </button>`;
+      </button>` : `
+      <div class="ac-note">The admin invites people, sets their role and casts them.</div>`);
   }
 
   /* One person: what they hold first, what they may do second. A part is the
@@ -5225,6 +5289,9 @@
     const m = member(personId);
     if (!m) return;
     const parts = partsOf(m.id);
+    /* Only an admin changes any of this. For anybody else the parts and the
+       role are facts: no crosses, no picker, no way out. */
+    const admin = can.admin();
     document.getElementById('personBody').innerHTML = `
       <div class="pe-head">
         <div class="pe-name cap-trim">${m.name}</div>
@@ -5238,30 +5305,38 @@
             <span class="le-top cap-trim">${p}</span>
             <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines || 0} lines · rehearses and records them</span>
           </span>
-          <button class="pe-x" onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
+          ${admin ? `<button class="pe-x" onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
-          </button>
+          </button>` : ''}
         </div>`).join('')
       : '<div class="ae-empty">Not cast in anything yet</div>'}
+      ${admin ? `
       <button class="se-add" onclick="openPartPick()">
         <i class="ph ph-plus ic-18"></i>Cast in a part
-      </button>
+      </button>` : ''}
 
       <div class="le-label">Role</div>
-      ${Object.entries(ROLES).map(([key, r]) => `
+      ${Object.entries(ROLES).filter(([key]) => admin || m.role === key).map(([key, r]) => admin ? `
         <button class="le-row ${m.role === key ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="setRole('${key}')">
           <span class="le-main">
             <span class="le-top">${r.label}</span>
             <span class="le-sub">${r.line}</span>
           </span>
           ${m.role === key ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>' : ''}
-        </button>`).join('')}
+        </button>` : `
+        <div class="le-row" style="margin-bottom:10px;cursor:default;">
+          <span class="le-main">
+            <span class="le-top">${r.label}</span>
+            <span class="le-sub">${r.line}</span>
+          </span>
+        </div>`).join('')}
       <div class="ac-note">A part is not a role. Whoever holds one rehearses it,
-        records it and may rewrite the lines they say — reader, editor and admin alike.</div>
+        records it and may rewrite the lines they say — reader, editor and admin alike.${admin ? '' : ' The admin sets both.'}</div>
 
+      ${admin ? `
       <button class="le-danger" onclick="openAlert('removeMember')">
         <i class="ph ph-sign-out ic-20"></i>Remove from the script
-      </button>`;
+      </button>` : ''}`;
   }
   function setRole(key) {
     const m = member(personId);
@@ -5299,6 +5374,8 @@
     /* Edit script counts what is behind its two rows, and it is one screen back
        from all of this — it has to be told. */
     renderEditMeta();
+    /* Casting yourself in, or out, changes what you may do. */
+    paintViewer();
     toast(msg);
   }
   function removeMember() {
@@ -5345,73 +5422,52 @@
   }
 
   /* ---- the cast: the parts, and who holds them ----
-     Drawn for the admin, who casts. Everybody else reads the same list — as a
-     list, with no way into a part and nothing to add — and keeps the one choice
-     that is theirs: which of two alternates they hear. That version is on its
-     own in the panel and behind the Cast card of a member's Script detail. */
-  let castView = 'admin';
-  function openCast(view = 'admin') {
-    castView = view;
+     Drawn for whoever is looking. An admin casts and picks the voices; an
+     editor may rename and add a character but not cast; everybody else reads
+     the same list — as a list — and keeps the one choice that is theirs, which
+     of two alternates they hear. */
+  function openCast() {
     renderCast();
     showScreen('castScreen');
   }
   function renderCast() {
     const el = document.getElementById('castList');
     if (!el) return;
-    const admin = castView === 'admin';
+    const admin = can.admin(), edits = can.edit();
     const chev = '<span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>';
     const partSub = c => `${c.lines} lines · ${castLine(c.name)}${
       /* An uncast part is only its voice, so the row says which. */
       castOf(c.name).length ? '' : ' · voice: ' + voiceOf(c.name).name}`;
+    const narrator = `
+        <span class="le-main">
+          <span class="le-top">Narrator</span>
+          <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
+        </span>`;
     el.innerHTML = `
       <div class="le-label">Read aloud by</div>
-      ${admin ? `
-      <button class="le-row" style="margin-bottom:10px;" onclick="openVoicePicker(null)">
-        <span class="le-main">
-          <span class="le-top">Narrator</span>
-          <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
-        </span>
-        ${chev}
-      </button>` : `
-      <div class="le-row" style="margin-bottom:10px;cursor:default;">
-        <span class="le-main">
-          <span class="le-top">Narrator</span>
-          <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
-        </span>
-      </div>`}
+      ${admin
+        ? `<button class="le-row" style="margin-bottom:10px;" onclick="openVoicePicker(null)">${narrator}${chev}</button>`
+        : `<div class="le-row" style="margin-bottom:10px;cursor:default;">${narrator}</div>`}
       <div class="le-label">Parts</div>` + CHARACTERS.map(c => {
-        if (admin) return `
-      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">
+        const main = extra => `
         <span class="le-main">
           <span class="le-top cap-trim">${c.name}</span>
-          <span class="le-sub">${partSub(c)}</span>
-        </span>
-        ${chev}
-      </button>`;
-        /* A member's row: a fact, except where the part has two actors — there
-           it says which one you hear and opens the choice. */
-        const alt = castOf(c.name).length > 1;
-        const heard = alt ? hearIn(c.name) : null;
-        return alt ? `
-      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openWhoYouHear()">
-        <span class="le-main">
-          <span class="le-top cap-trim">${c.name}</span>
-          <span class="le-sub">${partSub(c)}</span>
-          <span class="le-sub" style="color:var(--wine);font-weight:600;">You hear ${heard.you ? 'yourself' : heard.name}</span>
-        </span>
-        ${chev}
-      </button>` : `
-      <div class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">
-        <span class="le-main">
-          <span class="le-top cap-trim">${c.name}</span>
-          <span class="le-sub">${partSub(c)}</span>
-        </span>
-      </div>`;
-      }).join('') + (admin ? `
+          <span class="le-sub">${partSub(c)}</span>${extra || ''}
+        </span>`;
+        if (edits) return `
+      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">${main()}${chev}</button>`;
+        /* A row is a fact, except where the part has two actors — there it
+           says which one you hear and opens the choice. */
+        const heard = castOf(c.name).length > 1 ? hearIn(c.name) : null;
+        return heard ? `
+      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openWhoYouHear()">${main(
+          `<span class="le-sub" style="color:var(--wine);font-weight:600;">You hear ${heard.you ? 'yourself' : heard.name}</span>`)}${chev}</button>` : `
+      <div class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">${main()}</div>`;
+      }).join('') + (edits ? `
       <button class="se-add" style="margin-top:6px;" onclick="openCharacter(null)">
         <i class="ph ph-plus ic-18"></i>Add a character
-      </button>` : `
-      <div class="ac-note">The director casts the parts. Where a part has two actors, you choose which of them you hear — nobody else is affected.</div>`);
+      </button>` : '') + (admin ? '' : `
+      <div class="ac-note">The director casts the parts${edits ? ' and picks the voices' : ''}. Where a part has two actors, you choose which of them you hear — nobody else is affected.</div>`);
   }
 
   /* ---- who you hear: the alternates, and which of them plays for you ----
@@ -5702,7 +5758,8 @@
 
   /* The dot is whether anything is unread, not a decoration switched on by hand. */
   function paintBellDot() {
-    document.getElementById('bellDot').hidden = !NOTIFS.some(n => !n.read);
+    document.getElementById('bellDot').hidden =
+      !NOTIFS.some(n => !n.read && (n.kind !== 'missing' || scriptMissing(SCRIPTS[0])));
   }
 
   /* Both buttons and the shake end up in the same place. There is no feedback
@@ -6459,7 +6516,7 @@
                     stepLine('rehearse', 1);
                     openEvaluation('rehearse', null, true);
                   } },
-    audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'prepared',
+    audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'wip',
                   /* Reached in the app from a line's menu — Audio — on any line
                      of yours, and from the wizard's tag on a recorded line. */
                   /* One of mine, and one carrying a note, so the demo shows both
@@ -6482,7 +6539,7 @@
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddDirection(1); } },
     character:  { label:'Edit character',   group:'editing', screen:'characterScreen', st:'wip',
                   go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
-    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
+    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'wip',
                   go: () => { demoScene();
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
@@ -6526,20 +6583,10 @@
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
 
     /* ---- states the app has no route to ---- */
-    lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'prepared',
+    lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'wip',
                   go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
-    audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'prepared',
-                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } },
-    /* Two subtractions the app makes by role and by casting. Drawn once each so
-       they are written down; nothing in the app leads to them. */
-    scenenocast:  { label:'Scene — not cast', group:'proto', st:'wip',
-                  go: () => { openScene(DEMO_SCENE); setUncastView(true); } },
-    detailmember: { label:'Script detail — not an admin', group:'proto', st:'wip',
-                  go: () => openScript('s1', 'member') },
-    castmember:   { label:'Cast — not an admin', group:'proto', st:'wip',
-                  /* By way of the member's Script detail, whose Cast card is the
-                     way in — and what Back should find behind it. */
-                  go: () => { openScript('s1', 'member'); openCast('member'); } }
+    audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'wip',
+                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } }
   };
   /* ============================================================
      SCRIPT EDIT / SCENE EDIT
@@ -6702,8 +6749,8 @@
   function openAddLine(at) {
     closeSheet();
     lineAddAt = at;
-    const me = CHARACTERS.find(c => c.mine) || CHARACTERS[0];
-    lineDraft = { who: me.name, mine: !!me.mine, text: '' };
+    const own = CHARACTERS.find(c => c.mine) || CHARACTERS[0];
+    lineDraft = ownLine({ who: own.name, text: '' });
     editRender = renderLineEdit;
     editingKey = 'text';
     renderLineEdit();
@@ -6718,7 +6765,6 @@
     const line = lineDraft;
     line.text = text;
     line.key = (sc || 1) + '-n' + (++keySeq);
-    line.rec = false;                       // nothing recorded, so the wizard wants it
     SCRIPT.splice(lineAddAt, 0, line);
     lineEditIdx = SCRIPT.indexOf(line);
     lineDraft = null;
@@ -6737,18 +6783,27 @@
       <div class="le-scene cap-trim">${currentScene}</div>
 
       <div class="le-label">Character</div>
+      ${can.edit() ? `
       <button class="le-row ${line.mine ? 'mine' : 'others'}" onclick="openCharacterPick()">
         <span class="le-main">
           <span class="le-top cap-trim">${line.who}</span>
           <span class="le-sub">${line.mine ? 'Your part' : 'Someone else'}</span>
         </span>
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>
+      </button>` : `
+      <div class="le-row ${line.mine ? 'mine' : 'others'}" style="cursor:default;">
+        <span class="le-main">
+          <span class="le-top cap-trim">${line.who}</span>
+          <span class="le-sub">${line.mine ? 'Your part' : 'Someone else'}</span>
+        </span>
+      </div>`}
 
-      ${editSection('text', 'Line', '', line.text, 'Add the line')}
+      ${editSection('text', 'Line', '', line.text, 'Add the line', !can.line(line))}
       ${adding ? `
       <div class="ac-note">Until somebody records it, everyone hears this line
-        read by the app — so it is in the scene the moment you save it.</div>` : `
+        read by the app — so it is in the scene the moment you save it.</div>` : !line.mine ? `
+      <div class="le-label">Audio</div>
+      ${otherAudio(line)}` : `
       <div class="le-label">Audio</div>
       <div class="ae-take ${take ? '' : 'gen'}">
         <div style="display:flex;align-items:center;gap:12px;width:100%;">
@@ -6757,7 +6812,7 @@
           </button>
           <div class="ae-main">
             <div class="ae-when">${take ? 'In use' : 'Generated voice'}</div>
-            <div class="ae-len">${take ? fmtLen(take.len) : fmtLen(genLen(line)) + ' · until you record one'}</div>
+            <div class="ae-len">${take ? fmtLen(take.len) : voiceOf(line.who).name + ' · ' + fmtLen(genLen(line)) + ' · until you record one'}</div>
           </div>
           <button class="le-takes" onclick="openAudioEdit(${lineEditIdx})">
             ${takes.length} take${takes.length === 1 ? '' : 's'}
@@ -6769,7 +6824,7 @@
       `}
       ${editSection('note', 'Private note', '<i class="ph-fill ph-note ic-16 lbl-ic private"></i>', line.note, 'Add private note')}
 
-      ${editSection('dir', 'Directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add direction')}
+      ${editSection('dir', 'Directions', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', line.dir, 'Add direction', !(can.edit() || line.mine))}
 
       ${adding ? '' : `
       <div class="le-label">Reference</div>
@@ -6781,11 +6836,30 @@
         <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
       </button>
 
-      <button class="le-danger" onclick="openAlert('deleteLine')">
+      ${can.edit() ? `<button class="le-danger" onclick="openAlert('deleteLine')">
         <i class="ph ph-trash ic-20"></i>Delete line
-      </button>`}`;
+      </button>` : ''}`}`;
     applyTextStyle();
     growTextarea(document.getElementById('leInput'));
+  }
+  /* Somebody else's line has no takes of yours to manage. What it has is what
+     you will hear on it — the take of the actor you hear, or the part's voice —
+     and that is what the box says. The takes themselves are that actor's. */
+  function otherAudio(line) {
+    const m = hearIn(line.who);
+    const take = m && recordedBy(m.id, line) ? takeInUse(line, m.id) : null;
+    return `<div class="ae-take ${take ? '' : 'gen'}">
+        <div style="display:flex;align-items:center;gap:12px;width:100%;">
+          <button class="ae-play" onclick="toast('${take ? 'Playing take' : 'Playing the generated voice'}')" aria-label="Play line">
+            <i class="ph-fill ph-play ic-16"></i>
+          </button>
+          <div class="ae-main">
+            <div class="ae-when">${take ? m.name + '\u2019s take' : 'Generated voice'}</div>
+            <div class="ae-len">${take ? fmtLen(take.len) : voiceOf(line.who).name + ' · ' + fmtLen(genLen(line))}</div>
+          </div>
+        </div>
+      </div>
+      ${take ? '' : `<div class="ae-keep">${sourceLine(line)}.</div>`}`;
   }
   /* One editable field, used by every piece of writing in the app — the line, the
      private note, the stage direction, a character's name. Whoever renders it
@@ -6839,7 +6913,12 @@
       renderCast();
     }
   };
-  function editSection(key, label, icon, value, addLabel) {
+  function editSection(key, label, icon, value, addLabel, locked = false) {
+    /* Not yours to change: the text stands as text, and an empty field is not
+       offered at all — there is nothing for you to add to it. */
+    if (locked) {
+      return value ? `<div class="le-label">${icon || ''}${label}</div><div class="le-text" style="cursor:default;">${value}</div>` : '';
+    }
     const editing = editingKey === key;
     const trigger = value && !editing
       ? `<button class="le-trigger" onclick="editOpen('${key}')">
@@ -6929,7 +7008,7 @@
   }
   function setCharacter(name, mine) {
     const line = lineItem();
-    line.who = name; line.mine = mine;
+    line.who = name;                        // mine follows the cast
     renderLineEdit();
     toast('Character changed');
   }
@@ -7015,12 +7094,21 @@
         </button>
         <div class="ae-main">
           <div class="ae-when">Generated voice</div>
-          <div class="ae-len">${fmtLen(genLen(line))}</div>
+          <div class="ae-len">${voiceOf(line.who).name} · ${fmtLen(genLen(line))}</div>
         </div>
         ${hasTakes ? '' : '<button class="ae-use on" disabled>In use</button>'}
       </div>
     </div>
-    <div class="ae-keep">Made from the text, so the line is never silent. It cannot be deleted and it does not count as a take — record one and it takes over.</div>`;
+    <div class="ae-keep">Made from the text, so the line is never silent. It cannot be deleted and it does not count as a take — record one and it takes over.</div>
+    ${sharedPart(line)}`;
+  }
+  /* Two actors in one part each record their own takes and never see the
+     other's here; what the other changes is what a listener hears. On a shared
+     part Audio edit says so, once, under everything. */
+  function sharedPart(line) {
+    const others = castOf(line.who).filter(m => !m.you).map(m => m.name);
+    if (!others.length) return '';
+    return `<div class="ae-keep"><b>${others.join(' and ')} hold${others.length === 1 ? 's' : ''} this part too.</b> Whoever listens chooses which of you they hear.</div>`;
   }
   /* The same notes as in Read, and off to begin with: you came to listen to a
      take, not to read. They are here at all because a note often says why the
@@ -7130,10 +7218,10 @@
     const takes = takesFor(SCRIPT[audioIdx]);
     const gone = takes.find(t => t.id === id);
     if (!gone) return;
-    const key = SCRIPT[audioIdx].key;
+    const key = takeKey(SCRIPT[audioIdx]);
     TAKES[key] = takes.filter(t => t.id !== id);
     if (gone.use && TAKES[key][0]) TAKES[key][0].use = true;
-    if (!TAKES[key].length) SCRIPT[audioIdx].rec = false;
+    if (!TAKES[key].length) recSet(ME).delete(SCRIPT[audioIdx].key);
     renderAudioEdit();
     renderScenes();
   }
@@ -7195,8 +7283,9 @@
     const idx = lineIdx().find(i => SCRIPT[i].mine && !SCRIPT[i].note && !SCRIPT[i].dir)
              ?? lineIdx()[0];
     const line = SCRIPT[idx];
-    line.note = undefined; line.dir = undefined; line.rec = false;
-    TAKES[line.key] = [];
+    line.note = undefined; line.dir = undefined;
+    recSet(ME).delete(line.key);
+    TAKES[takeKey(line)] = [];
     return idx;
   }
 
@@ -7243,7 +7332,7 @@
     document.getElementById('dirTitle').textContent = adding ? 'Add direction' : 'Edit direction';
     document.getElementById('dirScroll').innerHTML = `
       <div class="le-scene cap-trim">${currentScene}</div>
-      ${editSection('stage', 'Direction', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', it.stage, 'Add the direction')}
+      ${editSection('stage', 'Direction', '<i class="ph-fill ph-note ic-16 lbl-ic stage"></i>', it.stage, 'Add the direction', !can.edit())}
       <div class="ac-note">A direction belongs to the scene, not to a line, and
         everybody in the cast reads the same one.</div>
       ${adding ? '' : `
@@ -7256,9 +7345,9 @@
         <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
       </button>
 
-      <button class="le-danger" onclick="openAlert('deleteDirection')">
+      ${can.edit() ? `<button class="le-danger" onclick="openAlert('deleteDirection')">
         <i class="ph ph-trash ic-20"></i>Delete direction
-      </button>`}`;
+      </button>` : ''}`}`;
     applyTextStyle();
     growTextarea(document.getElementById('leInput'));
   }
@@ -7275,7 +7364,15 @@
      ============================================================ */
   /* You, rather than a character: the name is what the rest of the cast sees
      against your lines, and the address is where the sign-in code goes. */
-  const ACCOUNT = { name: 'Luky Kuky', email: 'nina@example.com' };
+  /* Whoever is looking — the panel can make you any member, and this follows. */
+  const ACCOUNT = {
+    get name() { return me().name; },
+    set name(v) { me().name = v; },
+    get email() {
+      const m = me();
+      return m.email || m.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@example.com';
+    }
+  };
 
   function openAccount() {
     editingKey = null;
@@ -7347,7 +7444,38 @@
               onclick="openStatusMenu(event, '${key}')"
               title="Set where this stands">${statusText(v)}</span>`;
   }
+  /* ---- who is looking ----
+     Switching keeps you where you are when the screen can be redrawn for the
+     new member, reopens the scene in Read when you were in a mode — Rehearse
+     may not exist for them — and drops you back to the script from the editors
+     and the wizard, which are somebody's own. */
+  function renderViewer() {
+    const el = document.getElementById('panelViewer');
+    if (!el) return;
+    el.innerHTML = '<div class="panel-label">You are</div>' + MEMBERS.map(m => {
+      const parts = partsOf(m.id);
+      return `<button class="pv-member ${m.id === ME ? 'on' : ''}" onclick="becomeMember('${m.id}')">
+        <span class="pv-name">${m.name}</span>
+        <span class="pv-sub">${ROLES[m.role].label} · ${parts.length ? parts.join(', ') : 'not cast'}</span>
+      </button>`;
+    }).join('');
+  }
+  const OWN_SCREENS = ['wizardScenesScreen', 'wizardScreen', 'evaluationScreen', 'lineScreen', 'dirScreen', 'audioScreen'];
+  function becomeMember(id) {
+    if (!member(id) || id === ME) return;
+    ME = id;
+    closeSheet();
+    editingKey = null;
+    const here = activeScreen()?.id;
+    if (Object.values(MODE_SCREENS).includes(here)) openScene(currentScene || DEMO_SCENE);
+    else if (OWN_SCREENS.includes(here)) openScript(currentScript.id);
+    else { paintViewer(); if (REDRAW[here]) REDRAW[here](); }
+    renderPanel();
+    closePanel();
+    toast('You are ' + me().name);
+  }
   function renderPanel() {
+    renderViewer();
     const here = document.querySelector('.screen.active')?.id;
     const stuck = panelHere && panelAt === here ? panelHere : null;
     document.getElementById('panelBody').innerHTML = PANEL_GROUPS.map(([label, group]) => {
