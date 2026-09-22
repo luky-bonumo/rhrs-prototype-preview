@@ -697,31 +697,15 @@
      that ends by itself. */
   .badge.quiet { color: var(--wine); border-color: var(--wine-border); }
 
-  /* The cast, on Script detail: the parts and who holds them, under the wizard's
-     card. It is the question everybody has about a script they have just opened,
-     and an alternated part shows both names rather than the newest one. */
-  .cast-card { border-radius: var(--radius-card); padding: 6px 4px; }
-  .cast-card .cc-row {
-    display: flex; align-items: baseline; gap: 12px;
-    padding: 10px 16px; border-bottom: 1px solid var(--divider);
+  /* Casting, on Script detail: the same card as the wizard's, in wine. The parts
+     and who holds them were listed here at first and it ran the screen long —
+     the list belongs on the screen it leads to. Wine because casting is not
+     about your own lines; coral in this app means you. */
+  .rec-wizard.cast {
+    background: var(--wine-tint); border-color: var(--wine-border); color: var(--wine);
   }
-  .cast-card .cc-row:last-of-type { border-bottom: none; }
-  .cast-card .cc-part {
-    flex: 0 0 auto; font-family: var(--font-display); font-weight: 600; font-size: 16px;
-    color: var(--wine);
-  }
-  .cast-card .cc-row.mine .cc-part { color: var(--coral); }
-  .cast-card .cc-who {
-    flex: 1 1 auto; min-width: 0; text-align: right;
-    font-size: 13.5px; color: var(--text-muted);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .cast-card .cc-go {
-    display: flex; align-items: center; gap: 8px; width: 100%;
-    background: none; border: none; cursor: pointer; padding: 12px 16px 10px;
-    font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--wine);
-  }
-  .cast-card .cc-go .le-chev { margin-left: auto; display: flex; }
+  .rec-wizard.cast .rw-title,
+  .rec-wizard.cast .chevron { color: var(--wine); }
 
   /* ============ LINE EDIT ============ */
   /* Which scene this line is in. You can arrive here from a lot of places and
@@ -4785,17 +4769,18 @@
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
-      <div class="list-sublabel">Cast</div>
-      <div class="cast-card">
-        ${CHARACTERS.map(c => `
-        <div class="cc-row ${c.mine ? 'mine' : ''}">
-          <span class="cc-part cap-trim">${c.name}</span>
-          <span class="cc-who">${castLine(c.name)}</span>
-        </div>`).join('')}
-        <button class="cc-go" onclick="openCast()">
-          Cast the parts<span class="le-chev"><i class="ph ph-caret-right ic-18"></i></span>
-        </button>
-      </div>
+      <button class="rec-wizard cast" onclick="openCast()">
+        <i class="ph ph-users-three ic-22"></i>
+        <span class="rw-main">
+          <span class="rw-title">Cast</span>
+          <span class="rw-sub">Who plays which part</span>
+          <span class="rw-meta">${CHARACTERS.length} part${CHARACTERS.length === 1 ? '' : 's'} · ${
+            CHARACTERS.filter(c => !castOf(c.name).length).length
+              ? CHARACTERS.filter(c => !castOf(c.name).length).length + ' not cast'
+              : 'all cast'}</span>
+        </span>
+        <span class="chevron">${ICON.chevron}</span>
+      </button>
       <div class="list-sublabel">Scenes</div>`;
     html += scenes.map(sc => `
       <div class="card" onclick="openScene('${sc.title}')">
@@ -4868,7 +4853,7 @@
 
       <div class="le-label">Cast</div>
       ${!c ? '' : castOf(c.name).map(m => `
-        <div class="le-row ${m.you ? 'mine' : ''}">
+        <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;">
           <span class="le-main">
             <span class="le-top">${m.you ? 'You' : m.name}</span>
             <span class="le-sub">${m.you ? 'You rehearse and record this part' : 'Their takes play in your scenes'}</span>
@@ -4879,7 +4864,7 @@
         </div>`).join('')}
       ${!c ? '' : (castOf(c.name).length ? '' : '<div class="ae-empty">Not cast</div>') + `
       <button class="se-add" onclick="openCastPick('${c.name}')">
-        <i class="ph ph-plus ic-18"></i>Cast someone in this part
+        <i class="ph ph-plus ic-18"></i>Cast someone
       </button>`}
 
       ${c ? `<div class="le-label">Lines</div>
@@ -5950,7 +5935,7 @@
     /* ---- the scripts ---- */
     scripts:    { label:'All scripts',      group:'library', screen:'scriptsScreen', ver:1, st:'prepared',
                   go: () => showScreen('scriptsScreen') },
-    detail:     { label:'Script detail',    group:'library', screen:'detailScreen', ver:1, st:'prepared',
+    detail:     { label:'Script detail',    group:'library', screen:'detailScreen', st:'wip',
                   go: () => openScript('s1') },
 
     /* ---- who is on the script ---- */
@@ -6008,7 +5993,7 @@
                                          ?? lineIdx().find(i => SCRIPT[i].mine)); } },
 
     /* ---- writing and editing ---- */
-    edit:       { label:'Edit script',      group:'editing', screen:'editScriptScreen', ver:1, st:'prepared',
+    edit:       { label:'Edit script',      group:'editing', screen:'editScriptScreen', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
@@ -6019,7 +6004,7 @@
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddLine(1); } },
     adddir:     { label:'Add direction',    group:'editing', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddDirection(1); } },
-    character:  { label:'Edit character',   group:'editing', screen:'characterScreen', ver:1, st:'prepared',
+    character:  { label:'Edit character',   group:'editing', screen:'characterScreen', st:'wip',
                   go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
     line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
                   go: () => { demoScene();
