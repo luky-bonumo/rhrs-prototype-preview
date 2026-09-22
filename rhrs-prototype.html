@@ -665,6 +665,9 @@
   }
   .se-ins button:active { transform: translate(-50%, -50%) scale(0.88); }
 
+  /* Under a list of rows it is not another row, so it sits a touch lower than
+     the gap between them. */
+  .se-add { margin-top: 4px; }
   .se-add {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; border: none; cursor: pointer;
@@ -1815,6 +1818,10 @@
   }
   .settings-scroll::-webkit-scrollbar { width: 0; }
   .set-group { padding: 10px 0 4px; }
+  /* A sheet's own rows carry their inset (.set-row pads 24px); the app's rows do
+     not, so a sheet built out of those has to set it once, here. Without it the
+     invite ran edge to edge. */
+  .invite-body { padding: 2px 22px 26px; }
   .set-group-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
     text-transform: uppercase; color: var(--text-muted); padding: 8px 24px;
@@ -4858,7 +4865,7 @@
             <span class="le-top">${m.you ? 'You' : m.name}</span>
             <span class="le-sub">${m.you ? 'You rehearse and record this part' : 'Their takes play in your scenes'}</span>
           </span>
-          <button class="pe-x" onclick="uncast('${c.name}', '${m.id}')" aria-label="Take the part away">
+          <button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
           </button>
         </div>`).join('')}
@@ -4960,7 +4967,7 @@
             <span class="le-top cap-trim">${p}</span>
             <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines || 0} lines · rehearses and records them</span>
           </span>
-          <button class="pe-x" onclick="uncast('${p}', '${m.id}')" aria-label="Take the part away">
+          <button class="pe-x" onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
           </button>
         </div>`).join('')
@@ -4999,6 +5006,18 @@
     if (!CAST[name]) CAST[name] = [];
     if (!CAST[name].includes(id)) CAST[name].push(id);
     afterCast(member(id).name + ' is cast as ' + name);
+  }
+  /* Uncasting is undoing somebody else's week, so it asks — the same shape as
+     deleting a take. Casting does not: it takes nothing away. */
+  let pendingUncast = null;
+  function askUncast(name, id) {
+    pendingUncast = { name, id };
+    openAlert('uncast');
+  }
+  function confirmUncast() {
+    closeSheet();
+    if (pendingUncast) uncast(pendingUncast.name, pendingUncast.id);
+    pendingUncast = null;
   }
   function uncast(name, id) {
     CAST[name] = (CAST[name] || []).filter(x => x !== id);
@@ -5084,7 +5103,7 @@
   }
   function renderInvite() {
     document.getElementById('inviteBody').innerHTML = `
-      <div class="set-group">
+      <div class="invite-body">
         <div class="ac-note" style="padding-top:0;">Anyone with this link joins the script as
           the role you pick. It stops working once they have.</div>
         <button class="le-row" onclick="copyInvite()">
@@ -5270,6 +5289,15 @@
       text: 'The line, its note and all of its takes go with it. This cannot be undone.',
       primary: 'Delete line', act: "closeSheet(); toast('Line deleted')",
       ghost: 'Keep it'
+    },
+    /* Taking a part off somebody. What they recorded is not theirs to lose — the
+       takes belong to the script — so the alert says what actually changes. */
+    uncast: {
+      icon: 'ph ph-user-minus',
+      title: 'Take the part away?',
+      text: 'They stop rehearsing and recording it and it comes free for somebody else. What they have already recorded stays with the script.',
+      primary: 'Take it away', act: 'confirmUncast()',
+      ghost: 'Leave them cast'
     },
     /* Taking somebody off a script. Not destructive in the way the others are —
        what they recorded stays and their part comes free — so it says that
