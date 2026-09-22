@@ -340,16 +340,23 @@
   .panel-body::-webkit-scrollbar { width: 0; }
   /* Who is looking, above the list of screens: everything below is drawn for
      the one chosen. The panel's own greys, like the rest of it. */
-  .panel-viewer { flex: 0 0 auto; padding: 4px 12px 8px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
-  .pv-member {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    width: 100%; text-align: left; border: none; background: none; cursor: pointer;
-    border-radius: 10px; padding: 6px 10px;
-    font-family: inherit; font-size: 13.5px; font-weight: 500; color: #3A2A2E;
+  .panel-viewer {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 12px;
+    padding: 8px 14px 10px; border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
-  .pv-member:hover { background: rgba(0, 0, 0, 0.05); }
-  .pv-member.on { background: #3A2A2E; color: #FFFFFF; font-weight: 600; }
-  .pv-member .pv-sub { flex: 0 0 auto; font-size: 11px; opacity: 0.7; white-space: nowrap; }
+  .panel-viewer .panel-label { padding: 0; margin: 0; flex: 0 0 auto; }
+  /* A native select: one line in the panel, and the phone's own picker when it
+     opens. The caret is drawn beside it because the native one cannot be styled. */
+  .pv-wrap { position: relative; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; }
+  .pv-select {
+    width: 100%; appearance: none; -webkit-appearance: none;
+    border: 1px solid rgba(0, 0, 0, 0.12); background: #FFFFFF; color: #3A2A2E;
+    border-radius: 10px; padding: 7px 32px 7px 11px; cursor: pointer;
+    font-family: inherit; font-size: 13.5px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pv-select:focus-visible { outline: 2px solid #7A1E2D; outline-offset: 1px; }
+  .pv-wrap i { position: absolute; right: 10px; pointer-events: none; color: rgba(58, 42, 46, 0.6); }
   .panel-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
     color: rgba(58, 42, 46, 0.45); padding: 14px 8px 6px;
@@ -3267,7 +3274,9 @@
             <button class="align-opt" onclick="setAlign('justify', this)" aria-label="Justify"><i class="ph ph-text-align-justify ic-20"></i></button>
           </div>
         </div>
-        <div class="set-row">
+        <!-- Somebody who holds no part has no lines of their own: this row goes,
+             and the one under it stops saying "others'". Done in openSettings. -->
+        <div class="set-row js-cast-only">
           <div>
             <div class="set-label"><i class="ph ph-text-t ic-18 lbl-ic private"></i>My lines</div>
             <div class="set-sub">Show the text of my lines</div>
@@ -3276,8 +3285,8 @@
         </div>
         <div class="set-row">
           <div>
-            <div class="set-label"><i class="ph ph-text-t ic-18 lbl-ic stage"></i>Others' lines</div>
-            <div class="set-sub">Show the text of other characters</div>
+            <div class="set-label js-lines-label"><i class="ph ph-text-t ic-18 lbl-ic stage"></i>Others' lines</div>
+            <div class="set-sub js-lines-sub">Show the text of other characters</div>
           </div>
           <button class="toggle on" data-target="others" onclick="toggleLines(this)"></button>
         </div>
@@ -3311,7 +3320,7 @@
           <button class="set-link" onclick="openSpeedFromSettings()">
             <span class="link-left">
               <span class="set-label">Playback speed</span>
-              <span class="set-sub">My lines / others' lines</span>
+              <span class="set-sub js-speed-sub">My lines / others' lines</span>
             </span>
             <span class="link-right">
               <span class="speed-chip mine js-speed-mine">1.0x</span>
@@ -3333,7 +3342,7 @@
             </div>
             <button class="toggle" onclick="toggleNarrate('listen', 'note', this)"></button>
           </div>
-          <div class="set-row">
+          <div class="set-row js-cast-only">
             <div>
               <div class="set-label">Pause on my line</div>
               <div class="set-sub">Wait instead of reading it aloud</div>
@@ -4536,7 +4545,9 @@
     /* In Rehearse the app only ever reads the cues — your own lines are yours to
        say, so there is no speed to set for them. */
     document.getElementById('speedMineGroup').style.display =
-      (currentMode === 'rehearse' || currentMode === 'wizard') ? 'none' : '';
+      (currentMode === 'rehearse' || currentMode === 'wizard' || !can.act()) ? 'none' : '';
+    /* With no lines of your own there is one speed, and it is not "others'". */
+    document.querySelector('#speedSheet .speed-label.others').textContent = can.act() ? "Others' lines" : 'All lines';
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('speedSheet').classList.add('open');
@@ -4961,6 +4972,15 @@
     document.getElementById('setListen').style.display   = mode === 'listen'   ? '' : 'none';
     document.getElementById('setRehearse').style.display = mode === 'rehearse' ? '' : 'none';
     document.querySelectorAll('.js-hear-meta').forEach(el => el.textContent = hearMeta());
+    /* Somebody who holds no part has no lines of their own: the split into mine
+       and others' goes, and so does pausing on a line they will never say. The
+       rows are display:flex, so the hidden attribute would not take. */
+    const act = can.act();
+    document.querySelectorAll('.js-cast-only').forEach(el => el.style.display = act ? '' : 'none');
+    document.querySelectorAll('.js-lines-label').forEach(el => el.lastChild.textContent = act ? "Others' lines" : 'Lines');
+    document.querySelectorAll('.js-lines-sub').forEach(el => el.textContent = act ? 'Show the text of other characters' : 'Show the text of the lines');
+    document.querySelectorAll('.js-speed-sub').forEach(el => el.textContent = act ? "My lines / others' lines" : 'Every line');
+    document.querySelectorAll('#setListen .js-speed-mine').forEach(el => el.style.display = act ? '' : 'none');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('settingsSheet').classList.add('open');
   }
@@ -6556,7 +6576,9 @@
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
     modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'wip',
-                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); openSettings('rehearse'); } },
+                  /* Rehearse when you may have it; whoever cannot lands in Listen,
+                     and the sheet follows the mode they landed in. */
+                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); openSettings(currentMode); } },
     voice:      { label:'Voice picker',     group:'sheets', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openVoicePicker('Michael'); } },
     speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'prepared',
@@ -7452,13 +7474,14 @@
   function renderViewer() {
     const el = document.getElementById('panelViewer');
     if (!el) return;
-    el.innerHTML = '<div class="panel-label">You are</div>' + MEMBERS.map(m => {
-      const parts = partsOf(m.id);
-      return `<button class="pv-member ${m.id === ME ? 'on' : ''}" onclick="becomeMember('${m.id}')">
-        <span class="pv-name">${m.name}</span>
-        <span class="pv-sub">${ROLES[m.role].label} · ${parts.length ? parts.join(', ') : 'not cast'}</span>
-      </button>`;
-    }).join('');
+    el.innerHTML = `<span class="panel-label">You are</span>
+      <span class="pv-wrap">
+        <select class="pv-select" onchange="becomeMember(this.value)" aria-label="Who is looking">${MEMBERS.map(m => {
+          const parts = partsOf(m.id);
+          return `<option value="${m.id}" ${m.id === ME ? 'selected' : ''}>${m.name} — ${ROLES[m.role].label} · ${parts.length ? parts.join(', ') : 'not cast'}</option>`;
+        }).join('')}</select>
+        <i class="ph ph-caret-down ic-16"></i>
+      </span>`;
   }
   const OWN_SCREENS = ['wizardScenesScreen', 'wizardScreen', 'evaluationScreen', 'lineScreen', 'dirScreen', 'audioScreen'];
   function becomeMember(id) {
