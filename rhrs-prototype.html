@@ -6,6 +6,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>rhrs — prototype</title>
+<!-- The icons are real files, not data URIs: iOS reads apple-touch-icon only from
+     a file, and the manifest is what gives the home-screen app its name and icon
+     on Android. Relative paths, so they work from disk and from the preview. -->
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="rhrs">
+<meta name="theme-color" content="#EF5350">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -3363,6 +3372,21 @@
             <button class="toggle on" onclick="this.classList.toggle('on')"></button>
           </div>
         </div>
+        <div class="set-sep"></div>
+        <div class="set-group">
+          <div class="set-group-label">Voices</div>
+          <!-- The cues are somebody else's lines, so the alternate you hear is a
+               question here as much as in Listen. Same screen, one more door. -->
+          <button class="set-link" onclick="openWhoYouHearFromSettings()">
+            <span class="link-left">
+              <span class="set-label">Who you hear</span>
+              <span class="set-sub js-hear-meta">1 part has two actors</span>
+            </span>
+            <span class="link-right">
+              <i class="ph ph-caret-right ic-20"></i>
+            </span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -3927,7 +3951,9 @@
 
     editScriptScreen:     'detailScreen',
     peopleScreen:         'editScriptScreen',
-    castScreen:           'editScriptScreen',
+    /* Two honest parents: Edit script for an admin, Script detail for a member
+       who opened it from the Cast card. So it remembers which. */
+    castScreen:           'origin',
     personScreen:         'origin',
     /* The app never leads here — a link does — so in the prototype it lets go
        to the dashboard, the way the login does. */
@@ -3961,6 +3987,7 @@
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen',
     personScreen:     'peopleScreen',
+    castScreen:       'editScriptScreen',
     whoYouHearScreen: 'detailScreen'
   };
   /* Landing on a screen again is not the same as never having left it: counts
@@ -4020,7 +4047,8 @@
   /* Whose Script detail this is. The app is drawn for an admin — the pencil —
      and, for the panel only, as a member sees it: nothing to edit from here, so
      the corner carries the alternation glyph and opens Who you hear, and the
-     Cast card leads there too. */
+     Cast card opens the member's Cast — the list, with the one choice that is
+     theirs. */
   let detailView = 'admin';
   function openScript(id, view = 'admin') {
     const s = SCRIPTS.find(x => x.id === id);
@@ -4952,7 +4980,7 @@
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
-      <button class="rec-wizard cast" onclick="${detailView === 'admin' ? 'openCast()' : 'openWhoYouHear()'}">
+      <button class="rec-wizard cast" onclick="${detailView === 'admin' ? 'openCast()' : "openCast('member')"}">
         <i class="ph ph-users-three ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Cast</span>
@@ -5266,36 +5294,74 @@
     document.getElementById('sheet').classList.add('open');
   }
 
-  /* ---- the cast: the parts, and who holds them ---- */
-  function openCast() {
+  /* ---- the cast: the parts, and who holds them ----
+     Drawn for the admin, who casts. Everybody else reads the same list — as a
+     list, with no way into a part and nothing to add — and keeps the one choice
+     that is theirs: which of two alternates they hear. That version is on its
+     own in the panel and behind the Cast card of a member's Script detail. */
+  let castView = 'admin';
+  function openCast(view = 'admin') {
+    castView = view;
     renderCast();
     showScreen('castScreen');
   }
   function renderCast() {
     const el = document.getElementById('castList');
     if (!el) return;
+    const admin = castView === 'admin';
+    const chev = '<span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>';
+    const partSub = c => `${c.lines} lines · ${castLine(c.name)}${
+      /* An uncast part is only its voice, so the row says which. */
+      castOf(c.name).length ? '' : ' · voice: ' + voiceOf(c.name).name}`;
     el.innerHTML = `
       <div class="le-label">Read aloud by</div>
+      ${admin ? `
       <button class="le-row" style="margin-bottom:10px;" onclick="openVoicePicker(null)">
         <span class="le-main">
           <span class="le-top">Narrator</span>
           <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
         </span>
-        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>
-      <div class="le-label">Parts</div>` + CHARACTERS.map(c => `
+        ${chev}
+      </button>` : `
+      <div class="le-row" style="margin-bottom:10px;cursor:default;">
+        <span class="le-main">
+          <span class="le-top">Narrator</span>
+          <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
+        </span>
+      </div>`}
+      <div class="le-label">Parts</div>` + CHARACTERS.map(c => {
+        if (admin) return `
       <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">
         <span class="le-main">
           <span class="le-top cap-trim">${c.name}</span>
-          <span class="le-sub">${c.lines} lines · ${castLine(c.name)}${
-            /* An uncast part is only its voice, so the row says which. */
-            castOf(c.name).length ? '' : ' · voice: ' + voiceOf(c.name).name}</span>
+          <span class="le-sub">${partSub(c)}</span>
         </span>
-        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>`).join('') + `
+        ${chev}
+      </button>`;
+        /* A member's row: a fact, except where the part has two actors — there
+           it says which one you hear and opens the choice. */
+        const alt = castOf(c.name).length > 1;
+        const heard = alt ? hearIn(c.name) : null;
+        return alt ? `
+      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openWhoYouHear()">
+        <span class="le-main">
+          <span class="le-top cap-trim">${c.name}</span>
+          <span class="le-sub">${partSub(c)}</span>
+          <span class="le-sub" style="color:var(--wine);font-weight:600;">You hear ${heard.you ? 'yourself' : heard.name}</span>
+        </span>
+        ${chev}
+      </button>` : `
+      <div class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">
+        <span class="le-main">
+          <span class="le-top cap-trim">${c.name}</span>
+          <span class="le-sub">${partSub(c)}</span>
+        </span>
+      </div>`;
+      }).join('') + (admin ? `
       <button class="se-add" style="margin-top:6px;" onclick="openCharacter(null)">
         <i class="ph ph-plus ic-18"></i>Add a character
-      </button>`;
+      </button>` : `
+      <div class="ac-note">The director casts the parts. Where a part has two actors, you choose which of them you hear — nobody else is affected.</div>`);
   }
 
   /* ---- who you hear: the alternates, and which of them plays for you ----
@@ -6419,7 +6485,11 @@
     scenenocast:  { label:'Scene — not cast', group:'proto', st:'wip',
                   go: () => { openScene(DEMO_SCENE); setUncastView(true); } },
     detailmember: { label:'Script detail — not an admin', group:'proto', st:'wip',
-                  go: () => openScript('s1', 'member') }
+                  go: () => openScript('s1', 'member') },
+    castmember:   { label:'Cast — not an admin', group:'proto', st:'wip',
+                  /* By way of the member's Script detail, whose Cast card is the
+                     way in — and what Back should find behind it. */
+                  go: () => { openScript('s1', 'member'); openCast('member'); } }
   };
   /* ============================================================
      SCRIPT EDIT / SCENE EDIT

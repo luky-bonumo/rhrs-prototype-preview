@@ -6,6 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>rhrs — screen map</title>
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -159,6 +162,9 @@
   .n-entry rect { fill: var(--wine-surface); stroke: none; }
   .n-planned rect { fill: none; stroke: var(--grey); }
   .n-overlay rect { fill: var(--card); stroke: var(--coral-border); }
+  /* Drawn on its own — a version of a screen the app arrives at by taking things
+     away, which nothing leads to. Dotted, so it is neither a route nor a plan. */
+  .n-solo rect { fill: var(--card); stroke: var(--wine-border); stroke-dasharray: 2 4; }
   .g-frame { fill: var(--wine); fill-opacity: 0.035; stroke: var(--wine-border); }
   .arrow-head { fill: var(--wine); }
   svg line { stroke: var(--wine-border); }
@@ -171,6 +177,7 @@
   .n-entry .n-sub   { fill: var(--on-wine-soft); }
   .n-planned .n-title { fill: var(--text-muted); font-weight: 500; }
   .n-overlay .n-title { fill: var(--coral); font-size: 15px; }
+  .n-solo .n-title { fill: var(--wine); font-size: 15px; }
   .g-label {
     font-family: var(--font-body); font-size: 11px; font-weight: 700;
     letter-spacing: 1px; fill: var(--wine); text-transform: uppercase;
@@ -187,6 +194,7 @@
   .sw-built   { background: var(--white); border: 1.5px solid var(--wine-border); }
   .sw-overlay { background: var(--white); border: 1.5px dashed var(--coral-border); }
   .sw-planned { background: transparent; border: 1.5px dashed var(--grey); }
+  .sw-solo    { background: var(--white); border: 1.5px dotted var(--wine-border); }
 
   /* ---- screens table ---- */
   .rows { display: grid; gap: 10px; }
@@ -196,6 +204,9 @@
     border-radius: 14px; padding: 15px 20px;
   }
   .row .r-name { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--noir); }
+  /* The name is the way in, the same as the box on the map. */
+  .row .r-name a { color: inherit; text-decoration: none; }
+  .row .r-name a:hover { color: var(--wine); }
   .row .r-what { color: var(--text-muted); font-size: 14.5px; }
   .row .r-state {
     font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
@@ -204,6 +215,7 @@
   .st-built   { color: var(--wine);  border: 1.5px solid var(--wine-border); }
   .st-overlay { color: var(--coral); border: 1.5px solid var(--coral-border); }
   .st-todo    { color: var(--text-muted); border: 1.5px dashed var(--grey); }
+  .st-solo    { color: var(--wine);  border: 1.5px dotted var(--wine-border); }
   @media (max-width: 640px) {
     .row { grid-template-columns: 1fr auto; }
     .row .r-what { grid-column: 1 / -1; }
@@ -256,8 +268,10 @@
     <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
     <h1>Every screen,<br>and how you <em>get there</em>.</h1>
     <p class="lede">
-      The whole app in one picture. Solid boxes are drawn in the prototype — click one to open
-      it. Dashed boxes are still to be designed. Sheets slide up over whatever mode you are in.
+      The whole app in one picture. Solid boxes are drawn in the prototype — click one and it
+      opens in a new tab. Dashed grey boxes are still to be designed. Sheets slide up over
+      whatever you are on. Dotted boxes are drawn on their own: the app subtracts its way to
+      them by role and by casting, and nothing links to them.
     </p>
   </div>
 </header>
@@ -266,7 +280,7 @@
 
   <section>
     <div class="map">
-      <svg viewBox="0 -78 1040 750" role="img" aria-label="Map of the rhrs app screens and the routes between them">
+      <svg viewBox="0 -78 1040 1210" role="img" aria-label="Map of the rhrs app screens and the routes between them">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
@@ -283,6 +297,13 @@
               fill="#7A1E2D" fill-opacity="0.035" stroke="#DFCCD0" stroke-dasharray="2 5"/>
         <text class="g-label" x="308" y="218">One scene · three modes</text>
         <text class="g-note"  x="308" y="580">The mode bar at the bottom of the phone switches between the three without leaving the scene.</text>
+
+        <!-- ===== under the pencil: what an admin changes about a script ===== -->
+        <rect class="g-frame" x="282" y="612" width="718" height="420" rx="22"
+              fill="#7A1E2D" fill-opacity="0.035" stroke="#DFCCD0" stroke-dasharray="2 5"/>
+        <text class="g-label" x="308" y="640">Under the pencil · people, cast and the text</text>
+        <text class="g-note"  x="308" y="1010">Everything an admin changes about a script. A member sees Cast as a list and keeps the one choice</text>
+        <text class="g-note"  x="308" y="1024">that is theirs — which of two alternates they hear. Line edit and Audio edit also open from a line's menu and from the wizard.</text>
 
         <!-- ===== spine ===== -->
         <path class="edge" d="M140,-18 L140,42" marker-end="url(#arrow)"/>
@@ -305,41 +326,46 @@
         <path class="edge" d="M704,272 L744,272" marker-start="url(#arrow-both)" marker-end="url(#arrow-both)"/>
         <!-- rehearse → evaluation -->
         <path class="edge" d="M836,304 L836,364" marker-end="url(#arrow)"/>
+        <!-- edit script → the three things under the pencil: one trunk, three branches -->
+        <path class="edge" d="M240,440 L262,440 L262,910"/>
+        <path class="edge" d="M262,690 L300,690" marker-end="url(#arrow)"/>
+        <path class="edge" d="M262,800 L300,800" marker-end="url(#arrow)"/>
+        <path class="edge" d="M262,910 L300,910" marker-end="url(#arrow)"/>
 
         <!-- ===== spine nodes ===== -->
         <!-- Before everything else, and above it: the way into the app. -->
-        <a class="node" href="rhrs-prototype.html#login">
+        <a class="node " href="rhrs-prototype.html#login" target="_blank" rel="noopener">
           <rect x="40" y="-66" width="200" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
-          <text class="n-title" x="140" y="-36" text-anchor="middle">Login</text>
+          <text class="n-title" x="140" y="-37" text-anchor="middle">Login</text>
         </a>
-        <a class="node n-entry" href="rhrs-prototype.html#dashboard">
-          <rect x="40" y="48" width="200" height="64" rx="15" fill="#7A1E2D"/>
-          <text class="n-title" x="140" y="76"  text-anchor="middle">Dashboard</text>
-          <text class="n-sub"   x="140" y="95"  text-anchor="middle">Entry · last open · stats</text>
+        <a class="node n-entry" href="rhrs-prototype.html#dashboard" target="_blank" rel="noopener">
+          <rect x="40" y="48" width="200" height="64" rx="15" fill="#7A1E2D" />
+          <text class="n-title" x="140" y="76" text-anchor="middle">Dashboard</text>
+          <text class="n-sub"   x="140" y="95" text-anchor="middle">Entry · last open · stats</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#scripts">
+        <a class="node " href="rhrs-prototype.html#scripts" target="_blank" rel="noopener">
           <rect x="40" y="168" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="196" text-anchor="middle">All scripts</text>
           <text class="n-sub"   x="140" y="215" text-anchor="middle">Every script you have</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#detail">
+        <a class="node " href="rhrs-prototype.html#detail" target="_blank" rel="noopener">
           <rect x="40" y="288" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="316" text-anchor="middle">Script detail</text>
-          <text class="n-sub"   x="140" y="335" text-anchor="middle">Scenes · whole script</text>
+          <text class="n-sub"   x="140" y="335" text-anchor="middle">Scenes · wizard · cast</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#edit">
+        <a class="node " href="rhrs-prototype.html#edit" target="_blank" rel="noopener">
           <rect x="40" y="408" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="436" text-anchor="middle">Edit script</text>
-          <text class="n-sub"   x="140" y="455" text-anchor="middle">Characters · scenes</text>
+          <text class="n-sub"   x="140" y="455" text-anchor="middle">People · cast · scenes</text>
         </a>
 
-        <a class="node" href="rhrs-prototype.html#wizscenes">
+        <a class="node " href="rhrs-prototype.html#wizscenes" target="_blank" rel="noopener">
           <rect x="40" y="500" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="528" text-anchor="middle">Wizard — scenes</text>
           <text class="n-sub"   x="140" y="547" text-anchor="middle">Which scene to record</text>
         </a>
         <path class="edge" d="M140,564 L140,596" marker-end="url(#arrow)"/>
-        <a class="node" href="rhrs-prototype.html#wizard">
+        <a class="node " href="rhrs-prototype.html#wizard" target="_blank" rel="noopener">
           <rect x="40" y="602" width="200" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="140" y="630" text-anchor="middle">Recording Wizard</text>
           <text class="n-sub"   x="140" y="649" text-anchor="middle">One scene, line by line</text>
@@ -347,7 +373,7 @@
 
         <!-- A sheet, and one you can open: it has a link of its own. Sits above the
              other things the dashboard reaches, in the room the login made. -->
-        <a class="node n-overlay" href="rhrs-prototype.html#notifications">
+        <a class="node n-overlay" href="rhrs-prototype.html#notifications" target="_blank" rel="noopener">
           <rect x="294" y="-44" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
           <text class="n-title" x="389" y="-19" text-anchor="middle">Notifications</text>
         </a>
@@ -361,34 +387,34 @@
           <rect x="294" y="68" width="190" height="40" rx="12" fill="none" stroke="#C9BFC1" stroke-width="1.5" stroke-dasharray="5 5"/>
           <text class="n-title" x="389" y="93" text-anchor="middle">My characters</text>
         </g>
-        <a class="node" href="rhrs-prototype.html#settings">
+        <a class="node " href="rhrs-prototype.html#settings" target="_blank" rel="noopener">
           <rect x="294" y="116" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="389" y="141" text-anchor="middle">Global settings</text>
         </a>
         <!-- also reached from the account button on any mode's settings sheet -->
         <path class="edge" d="M484,136 L512,136" marker-end="url(#arrow)"/>
-        <a class="node" href="rhrs-prototype.html#account">
+        <a class="node " href="rhrs-prototype.html#account" target="_blank" rel="noopener">
           <rect x="518" y="116" width="190" height="40" rx="12" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="613" y="141" text-anchor="middle">Account</text>
         </a>
 
         <!-- ===== modes ===== -->
-        <a class="node" href="rhrs-prototype.html#read">
+        <a class="node " href="rhrs-prototype.html#read" target="_blank" rel="noopener">
           <rect x="300" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="388" y="268" text-anchor="middle">Read</text>
           <text class="n-sub"   x="388" y="287" text-anchor="middle">Lines · notes · no audio</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#listen">
+        <a class="node " href="rhrs-prototype.html#listen" target="_blank" rel="noopener">
           <rect x="524" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="612" y="268" text-anchor="middle">Listen</text>
           <text class="n-sub"   x="612" y="287" text-anchor="middle">The scene reads itself</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#rehearse">
+        <a class="node " href="rhrs-prototype.html#rehearse" target="_blank" rel="noopener">
           <rect x="748" y="240" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="836" y="268" text-anchor="middle">Rehearse</text>
           <text class="n-sub"   x="836" y="287" text-anchor="middle">Cue plays · you speak</text>
         </a>
-        <a class="node" href="rhrs-prototype.html#evaluation">
+        <a class="node " href="rhrs-prototype.html#evaluation" target="_blank" rel="noopener">
           <rect x="748" y="364" width="176" height="64" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
           <text class="n-title" x="836" y="392" text-anchor="middle">Evaluation</text>
           <text class="n-sub"   x="836" y="411" text-anchor="middle">Transcript of your take</text>
@@ -397,18 +423,114 @@
         <!-- ===== overlays ===== -->
         <line x1="308" y1="470" x2="974" y2="470" stroke="#DFCCD0" stroke-dasharray="2 5"/>
         <text class="g-label" x="308" y="462">Slides up over any mode</text>
-        <g class="node n-overlay">
+        <a class="node n-overlay" href="rhrs-prototype.html#linemenu" target="_blank" rel="noopener">
           <rect x="308" y="492" width="212" height="52" rx="14" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
           <text class="n-title" x="414" y="523" text-anchor="middle">Line menu</text>
-        </g>
-        <g class="node n-overlay">
+        </a>
+        <a class="node n-overlay" href="rhrs-prototype.html#modeset" target="_blank" rel="noopener">
           <rect x="540" y="492" width="212" height="52" rx="14" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
           <text class="n-title" x="646" y="523" text-anchor="middle">Mode settings</text>
-        </g>
-        <g class="node n-overlay">
-          <rect x="772" y="492" width="202" height="52" rx="14" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
+        </a>
+        <g class="node n-planned">
+          <rect x="772" y="492" width="202" height="52" rx="14" fill="none" stroke="#C9BFC1" stroke-width="1.5" stroke-dasharray="5 5"/>
           <text class="n-title" x="873" y="523" text-anchor="middle">Note editor</text>
         </g>
+
+        <!-- ===== under the pencil ===== -->
+        <!-- People → Person; Invite is a sheet off People, and what it makes is Join,
+             which the app never leads to — the link does. -->
+        <a class="node " href="rhrs-prototype.html#people" target="_blank" rel="noopener">
+          <rect x="300" y="660" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="375" y="688" text-anchor="middle">People</text>
+          <text class="n-sub"   x="375" y="707" text-anchor="middle">Who is on the script</text>
+        </a>
+        <path class="edge" d="M450,690 L476,690" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#person" target="_blank" rel="noopener">
+          <rect x="476" y="660" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="688" text-anchor="middle">Person</text>
+          <text class="n-sub"   x="551" y="707" text-anchor="middle">Parts, then the role</text>
+        </a>
+        <path class="edge" d="M375,720 C375,748 727,748 727,720" marker-end="url(#arrow)"/>
+        <a class="node n-overlay" href="rhrs-prototype.html#invite" target="_blank" rel="noopener">
+          <rect x="652" y="660" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="727" y="688" text-anchor="middle">Invite</text>
+          <text class="n-sub"   x="727" y="707" text-anchor="middle">A link with a role</text>
+        </a>
+        <path class="edge" d="M802,690 L828,690" marker-end="url(#arrow)"/>
+        <a class="node n-entry" href="rhrs-prototype.html#join" target="_blank" rel="noopener">
+          <rect x="828" y="660" width="150" height="60" rx="15" fill="#7A1E2D" />
+          <text class="n-title" x="903" y="688" text-anchor="middle">Join</text>
+          <text class="n-sub"   x="903" y="707" text-anchor="middle">From the link</text>
+        </a>
+
+        <!-- Cast → the part → its voice; Who you hear is the one thing here that is
+             not the admin's, so it is also reached from Mode settings, and from the
+             corner of a member's Script detail. -->
+        <a class="node " href="rhrs-prototype.html#cast" target="_blank" rel="noopener">
+          <rect x="300" y="770" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="375" y="798" text-anchor="middle">Cast</text>
+          <text class="n-sub"   x="375" y="817" text-anchor="middle">Parts · narrator's voice</text>
+        </a>
+        <path class="edge" d="M450,800 L476,800" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#character" target="_blank" rel="noopener">
+          <rect x="476" y="770" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="798" text-anchor="middle">Edit character</text>
+          <text class="n-sub"   x="551" y="817" text-anchor="middle">Name · cast · voice</text>
+        </a>
+        <path class="edge" d="M626,800 L652,800" marker-end="url(#arrow)"/>
+        <a class="node n-overlay" href="rhrs-prototype.html#voice" target="_blank" rel="noopener">
+          <rect x="652" y="770" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="727" y="798" text-anchor="middle">Voice picker</text>
+          <text class="n-sub"   x="727" y="817" text-anchor="middle">Preview, then choose</text>
+        </a>
+        <path class="edge" d="M551,830 C551,858 903,858 903,830" marker-end="url(#arrow)"/>
+        <path class="edge" d="M752,518 C1080,518 1080,800 978,800" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#whoyouhear" target="_blank" rel="noopener">
+          <rect x="828" y="770" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="798" text-anchor="middle">Who you hear</text>
+          <text class="n-sub"   x="903" y="817" text-anchor="middle">Yours alone</text>
+        </a>
+
+        <!-- The text: a scene's items, one line, its takes; a direction of its own. -->
+        <a class="node " href="rhrs-prototype.html#sceneedit" target="_blank" rel="noopener">
+          <rect x="300" y="880" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="375" y="908" text-anchor="middle">Scene edit</text>
+          <text class="n-sub"   x="375" y="927" text-anchor="middle">Reorder · add between</text>
+        </a>
+        <path class="edge" d="M450,910 L476,910" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#line" target="_blank" rel="noopener">
+          <rect x="476" y="880" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="908" text-anchor="middle">Line edit</text>
+          <text class="n-sub"   x="551" y="927" text-anchor="middle">Text · note · direction</text>
+        </a>
+        <path class="edge" d="M626,910 L652,910" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#audio" target="_blank" rel="noopener">
+          <rect x="652" y="880" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="727" y="908" text-anchor="middle">Audio edit</text>
+          <text class="n-sub"   x="727" y="927" text-anchor="middle">Takes · in use</text>
+        </a>
+        <path class="edge" d="M375,940 C375,968 903,968 903,940" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#dir" target="_blank" rel="noopener">
+          <rect x="828" y="880" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="908" text-anchor="middle">Direction edit</text>
+          <text class="n-sub"   x="903" y="927" text-anchor="middle">A direction of its own</text>
+        </a>
+
+        <!-- ===== drawn on their own ===== -->
+        <line x1="308" y1="1058" x2="974" y2="1058" stroke="#DFCCD0" stroke-dasharray="2 5"/>
+        <text class="g-label" x="308" y="1050">Drawn on their own — nothing in the app leads here</text>
+        <a class="node n-solo" href="rhrs-prototype.html#scenenocast" target="_blank" rel="noopener">
+          <rect x="300" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
+          <text class="n-title" x="408" y="1103" text-anchor="middle">Scene — not cast</text>
+        </a>
+        <a class="node n-solo" href="rhrs-prototype.html#detailmember" target="_blank" rel="noopener">
+          <rect x="536" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
+          <text class="n-title" x="644" y="1103" text-anchor="middle">Script detail — not an admin</text>
+        </a>
+        <a class="node n-solo" href="rhrs-prototype.html#castmember" target="_blank" rel="noopener">
+          <rect x="772" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
+          <text class="n-title" x="880" y="1103" text-anchor="middle">Cast — not an admin</text>
+        </a>
       </svg>
     </div>
 
@@ -417,6 +539,7 @@
       <span><i class="sw sw-built"></i>Drawn — click to open</span>
       <span><i class="sw sw-overlay"></i>Bottom sheet</span>
       <span><i class="sw sw-planned"></i>Still to design</span>
+      <span><i class="sw sw-solo"></i>Drawn on its own — nothing leads here</span>
     </div>
   </section>
 
@@ -429,99 +552,184 @@
 
     <div class="rows">
       <div class="row">
-        <span class="r-name cap-trim">Dashboard</span>
-        <span class="r-what">Landing screen. Last opened scripts, shortcuts, and the week's stats. The only screen on a wine background.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">All scripts</span>
-        <span class="r-what">Every script, with scene counts and whether you have a part in it.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Script detail</span>
-        <span class="r-what">The scenes of one script, plus a whole-script entry. Leads to Edit script.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Login</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#login" target="_blank" rel="noopener">Login</a></span>
         <span class="r-what">Apple, Google, or email and then a six-digit code. The two providers are shown identically — Apple asks to be no less prominent than any other, and equal treatment also stops the screen naming a right answer; through either of them there is no code and no name step, because the name arrives with the account. The email route is one route rather than two — there is nothing to choose between signing in and signing up, so a new account is one extra screen (your name) instead of a separate path. In the prototype the code 000000 is wrong and 111111 has expired; nina@example.com is an existing account and anything else is new.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Notifications</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#dashboard" target="_blank" rel="noopener">Dashboard</a></span>
+        <span class="r-what">Landing screen. Where you left off, last opened scripts, shortcuts, and the week's stats. The only screen on a wine background.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#notifications" target="_blank" rel="noopener">Notifications</a></span>
         <span class="r-what">A sheet from the bell on the dashboard. Two kinds: lines of yours still without audio, naming the scene and the script and leading into the wizard, and a note that shaking the phone sends feedback. The bell's dot is whether anything is unread; they are marked read when the sheet closes, so you can still see which were new while it is open.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#settings" target="_blank" rel="noopener">Global settings</a></span>
+        <span class="r-what">Account and Appearance are drawn — the way into your account, and the light / dark switch so the prototype can be looked at on a phone in either mode. Voices, rehearsal defaults, notifications, storage and subscription are still to come, and the screen says so.</span>
+        <span class="r-state st-built">Part drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#account" target="_blank" rel="noopener">Account</a></span>
+        <span class="r-what">You, rather than a character: the name the rest of the cast sees against your lines, edited in the same field as everything else that is written in the app, the address your sign-in code goes to, and the way out. From Global settings or from the account button on any mode's settings sheet.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Wizard — scenes</span>
-        <span class="r-what">Step one of recording: which scene. Every scene of the script with what it is still short, a scene you are not in shown but inert, and a finished one marked as recorded rather than hidden.</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#scripts" target="_blank" rel="noopener">All scripts</a></span>
+        <span class="r-what">Every script, with scene counts and whether you have a part in it.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Recording Wizard</span>
-        <span class="r-what">Rehearse narrowed to one job. The list is the whole scene — cue lines, directions and private notes included — and the filter (Unrecorded / All my lines) decides where the wizard takes you, not what you can see. The recorder is the one from Rehearse: left to run it keeps the take, stopped by hand it goes to Evaluation, where Use keeps it and Retake throws it away. A line that already has audio opens its takes in Audio edit.</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#detail" target="_blank" rel="noopener">Script detail</a></span>
+        <span class="r-what">Where you left off in coral, Whole script in wine, the Recording wizard's card with how many of your lines still have no audio, the Cast card, then the scenes. An admin has the pencil in the corner; a member has the alternation glyph there instead, and it opens Who you hear.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Edit script</span>
-        <span class="r-what">Characters and their line counts, and reorder, edit or delete scenes.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Read</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#read" target="_blank" rel="noopener">Read</a></span>
         <span class="r-what">Plain reading. Lines separated by rules, private notes and directions, no playback.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Listen</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#listen" target="_blank" rel="noopener">Listen</a></span>
         <span class="r-what">The scene plays itself. Lines become cards, the one being read is outlined, and the transport takes the colour of whoever is speaking.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Rehearse</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#rehearse" target="_blank" rel="noopener">Rehearse</a></span>
         <span class="r-what">Cue and answer. Someone else's line plays as audio in wine; your own line records in coral with the text hidden.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Evaluation</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#evaluation" target="_blank" rel="noopener">Evaluation</a></span>
         <span class="r-what">What the app heard you say, against the line as written. Opens from Rehearse and from either recorder, and closes back to whichever it was. When the take itself is the problem — quiet, muffled — a block under the transcript says so and what to do about it, because the words above it may not be the ones you said.</span>
         <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">People</span>
-        <span class="r-what">Who is on this script, from Edit script. A role — reader, editor, admin — and, separately, whether they hold a part: the two are independent, so an admin can act and an actor can be nothing more than a reader who holds a part. Invite is a link that carries the role and, when it is already known, the part.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Person</span>
-        <span class="r-what">One person: the parts they hold first, the role second. Removing them asks, and says what does not happen — their takes stay with the script and the part comes free.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Cast</span>
-        <span class="r-what">The parts and who holds them. A part can be held by more than one person and a person can hold more than one part. It took over the character list that used to sit on Edit script, so there is one list in one place. Script detail carries the same thing, read-only, under the wizard's card.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Join</span>
-        <span class="r-what">What somebody sees arriving from an invitation link: who invited them, the script, the role, and the part if the admin already set one. Nobody claims a free part — the director casts.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Line menu</span>
-        <span class="r-what">Per-line actions: start here in Listen or Rehearse, edit the line, add a private note, record audio.</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#linemenu" target="_blank" rel="noopener">Line menu</a></span>
+        <span class="r-what">Per-line actions: start here in Listen or Rehearse, edit the line, add a private note, and — on a line of yours — its audio.</span>
         <span class="r-state st-overlay">Sheet</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim">Mode settings</span>
-        <span class="r-what">Settings for the mode you are in — text size, which lines show, note defaults, playback speed.</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#modeset" target="_blank" rel="noopener">Mode settings</a></span>
+        <span class="r-what">Settings for the mode you are in — text size, which lines show, note defaults, playback speed, what the narrator reads, and in Listen and Rehearse the way into Who you hear.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#speed" target="_blank" rel="noopener">Playback speed</a></span>
+        <span class="r-what">Two speeds, yours and theirs, as presets over a stepper. From the figure under the scrubber or from Mode settings; in Rehearse only theirs, because you say your own.</span>
         <span class="r-state st-overlay">Sheet</span>
       </div>
       <div class="row">
         <span class="r-name cap-trim">Note editor</span>
         <span class="r-what">Writing a private note straight from the line menu, without going through Line edit. A line's own text, its note and its direction are already editable in Line edit, and a standalone direction has a screen of its own; this is the shortcut, and it is not drawn yet.</span>
         <span class="r-state st-todo">To design</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#wizscenes" target="_blank" rel="noopener">Wizard — scenes</a></span>
+        <span class="r-what">Step one of recording: which scene. Every scene of the script with what it is still short, a scene you are not in shown but inert, and a finished one marked as recorded rather than hidden.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#wizard" target="_blank" rel="noopener">Recording Wizard</a></span>
+        <span class="r-what">Rehearse narrowed to one job. The list is the whole scene — cue lines, directions and private notes included — and the filter (Unrecorded / All my lines) decides where the wizard takes you, not what you can see. The recorder is the one from Rehearse: left to run it keeps the take, stopped by hand it goes to Evaluation, where Use keeps it and Retake throws it away. A line that already has audio opens its takes in Audio edit.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#wizardset" target="_blank" rel="noopener">Wizard settings</a></span>
+        <span class="r-what">Auto-advance, play the cue first, and step through every line the way Rehearse does.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#edit" target="_blank" rel="noopener">Edit script</a></span>
+        <span class="r-what">People and Cast at the top, each with its count, then the real list of scenes — reordered by the handle on the right, opened into their lines. Delete script at the bottom, which asks.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#people" target="_blank" rel="noopener">People</a></span>
+        <span class="r-what">Who is on this script, from Edit script. A role — reader, editor, admin — and, separately, whether they hold a part: the two are independent, so an admin can act and an actor can be nothing more than a reader who holds a part.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#person" target="_blank" rel="noopener">Person</a></span>
+        <span class="r-what">One person: the parts they hold first, the role second. Removing them asks, and says what does not happen — their takes stay with the script and the part comes free.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#invite" target="_blank" rel="noopener">Invite</a></span>
+        <span class="r-what">A link that carries the role and, when the admin already knows it, the part. Choosing the part swaps the sheet rather than stacking one on another.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#join" target="_blank" rel="noopener">Join</a></span>
+        <span class="r-what">What somebody sees arriving from an invitation link: who invited them, the script, the role, and the part if the admin already set one. Nobody claims a free part — the director casts.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#cast" target="_blank" rel="noopener">Cast</a></span>
+        <span class="r-what">The parts and who holds them, with the narrator's voice at the top. A part can have more than one actor and a person more than one part. An admin opens a part from here; a member sees the same list read-only and, on an alternated part, which of the actors they hear.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#character" target="_blank" rel="noopener">Edit character</a></span>
+        <span class="r-what">The name, the cast with how much of the part each actor has recorded, You hear when the part has two actors, and the voice heard until a line is recorded.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#voice" target="_blank" rel="noopener">Voice picker</a></span>
+        <span class="r-what">The voices for a part or for the narrator, each with a preview that reads this part's first line — the question is never how a voice sounds but how it sounds saying this. Admin only. A Suggested group sits on top once there is one.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#whoyouhear" target="_blank" rel="noopener">Who you hear</a></span>
+        <span class="r-what">Every part with more than one actor, and which of them plays for you. Yours alone — nobody else is affected. From Listen and Rehearse settings, from the part, from a member's Cast, and from the corner of a member's Script detail.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#sceneedit" target="_blank" rel="noopener">Scene edit</a></span>
+        <span class="r-what">The items of one scene, lines and standalone directions alike, dragged by the handle on the right; a small (+) between two rows adds a line or a direction right there.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#line" target="_blank" rel="noopener">Line edit</a></span>
+        <span class="r-what">One line: its character, text, private note, direction and audio — every field the same editable component. Reached from a line's menu, from Scene edit and from the wizard.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#audio" target="_blank" rel="noopener">Audio edit</a></span>
+        <span class="r-what">The takes of one of your lines, newest first. In use picks the one everybody hears; the generated voice sits underneath as the default, so the line is never silent.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#dir" target="_blank" rel="noopener">Direction edit</a></span>
+        <span class="r-what">A standalone direction, with a reference of its own. Its menu in Read leads here too.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#addhere" target="_blank" rel="noopener">Add here</a></span>
+        <span class="r-what">A line or a direction, before the row you tapped between.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#alertrec" target="_blank" rel="noopener">Alerts</a></span>
+        <span class="r-what">One sheet, one table of words: delete a recording, a take, a line, a direction or a script; take a part away; remove somebody from the script; sign out; record all your lines; and Android's playback controls after notifications were refused.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#scenenocast" target="_blank" rel="noopener">Scene — not cast</a></span>
+        <span class="r-what">Two modes, not three: nobody who is not cast has Rehearse, and the line menu loses Rehearse from here with it. In the app the wizard, the microphone on a line and the missing-audio notification go too.</span>
+        <span class="r-state st-solo">On its own</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#detailmember" target="_blank" rel="noopener">Script detail — not an admin</a></span>
+        <span class="r-what">The same screen with the alternation glyph in the corner instead of the pencil, opening Who you hear. The Cast card opens the member's Cast.</span>
+        <span class="r-state st-solo">On its own</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#castmember" target="_blank" rel="noopener">Cast — not an admin</a></span>
+        <span class="r-what">The cast as a list: no way into a part, nothing to add, the narrator's voice as a line of text. A part with two actors says which one you hear and opens the choice.</span>
+        <span class="r-state st-solo">On its own</span>
       </div>
       <div class="row">
         <span class="r-name cap-trim">Self tape</span>
@@ -532,19 +740,6 @@
         <span class="r-name cap-trim">My characters</span>
         <span class="r-what">The roles you play across all scripts. Shortcut exists on the dashboard, screen not yet drawn.</span>
         <span class="r-state st-todo">To design</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Account</span>
-        <span class="r-what">You, rather than a character: the name the rest of the cast sees against your lines, edited in the same field as everything else that is written in the app, the address your sign-in code goes to, and the way out. From Global settings or from the account button on any mode's settings sheet.</span>
-        <span class="r-state st-built">Drawn</span>
-      </div>
-      <div class="row">
-        <span class="r-name cap-trim">Global settings</span>
-        <span class="r-what">Account and Appearance are drawn — the way into your account, and the light / dark
-          switch so the prototype can be looked at on a phone in either mode. Voices, rehearsal
-          defaults, notifications, storage and subscription are still to come, and the screen
-          says so.</span>
-        <span class="r-state st-built">Part drawn</span>
       </div>
     </div>
   </section>

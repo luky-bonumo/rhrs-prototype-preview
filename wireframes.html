@@ -6,6 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>rhrs — wireframes</title>
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -384,9 +387,10 @@
           <b>Everyone reads the cast, only an admin changes it.</b> Script detail carries the
           parts and who holds them, under the wizard's card — it is the question everybody has
           about a script they have just opened, and an alternated part shows both names. The
-          block leads on: an admin and an editor into <b>Cast</b>, everybody else into
-          <b>Who you hear</b>, where the only thing they can change is which of the two they
-          listen to.<br><br>
+          block leads on: an admin into <b>Cast</b>; everybody else into the same list
+          read-only — <b>Cast — not an admin</b> — where the only thing they can change is
+          which of two alternates they listen to. The corner glyph opens <b>Who you hear</b>
+          directly.<br><br>
           <b>Managing people lives under the pencil</b>, on Edit script, with the rest of what
           a script is made of. It is not a place you pass through on the way to rehearsing.
         </div>
@@ -572,7 +576,7 @@
         </div>
       </div>
 
-      <h3>Who you hear — one screen, three ways in</h3>
+      <h3>Who you hear — one screen, four ways in</h3>
       <p class="note-line">
         Choosing an alternate is not editing the script: it is how <i>this</i> production sounds
         to <i>you</i>, and everyone in the cast may do it. So it is its own screen, listing every
@@ -585,7 +589,7 @@
         <div class="wf sheet">
           <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Mode settings</button><span>exists, one row added</span></div>
           <div class="wf-body">
-            <div class="wf-title">Listen settings</div>
+            <div class="wf-title">Listen / Rehearse settings</div>
             <div class="wf-bar mid"></div>
             <div class="wf-bar short"></div>
             <div class="wf-label">Voices</div>
