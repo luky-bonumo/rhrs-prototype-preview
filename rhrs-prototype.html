@@ -3426,7 +3426,9 @@
      on screen. Two scenes both have a third line; they do not share recordings.
      The whole-script list holds the same objects, so a key travels with it. */
   SCENE_LISTS.forEach((list, s) => list.forEach((it, i) => {
-    if (it.who) it.key = (s + 1) + '-' + (i + 1);
+    /* A direction is quoted in a message as often as a line is, so it carries a
+       key as well — `d` so the two kinds cannot be mistaken for one another. */
+    it.key = (s + 1) + (it.who ? '-' : '-d') + (i + 1);
   }));
   SCRIPTS[0].scenes = SCENES;
   /* Whichever script's scenes Script detail and the scene steps are working on. */
@@ -5991,6 +5993,24 @@
     const n = at < 0 ? 0 : items.slice(0, at + 1).filter(it => it.who).length;
     return '#' + String(sc).padStart(3, '0') + '-' + String(n).padStart(4, '0');
   }
+  /* The same handle a line has, for the thing that is not a line: the scene, and
+     which direction it is inside that scene. #001-D02 sits beside #001-0002
+     without either being read as the other. */
+  function dirId(idx) {
+    const it = SCRIPT[idx];
+    if (!it || !it.key) return '#000-D00';
+    const sc = Number(it.key.split('-')[0]);
+    const items = SCENE_LISTS[sc - 1] || [];
+    const at = items.indexOf(it);
+    const n = at < 0 ? 0 : items.slice(0, at + 1).filter(x => x.stage).length;
+    return '#' + String(sc).padStart(3, '0') + '-D' + String(n).padStart(2, '0');
+  }
+  function copyDirId(idx) {
+    const id = dirId(idx);
+    navigator.clipboard?.writeText(id);
+    toast(id + ' copied');
+  }
+
   function openAudioEdit(idx) {
     audioIdx = idx;
     renderAudioEdit();
@@ -6247,8 +6267,10 @@
     setTimeout(() => document.getElementById('leInput')?.focus(), 60);
   }
   function commitDirection(text) {
+    const sc = SCENE_LISTS.indexOf(SCRIPT) + 1;
     const it = dirDraft;
     it.stage = text;
+    it.key = (sc || 1) + '-dn' + (++keySeq);
     SCRIPT.splice(dirAddAt, 0, it);
     dirIdx = SCRIPT.indexOf(it);
     dirDraft = null;
@@ -6265,6 +6287,15 @@
       <div class="ac-note">A direction belongs to the scene, not to a line, and
         everybody in the cast reads the same one.</div>
       ${adding ? '' : `
+      <div class="le-label">Reference</div>
+      <button class="le-row" onclick="copyDirId(${dirIdx})">
+        <span class="le-main">
+          <span class="le-top" style="font-variant-numeric:tabular-nums;">${dirId(dirIdx)}</span>
+          <span class="le-sub">Tap to copy — use it to point someone at this direction</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
+      </button>
+
       <button class="le-danger" onclick="openAlert('deleteDirection')">
         <i class="ph ph-trash ic-20"></i>Delete direction
       </button>`}`;

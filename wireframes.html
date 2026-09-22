@@ -253,6 +253,13 @@
       <span><i class="box fill"></i>text that is not the point here</span>
       <span><i class="ph ph-arrow-right"></i>what takes you on</span>
     </div>
+    <p class="note-line">
+      <b>The app is drawn for an admin.</b> Everything can be done here; taking things away
+      from the roles that may not do them is engineering's job, not a second set of screens.
+      Where a role genuinely needs a screen of its own — a reader with no Rehearse, someone
+      who may choose an alternate but not edit — it is drawn on its own below and wired to
+      nothing. That is the whole reason those boxes are marked <i>on its own</i>.
+    </p>
   </section>
 
   <!-- ============================================================ 1 -->
@@ -274,7 +281,7 @@
         <tr><th>Read and Listen</th><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
         <tr><th>Rehearse</th><td class="n">no</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
         <tr><th>Change their own name</th><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
-        <tr><th>Write private notes</th><td class="own">their own</td><td class="own">their own</td><td class="own">their own</td><td class="own">their own</td></tr>
+        <tr><th>Write private notes</th><td class="own">their own, on any line</td><td class="own">their own, on any line</td><td class="own">their own, on any line</td><td class="own">their own, on any line</td></tr>
         <tr><th>Edit the text of a line</th><td class="n">no</td><td class="own">their part only</td><td class="y">yes</td><td class="y">yes</td></tr>
         <tr><th>Record and manage audio</th><td class="n">no</td><td class="own">their part only</td><td class="own">their part only</td><td class="own">their part only</td></tr>
         <tr><th>Direction written on a line</th><td class="n">no</td><td class="own">their part only</td><td class="y">yes</td><td class="y">yes</td></tr>
@@ -374,10 +381,9 @@
         </div>
 
         <div class="note">
-          <b>How do I become Nina?</b> Somebody casts you. Only an admin may cast, so an
-          uncast member sees <i>You have not been cast yet</i> and the part comes from the
-          director, not from a queue. If that is wrong, this is the decision to overturn —
-          the alternative is a part anybody can claim while it is free.<br><br>
+          <b>How do I become Nina?</b> Somebody casts you. Only an admin may cast — confirmed
+          22 September — so an uncast member sees <i>You have not been cast yet</i> and the part
+          comes from the director. Nobody claims a part because it happens to be free.<br><br>
           The invitation carries the role, and the part when the admin already knows it.
           Email invitations come later; a link is enough to test with.
         </div>
@@ -385,7 +391,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><span>Existing screen</span><span>changes</span></div>
+          <div class="wf-kind"><span>Screen</span><span>on its own</span></div>
           <div class="wf-body">
             <div class="wf-title">A reader's scene</div>
             <div class="wf-bar"></div>
@@ -398,12 +404,13 @@
         <div class="note">
           <b>A reader has no Rehearse.</b> The mode bar carries two, not three — and with it
           go the Recording wizard, the microphone on a line, and the notification about lines
-          without audio. There is nothing for them to record.<br><br>
-          <b>An assigned member</b> keeps all three modes, but Scene edit loses its + between
-          the rows and its <i>Add line</i> / <i>Add direction</i>: they may rewrite their own
-          lines, not the script.<br><br>
-          <b>In the prototype, "who am I" is a switch in the panel</b>, next to light and dark.
-          It is a tool for looking at the app, never a control inside it.
+          without audio. There is nothing for them to record. Decided 22 September.<br><br>
+          <b>An assigned member</b> keeps all three modes; what they lose is the + between the
+          rows in Scene edit and <i>Add line</i> / <i>Add direction</i>. They may rewrite their
+          own lines, not the script.<br><br>
+          Neither of those is a screen to build. They are subtractions from screens that
+          exist, and the prototype keeps showing the admin's version — this box is here so the
+          subtraction is written down somewhere.
         </div>
       </div>
     </div>
@@ -450,7 +457,7 @@
             <div class="wf-row"><span class="grow">Petr Novák<span class="r-sub">2 of 9 lines recorded</span></span><i class="ph ph-x"></i></div>
             <div class="wf-btn">Cast someone else</div>
             <div class="wf-label">You hear</div>
-            <div class="wf-row"><span class="grow">Luděk Sobota<span class="r-sub">Only you — everyone chooses their own</span></span><i class="ph ph-caret-down"></i></div>
+            <div class="wf-row"><span class="grow">Luděk Sobota<span class="r-sub">Only you — everyone chooses their own</span></span><i class="ph ph-caret-right"></i></div>
             <div class="wf-label">Voice, until it is recorded</div>
             <div class="wf-row"><span class="grow">Rufus<span class="r-sub">Set by the admin, heard by everyone</span></span><i class="ph ph-caret-right"></i></div>
           </div>
@@ -481,16 +488,63 @@
         </div>
       </div>
 
+      <h3>Who you hear — one screen, three ways in</h3>
+      <p class="note-line">
+        Choosing an alternate is not editing the script: it is how <i>this</i> production sounds
+        to <i>you</i>, and everyone in the cast may do it. So it is its own screen, listing every
+        part that has more than one actor, and the three places it is reached from are the three
+        places the question comes up — while you listen, while you look at the script, and while
+        you are standing on the part itself.
+      </p>
+
       <div class="flow">
-        <div class="note" style="width:100%;max-width:70ch">
-          <b>What plays, in order.</b> The alternate you chose to hear, if they have recorded
-          the line → otherwise the generated voice of the character. Nothing else changes:
-          a take still belongs to the person who recorded it, Audio edit still shows you your
-          own takes and nobody else's, and the Recording wizard still counts only the lines
-          <i>you</i> owe. Two alternates each see their own count.<br><br>
-          <b>The one thing to decide:</b> where "You hear" lives. Here it is on the part, next
-          to the people who hold it. It could also be a row in Listen's settings — but a
-          setting that only exists for parts with two actors is a setting nobody finds.
+        <div class="wf sheet">
+          <div class="wf-kind"><span>Sheet</span><span>exists, one row added</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Listen settings</div>
+            <div class="wf-bar mid"></div>
+            <div class="wf-bar short"></div>
+            <div class="wf-label">Voices</div>
+            <div class="wf-row"><span class="grow">Who you hear<span class="r-sub">1 part has two actors</span></span><i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Who you hear</div>
+            <div class="wf-text">Some parts are played by more than one actor. Pick the one you want to hear — it changes nothing for anybody else.</div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">Luděk Sobota · Petr Novák</span></span><i class="ph ph-caret-down"></i></div>
+            <div class="wf-sub">Parts with one actor are not listed. There is nothing to choose.</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-left"></i>also from</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>on its own</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Script detail — not an admin</div>
+            <div class="wf-row flat"><span class="grow">Top right, where an admin has the pencil</span><i class="ph ph-users-three"></i></div>
+            <div class="wf-bar"></div>
+            <div class="wf-bar mid"></div>
+            <div class="wf-bar short"></div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>The pencil is an admin's.</b> An editor keeps it; everyone else has nothing to edit
+          from here, so that corner carries the alternation glyph instead and opens
+          <i>Who you hear</i>. Same corner, the most useful thing that role can do to the script
+          from this screen.<br><br>
+          <b>The third way in is the part itself</b> — the <i>You hear</i> row on the character,
+          for when you are already standing there. One setting, three doors, no copies.<br><br>
+          <b>What plays, in order:</b> the alternate you chose, if they have recorded the line →
+          otherwise the generated voice. A take still belongs to whoever recorded it, Audio edit
+          shows you your own and nobody else's, and the Recording wizard counts only the lines
+          <i>you</i> owe — two alternates each see their own count.
         </div>
       </div>
     </div>
@@ -585,9 +639,10 @@
           <b>Two failures, two messages:</b> a file with no text in it, and a file with text but
           no characters in it (prose, a synopsis, the wrong document). Each says what it saw and
           offers the way out that would work.<br><br>
-          <b>Leaving in the middle</b> — decide: keep the half-read import as a draft, or throw
-          it away. Keeping it means it has to appear somewhere, which means a state on
-          All scripts.
+          <b>Leaving in the middle keeps a draft.</b> Decided 22 September. The script is
+          already in by the time these passes start, so what is unfinished is the read-through,
+          not the import — it waits on All scripts marked <i>Draft · import not checked</i>,
+          carries on where you left it, and can be deleted there like any other script.
         </div>
       </div>
 
@@ -738,14 +793,22 @@
   </section>
 
   <section>
-    <div class="sec-label">Still open</div>
-    <h2>What these wireframes do not answer</h2>
+    <div class="sec-label">Settled, and still open</div>
+    <h2>The decisions behind these boxes</h2>
     <p class="note-line">
-      Five decisions are deliberately left standing. They are in <a href="todo.html">todo</a>
-      and none of them block drawing: a reader losing the missing-audio notification along with
-      Rehearse; whether an assigned member may write a private note on somebody else's line;
-      where "You hear" lives; what happens to an import left half-finished; and whether a
-      standalone direction gets a reference of its own, the way a line has <b>#001-0002</b>.
+      Four of the five questions these wireframes were drawn around were answered on
+      22 September. <b>Casting is the admin's alone</b> — nobody claims a free part.
+      <b>A reader loses the Recording wizard and the missing-audio notification</b> along with
+      Rehearse, because none of them have anything to say to someone who does not record.
+      <b>A private note can hang on anybody's line</b> — it is yours, nobody else sees it, and
+      the line it is about is often not your own. <b>A standalone direction gets a reference</b>
+      of its own, <b>#001-D02</b>, the way a line has #001-0002: it is quoted in messages just
+      as often.
+    </p>
+    <p class="note-line">
+      And the fifth: <b>an import left half-way keeps a draft</b>. It sits on All scripts as
+      <i>Draft · import not checked</i> and carries on where it was left. Nothing in these
+      three blocks is waiting on a decision any more.
     </p>
   </section>
 
