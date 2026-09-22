@@ -712,6 +712,36 @@
   .rec-wizard.cast .rw-title,
   .rec-wizard.cast .chevron { color: var(--wine); }
 
+  /* ============ WHO YOU HEAR ============ */
+  /* The part is the heading and the actors are the choice under it, so the
+     heading is the part's name in the part's own type — wine for somebody
+     else's part, coral when it is one of yours. */
+  .wh-part {
+    font-family: var(--font-display); font-weight: 700; font-size: 17px;
+    color: var(--wine); padding: 20px 2px 10px;
+  }
+  .wh-part.mine { color: var(--coral); }
+
+  /* ============ VOICE PICKER ============ */
+  /* A voice previews inside its own row, the way a take plays in Audio edit:
+     the bar belongs to the thing that is playing. Wine, not coral — a voice is
+     the app reading, and coral in this app means you. */
+  .le-row.voice { flex-wrap: wrap; }
+  .le-row.voice .le-play { background: var(--wine-tint); color: var(--wine); }
+  .le-row.voice.playing .le-play { background: var(--wine); color: var(--on-mark); }
+  .le-row.voice .vp-bar {
+    flex: 1 1 100%; height: 4px; border-radius: 2px; background: var(--stone);
+    margin-top: 10px; position: relative; overflow: hidden;
+  }
+  .le-row.voice .vp-fill {
+    position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 2px;
+    background: var(--wine);
+  }
+
+  /* Somebody who is not cast has two modes, not three. Panel-only; in the app
+     the subtraction is engineering's. */
+  .phone.uncast .mode.mode-rehearse { display: none; }
+
   /* ============ LINE EDIT ============ */
   /* Which scene this line is in. You can arrive here from a lot of places and
      one line out of context is hard to place. */
@@ -1823,9 +1853,9 @@
   /* A sheet's own rows carry their inset (.set-row pads 24px); the app's rows do
      not, so a sheet built out of those has to set it once, here. Without it the
      invite ran edge to edge. */
-  .invite-body { padding: 2px 22px 26px; }
+  .invite-body, .voice-body { padding: 2px 22px 26px; }
   /* The lede is a sentence about what follows, not a caption on it. */
-  .invite-body .ac-note { padding: 4px 2px 16px; }
+  .invite-body .ac-note, .voice-body .ac-note { padding: 4px 2px 16px; }
   .invite-body .gs-theme { margin-bottom: 6px; }
   .set-group-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
@@ -2772,7 +2802,9 @@
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" id="detailTitle">I love you, you're fine, but change…</span>
-      <button class="back" onclick="openEditScript()" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
+      <!-- The pencil for an admin; for a member, who has nothing to edit from
+           here, the alternation glyph — painted by paintDetailCorner. -->
+      <button class="back" id="detailAction" onclick="detailAction()" aria-label="Edit script"><i class="ph ph-pencil-simple ic-21"></i></button>
     </div>
     <div class="list fades" id="scenesList"></div>
   </div>
@@ -2891,6 +2923,20 @@
     <div class="list fades" id="castList"></div>
   </div>
 
+  <!-- ============ SCREEN: WHO YOU HEAR ============
+       Where a part has more than one actor, which of them you hear. Yours alone,
+       so it is not editing the script and everyone in the cast may do it — a
+       screen of its own, reached from Listen settings, from the part, and from
+       the corner of Script detail where a member has no pencil. -->
+  <div class="screen" id="whoYouHearScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Who you hear</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="hearBody"></div>
+  </div>
+
   <!-- ============ SCREEN: JOIN ============
        What somebody sees coming in from an invitation link. The app never leads
        here; the link does. -->
@@ -2939,7 +2985,7 @@
     <div class="modebar">
       <button class="mode active" onclick="switchMode('read')"><i class="ph-fill ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
       <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
-      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
+      <button class="mode mode-rehearse" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -2993,7 +3039,7 @@
     <div class="modebar">
       <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
       <button class="mode active" onclick="switchMode('listen')"><i class="ph-fill ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
-      <button class="mode" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
+      <button class="mode mode-rehearse" onclick="switchMode('rehearse')"><i class="ph ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -3086,7 +3132,7 @@
     <div class="modebar">
       <button class="mode" onclick="switchMode('read')"><i class="ph ph-book-open ic-24"></i><span class="cap-trim">Read</span></button>
       <button class="mode" onclick="switchMode('listen')"><i class="ph ph-headphones ic-24"></i><span class="cap-trim">Listen</span></button>
-      <button class="mode active" onclick="switchMode('rehearse')"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
+      <button class="mode mode-rehearse active" onclick="switchMode('rehearse')"><i class="ph-fill ph-microphone ic-24"></i><span class="cap-trim">Rehearse</span></button>
     </div>
   </div>
 
@@ -3258,6 +3304,22 @@
             <button class="toggle" onclick="this.classList.toggle('on')"></button>
           </div>
         </div>
+        <div class="set-sep"></div>
+        <div class="set-group">
+          <div class="set-group-label">Voices</div>
+          <!-- Which alternate you hear is a screen, not a row of switches: it is
+               reached from here, from the part and from Script detail, and lives
+               in one place. The sheet goes first, the way it does for speed. -->
+          <button class="set-link" onclick="openWhoYouHearFromSettings()">
+            <span class="link-left">
+              <span class="set-label">Who you hear</span>
+              <span class="set-sub js-hear-meta">1 part has two actors</span>
+            </span>
+            <span class="link-right">
+              <i class="ph ph-caret-right ic-20"></i>
+            </span>
+          </button>
+        </div>
       </div>
 
       <!-- Rehearse-only -->
@@ -3368,6 +3430,18 @@
       <span class="h-title cap-trim">Invite someone</span>
     </div>
     <div class="set-scroll" id="inviteBody"></div>
+  </div>
+
+  <!-- ============ SHEET: VOICE PICKER ============
+       The voices, each with a preview that reads this part's first line. One
+       sheet for the parts and for the narrator. Built in groups so a Suggested
+       group can sit at the top of the same list later. -->
+  <div class="settings-sheet" id="voiceSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title">
+      <span class="h-title cap-trim" id="voiceTitle">Voice</span>
+    </div>
+    <div class="set-scroll" id="voiceBody"></div>
   </div>
 
   <!-- playback speed, opened from the figure under the scrubber -->
@@ -3639,6 +3713,67 @@
     get actors() { return castOf(this.name); }
   }));
 
+  /* ---- voices ----
+     What a part sounds like before anybody has recorded it, and what reads the
+     directions aloud. The script's, not yours: an admin picks them and everyone
+     hears the same. A Suggested group, picked from the part itself, comes later
+     and sits at the top of the same list. */
+  const VOICES = [
+    { id:'rufus', name:'Rufus', line:'Low, unhurried' },
+    { id:'ivy',   name:'Ivy',   line:'Warm, mid' },
+    { id:'arto',  name:'Arto',  line:'Bright, quick' },
+    { id:'mara',  name:'Mara',  line:'Dry, level' }
+  ];
+  const voiceById = id => VOICES.find(v => v.id === id);
+  /* One per part, keyed by the part's name the way CAST is, and one for the
+     narrator — `null` as the part means the narrator throughout. A part nobody
+     has chosen for falls back to the first voice: no line is ever silent. */
+  const VOICE = { Nina:'mara', Michael:'rufus', Anna:'ivy' };
+  let narratorVoice = 'ivy';
+  const voiceOf = name => voiceById(name ? VOICE[name] : narratorVoice) || VOICES[0];
+  function setVoice(name, id) {
+    if (name) VOICE[name] = id; else narratorVoice = id;
+  }
+
+  /* ---- who you hear ----
+     Where a part has more than one actor, which of them plays in your ears.
+     Yours alone: the same script sounds different to each member, and changing
+     it changes nothing for anybody else. Keyed by part; a part with one actor
+     needs no entry, and until you choose you hear whoever was cast first.
+
+     What plays on a line, in order: the take of the actor you hear, if they have
+     recorded it — otherwise the part's voice. A take belongs to whoever recorded
+     it: Audio edit shows you your own and nobody else's, and the wizard counts
+     only the lines you owe, so two alternates each see their own count. */
+  const HEAR = { Michael: 'ls' };
+  const alternated = () => CHARACTERS.filter(c => castOf(c.name).length > 1);
+  function hearIn(name) {
+    const who = castOf(name);
+    return who.find(m => m.id === HEAR[name]) || who[0] || null;
+  }
+  /* Which of a part's lines each actor has recorded. Yours are on the lines
+     themselves (`rec`); the others' are here, because a second actor in a part
+     can be part-way through. In the demo Luděk has all of Michael's, Petr the
+     first two. */
+  const OTHERS_REC = { ls: 'all', pn: 2 };
+  function recordedCount(id, name) {
+    const lines = WHOLE_SCRIPT.filter(it => it.who === name);
+    if (id === ME) return lines.filter(it => it.rec !== false).length;
+    const has = OTHERS_REC[id];
+    return has === 'all' ? lines.length : Math.min(lines.length, has || 0);
+  }
+  /* The sentence under the row that leads to Who you hear, so the row says
+     whether there is anything to choose before it is opened. */
+  function hearMeta() {
+    const parts = alternated();
+    if (!parts.length) return 'Every part has one actor';
+    if (parts.length === 1) {
+      const n = castOf(parts[0].name).length;
+      return '1 part has ' + (['two', 'three', 'four'][n - 2] || n) + ' actors';
+    }
+    return parts.length + ' parts have more than one actor';
+  }
+
   /* Icons — swap any ph-* name from https://phosphoricons.com */
   const ICON = {
     chevron:  '<i class="ph ph-caret-right ic-20"></i>',
@@ -3806,6 +3941,9 @@
     audioScreen:          'origin',
     evaluationScreen:     'origin',
     accountScreen:        'origin',
+    /* Opened from Listen settings, from a part and from the corner of Script
+       detail — three doors, so it goes back to whichever one it came in by. */
+    whoYouHearScreen:     'origin',
 
     /* Signing in is a flow of its own: it goes back a step, not up a tree. The
        prototype can leave it altogether, which the app cannot — there is no
@@ -3822,7 +3960,8 @@
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen',
-    personScreen:     'peopleScreen'
+    personScreen:     'peopleScreen',
+    whoYouHearScreen: 'detailScreen'
   };
   /* Landing on a screen again is not the same as never having left it: counts
      move, takes are added, a name is changed. Each place says how to redraw. */
@@ -3834,6 +3973,7 @@
     peopleScreen:       () => renderPeople(),
     personScreen:       () => renderPerson(),
     castScreen:         () => renderCast(),
+    whoYouHearScreen:   () => renderWhoYouHear(),
     joinScreen:         () => renderJoin(),
     sceneEditScreen:    () => renderSceneEdit(),
     characterScreen:    () => { editRender = renderCharacter; renderCharacter(); },
@@ -3877,12 +4017,28 @@
     paint(to);
     REDRAW[to]?.();
   }
-  function openScript(id) {
+  /* Whose Script detail this is. The app is drawn for an admin — the pencil —
+     and, for the panel only, as a member sees it: nothing to edit from here, so
+     the corner carries the alternation glyph and opens Who you hear, and the
+     Cast card leads there too. */
+  let detailView = 'admin';
+  function openScript(id, view = 'admin') {
     const s = SCRIPTS.find(x => x.id === id);
     currentScript = s;
+    detailView = view;
     document.getElementById('detailTitle').textContent = s.title;
+    paintDetailCorner();
     renderScenes();
     showScreen('detailScreen');
+  }
+  function paintDetailCorner() {
+    const admin = detailView === 'admin';
+    const b = document.getElementById('detailAction');
+    b.innerHTML = admin ? '<i class="ph ph-pencil-simple ic-21"></i>' : '<i class="ph ph-users-three ic-22"></i>';
+    b.setAttribute('aria-label', admin ? 'Edit script' : 'Who you hear');
+  }
+  function detailAction() {
+    if (detailView === 'admin') openEditScript(); else openWhoYouHear();
   }
   function openScene(name) {
     /* Whole script is a scene name like any other as far as the header is
@@ -3892,6 +4048,7 @@
        that is written. Whole script is the only name that is not a scene. */
     SCRIPT = sc ? (sc.items || SCENE_1) : WHOLE_SCRIPT;
     currentScene = name;
+    setUncastView(false);
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
     /* The top of the scene, whatever it is. A leading stage direction used to be
@@ -3904,6 +4061,17 @@
     showScreen('readScreen');
     const rs = document.getElementById('readScroll');
     rs.scrollTop = sceneStart(rs);
+  }
+
+  /* A scene as somebody who is not cast sees it: two modes, not three, because
+     Rehearse is nothing to say. The wizard, the microphone on a line and the
+     missing-audio notification go with it in the app; the prototype draws the
+     admin's version and this takes away what is on this screen — the mode and
+     the jump to it in a line's menu. Panel-only; opening a scene clears it. */
+  let uncastView = false;
+  function setUncastView(on) {
+    uncastView = on;
+    document.querySelector('.phone').classList.toggle('uncast', on);
   }
 
   /* Switching mode replaces the current mode screen. Back from any of the three
@@ -4605,7 +4773,7 @@
        what the menu on a line is for. */
     if (!noJumps) {
       html += item('listen', 'Listen from here', false, "Listen from this line");
-      html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
+      if (!uncastView) html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
       html += '<div class="sheet-sep"></div>';
     }
     html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
@@ -4650,6 +4818,8 @@
     document.getElementById('scrim').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
     document.getElementById('inviteSheet').classList.remove('open');
+    document.getElementById('voiceSheet').classList.remove('open');
+    vpStop();
     document.getElementById('settingsSheet').classList.remove('open');
     document.getElementById('speedSheet').classList.remove('open');
     document.getElementById('wizardSettingsSheet').classList.remove('open');
@@ -4662,6 +4832,7 @@
     document.getElementById('settingsTitle').textContent = label;
     document.getElementById('setListen').style.display   = mode === 'listen'   ? '' : 'none';
     document.getElementById('setRehearse').style.display = mode === 'rehearse' ? '' : 'none';
+    document.querySelectorAll('.js-hear-meta').forEach(el => el.textContent = hearMeta());
     document.getElementById('scrim').classList.add('open');
     document.getElementById('settingsSheet').classList.add('open');
   }
@@ -4781,7 +4952,7 @@
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
-      <button class="rec-wizard cast" onclick="openCast()">
+      <button class="rec-wizard cast" onclick="${detailView === 'admin' ? 'openCast()' : 'openWhoYouHear()'}">
         <i class="ph ph-users-three ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Cast</span>
@@ -4860,32 +5031,49 @@
   function renderCharacter() {
     const c = CHARACTERS.find(x => x.name === charEditing);
     document.getElementById('charTitle').textContent = charEditing ? 'Edit character' : 'Add character';
+    const actors = c ? castOf(c.name) : [];
+    const heard = c ? hearIn(c.name) : null;
     document.getElementById('charBody').innerHTML =
-      editSection('charname', 'Name', '', charEditing, 'Name this character') + `
+      editSection('charname', 'Name', '', charEditing, 'Name this character') + (!c ? '' : `
 
       <div class="le-label">Cast</div>
-      ${!c ? '' : castOf(c.name).map(m => `
+      ${actors.map(m => `
         <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;">
           <span class="le-main">
             <span class="le-top">${m.you ? 'You' : m.name}</span>
-            <span class="le-sub">${m.you ? 'You rehearse and record this part' : 'Their takes play in your scenes'}</span>
+            <span class="le-sub">${recordedCount(m.id, c.name)} of ${c.lines} lines recorded</span>
           </span>
           <button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
           </button>
         </div>`).join('')}
-      ${!c ? '' : (castOf(c.name).length ? '' : '<div class="ae-empty">Not cast</div>') + `
+      ${actors.length ? '' : '<div class="ae-empty">Not cast</div>'}
       <button class="se-add" onclick="openCastPick('${c.name}')">
-        <i class="ph ph-plus ic-18"></i>Cast someone
-      </button>`}
+        <i class="ph ph-plus ic-18"></i>Cast someone${actors.length ? ' else' : ''}
+      </button>
 
-      ${c ? `<div class="le-label">Lines</div>
-      <div class="le-row"><span class="le-main"><span class="le-top">${c.lines} lines</span>
-        <span class="le-sub">Across the whole script</span></span></div>
+      ${actors.length > 1 ? `
+      <div class="le-label">You hear</div>
+      <button class="le-row" onclick="openWhoYouHear()">
+        <span class="le-main">
+          <span class="le-top">${heard.you ? 'You' : heard.name}</span>
+          <span class="le-sub">Only you — everyone chooses their own</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>` : ''}
+
+      <div class="le-label">Voice, until it is recorded</div>
+      <button class="le-row" onclick="openVoicePicker('${c.name}')">
+        <span class="le-main">
+          <span class="le-top">${voiceOf(c.name).name}</span>
+          <span class="le-sub">Set by the admin, heard by everyone</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
 
       <button class="le-danger" onclick="toast('Character deleted')">
         <i class="ph ph-trash ic-20"></i>Delete character
-      </button>` : ''}`;
+      </button>`);
     growTextarea(document.getElementById('leInput'));
   }
   /* One part is yours at a time, so taking one releases the other. It applies on
@@ -5086,17 +5274,152 @@
   function renderCast() {
     const el = document.getElementById('castList');
     if (!el) return;
-    el.innerHTML = CHARACTERS.map(c => `
+    el.innerHTML = `
+      <div class="le-label">Read aloud by</div>
+      <button class="le-row" style="margin-bottom:10px;" onclick="openVoicePicker(null)">
+        <span class="le-main">
+          <span class="le-top">Narrator</span>
+          <span class="le-sub">Reads the directions · voice: ${voiceOf(null).name}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <div class="le-label">Parts</div>` + CHARACTERS.map(c => `
       <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">
         <span class="le-main">
           <span class="le-top cap-trim">${c.name}</span>
-          <span class="le-sub">${c.lines} lines · ${castLine(c.name)}</span>
+          <span class="le-sub">${c.lines} lines · ${castLine(c.name)}${
+            /* An uncast part is only its voice, so the row says which. */
+            castOf(c.name).length ? '' : ' · voice: ' + voiceOf(c.name).name}</span>
         </span>
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>`).join('') + `
       <button class="se-add" style="margin-top:6px;" onclick="openCharacter(null)">
         <i class="ph ph-plus ic-18"></i>Add a character
       </button>`;
+  }
+
+  /* ---- who you hear: the alternates, and which of them plays for you ----
+     Not editing the script — how this production sounds to you — so everyone in
+     the cast may do it, and it lists only the parts where there is a choice. */
+  function openWhoYouHear() {
+    renderWhoYouHear();
+    showScreen('whoYouHearScreen');
+  }
+  /* Out of Listen settings the sheet goes first, the way it does for speed: a
+     screen does not open under a sheet. */
+  function openWhoYouHearFromSettings() {
+    closeSheet();
+    setTimeout(openWhoYouHear, 180);
+  }
+  function renderWhoYouHear() {
+    const parts = alternated();
+    document.getElementById('hearBody').innerHTML = `
+      <div class="ac-note" style="padding:4px 2px 6px;">Some parts are played by more than one
+        actor. Pick the one you want to hear — it changes nothing for anybody else.</div>` +
+      (parts.length ? parts.map(c => {
+        const heard = hearIn(c.name);
+        return `<div class="wh-part ${c.mine ? 'mine' : ''} cap-trim">${c.name}</div>` +
+          castOf(c.name).map(m => `
+          <button class="le-row ${m.id === heard.id ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="hear('${c.name}', '${m.id}')">
+            <span class="le-main">
+              <span class="le-top">${m.you ? 'You' : m.name}</span>
+              <span class="le-sub">${recordedCount(m.id, c.name)} of ${c.lines} lines recorded</span>
+            </span>
+            ${m.id === heard.id ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>' : ''}
+          </button>`).join('');
+      }).join('') + `
+      <div class="ac-note">Parts with one actor are not listed — there is nothing to choose.
+        Where the actor you pick has not recorded a line yet, the part's voice reads it.</div>`
+      : '<div class="ae-empty">Every part has one actor. There is nothing to choose.</div>');
+  }
+  function hear(name, id) {
+    if (HEAR[name] === id) return;
+    HEAR[name] = id;
+    renderWhoYouHear();
+    const m = member(id);
+    toast('You hear ' + (m.you ? 'yourself' : m.name) + ' as ' + name);
+  }
+
+  /* ---- the voice picker: what a part sounds like until it is recorded ----
+     One sheet for the parts and the narrator; `null` is the narrator. Only an
+     admin opens it — for everyone else the voice row is a line of text — and
+     the app is drawn for the admin. */
+  let voiceFor = null, voiceLen = 3, vpPlaying = null, vpTick;
+  const VOICE_GROUPS = [
+    /* { label:'Suggested', ids:[…] } goes first when the recommendation exists.
+       It is picked from the part, so nothing can be typed in for it now. */
+    { label:'All voices', ids: VOICES.map(v => v.id) }
+  ];
+  function openVoicePicker(name) {
+    voiceFor = name;
+    vpStop();
+    renderVoicePicker();
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('voiceSheet').classList.add('open');
+  }
+  /* The preview reads a real line — this part's first, or the first direction
+     for the narrator — because the question is never how a voice sounds but how
+     it sounds saying this. It runs as long as that line would. */
+  function previewLine() {
+    if (voiceFor) return (WHOLE_SCRIPT.find(x => x.who === voiceFor) || {}).text || '';
+    return (WHOLE_SCRIPT.find(x => x.stage) || {}).stage || (WHOLE_SCRIPT.find(x => x.dir) || {}).dir || '';
+  }
+  function renderVoicePicker() {
+    const name = voiceFor, chosen = name ? VOICE[name] : narratorVoice;
+    const first = previewLine();
+    voiceLen = genLen({ text: first });
+    document.getElementById('voiceTitle').textContent = name ? 'Voice for ' + name : 'Voice for the narrator';
+    document.getElementById('voiceBody').innerHTML = `
+      <div class="voice-body">
+        <div class="ac-note" style="padding-top:0;">${name
+          ? 'Heard on ' + name + '\u2019s lines until somebody records them.'
+          : 'Reads the directions aloud, between the lines.'}</div>
+        ${VOICE_GROUPS.map(g =>
+          (VOICE_GROUPS.length > 1 ? `<div class="le-label">${g.label}</div>` : '') +
+          g.ids.map(id => voiceRow(voiceById(id), id === chosen)).join('')).join('')}
+        <div class="ac-note">${first
+          ? 'Play one to hear it read ' + (name ? name + '\u2019s first line' : 'the first direction') +
+            ': \u201C' + shorten(first) + '\u201D'
+          : 'Play one to hear it.'}</div>
+      </div>`;
+  }
+  /* The play sits inside the row and the row is the choice — so the play stops
+     the tap from choosing, and the bar belongs to the row that is playing. */
+  function voiceRow(v, on) {
+    const playing = vpPlaying === v.id;
+    return `<div class="le-row voice ${on ? 'chosen' : ''} ${playing ? 'playing' : ''}" style="margin-bottom:10px;" onclick="chooseVoice('${v.id}')">
+      <button class="le-play" onclick="event.stopPropagation(); vpToggle('${v.id}')" aria-label="Hear ${v.name}">
+        <i class="ph-fill ph-${playing ? 'pause' : 'play'} ic-16"></i>
+      </button>
+      <span class="le-main">
+        <span class="le-top">${v.name}</span>
+        <span class="le-sub">${v.line}</span>
+      </span>
+      ${on ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>' : ''}
+      ${playing ? '<span class="vp-bar"><span class="vp-fill" id="vpFill"></span></span>' : ''}
+    </div>`;
+  }
+  function vpToggle(id) {
+    if (vpPlaying === id) { vpStop(); renderVoicePicker(); return; }
+    vpStop();
+    vpPlaying = id;
+    renderVoicePicker();
+    const started = Date.now();
+    vpTick = setInterval(() => {
+      const at = (Date.now() - started) / 1000, fill = document.getElementById('vpFill');
+      if (at >= voiceLen || !fill) { vpStop(); renderVoicePicker(); return; }
+      fill.style.width = Math.min(100, at / voiceLen * 100) + '%';
+    }, 50);
+  }
+  function vpStop() { clearInterval(vpTick); vpPlaying = null; }
+  function chooseVoice(id) {
+    if ((voiceFor ? VOICE[voiceFor] : narratorVoice) === id) return;
+    setVoice(voiceFor, id);
+    renderVoicePicker();
+    /* The rows under the sheet name the voice too. */
+    renderCast();
+    if (charEditing) renderCharacter();
+    toast((voiceFor || 'The narrator') + ' now sounds like ' + voiceById(id).name);
   }
 
   /* ---- inviting ---- */
@@ -5980,6 +6303,10 @@
                   go: () => { openScript('s1'); openEditScript(); openPeople(); openInvite(); } },
     cast:       { label:'Cast',             group:'people', screen:'castScreen', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); openCast(); } },
+    whoyouhear: { label:'Who you hear',     group:'people', screen:'whoYouHearScreen', st:'wip',
+                  /* By way of the part, which is the admin's door; Listen
+                     settings and the corner of Script detail are the others. */
+                  go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openWhoYouHear(); } },
     join:       { label:'Join',             group:'people', screen:'joinScreen', st:'wip',
                   /* Reached from a link, never from inside the app. */
                   go: () => openJoin() },
@@ -6055,8 +6382,10 @@
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddSheet(1); } },
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
-    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'prepared',
+    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'wip',
                   go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); openSettings('rehearse'); } },
+    voice:      { label:'Voice picker',     group:'sheets', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openVoicePicker('Michael'); } },
     speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
     wizardset:  { label:'Wizard settings',  group:'sheets', st:'wip',
@@ -6084,7 +6413,13 @@
     lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
     audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'prepared',
-                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } }
+                  go: () => { openScript('s1'); openAudioEdit(emptyLine()); } },
+    /* Two subtractions the app makes by role and by casting. Drawn once each so
+       they are written down; nothing in the app leads to them. */
+    scenenocast:  { label:'Scene — not cast', group:'proto', st:'wip',
+                  go: () => { openScene(DEMO_SCENE); setUncastView(true); } },
+    detailmember: { label:'Script detail — not an admin', group:'proto', st:'wip',
+                  go: () => openScript('s1', 'member') }
   };
   /* ============================================================
      SCRIPT EDIT / SCENE EDIT
@@ -6371,6 +6706,9 @@
            whoever was cast quietly stops being. */
         CAST[v] = CAST[charEditing] || [];
         delete CAST[charEditing];
+        /* So do the voice and whoever you chose to hear in it. */
+        if (VOICE[charEditing]) { VOICE[v] = VOICE[charEditing]; delete VOICE[charEditing]; }
+        if (HEAR[charEditing])  { HEAR[v]  = HEAR[charEditing];  delete HEAR[charEditing]; }
         ch.name = v; charEditing = v;
       } else {
         CAST[v] = [];
@@ -6975,6 +7313,8 @@
   let panelHere = null, panelAt = null, panelGoing = false;
   function panelGo(key) {
     panelGoing = true;
+    /* A sheet left open by the last stop would sit over the next one. */
+    closeSheet();
     SCREENS[key].go();
     panelGoing = false;
     panelHere = key;
@@ -6987,7 +7327,9 @@
 
   function openFromHash() {
     const entry = SCREENS[location.hash.replace('#', '')];
-    if (entry) entry.go();
+    if (!entry) return;
+    closeSheet();
+    entry.go();
   }
   window.addEventListener('hashchange', openFromHash);
   /* After SCREENS and PANEL_GROUPS exist, not with the other renderers further
