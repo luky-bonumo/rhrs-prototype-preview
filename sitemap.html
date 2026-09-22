@@ -270,8 +270,9 @@
     <p class="lede">
       The whole app in one picture. Solid boxes are drawn in the prototype — click one and it
       opens in a new tab. Dashed grey boxes are still to be designed. Sheets slide up over
-      whatever you are on. Dotted boxes are drawn on their own: the app subtracts its way to
-      them by role and by casting, and nothing links to them.
+      whatever you are on. Every screen is drawn for whoever is looking: the prototype's panel
+      has a <i>You are</i> switch, and a reader, an editor and an admin see the same boxes with
+      less on them.
     </p>
   </div>
 </header>
@@ -280,7 +281,7 @@
 
   <section>
     <div class="map">
-      <svg viewBox="0 -78 1040 1210" role="img" aria-label="Map of the rhrs app screens and the routes between them">
+      <svg viewBox="0 -78 1040 1610" role="img" aria-label="Map of the rhrs app screens and the routes between them">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
                   markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
@@ -516,21 +517,104 @@
           <text class="n-sub"   x="903" y="927" text-anchor="middle">A direction of its own</text>
         </a>
 
-        <!-- ===== drawn on their own ===== -->
-        <line x1="308" y1="1058" x2="974" y2="1058" stroke="#DFCCD0" stroke-dasharray="2 5"/>
-        <text class="g-label" x="308" y="1050">Drawn on their own — nothing in the app leads here</text>
-        <a class="node n-solo" href="rhrs-prototype.html#scenenocast" target="_blank" rel="noopener">
-          <rect x="300" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
-          <text class="n-title" x="408" y="1103" text-anchor="middle">Scene — not cast</text>
+        <!-- ===== getting a script in ===== -->
+        <rect class="g-frame" x="282" y="1052" width="718" height="460" rx="22"
+              fill="#7A1E2D" fill-opacity="0.035" stroke="#DFCCD0" stroke-dasharray="2 5"/>
+        <text class="g-label" x="308" y="1080">Getting a script in · read by the machine, checked by a person</text>
+        <text class="g-note"  x="308" y="1490">From the plus on All scripts and the row under it on the dashboard, for whoever runs a script somewhere.</text>
+        <text class="g-note"  x="308" y="1504">The script exists from the moment it is read; leaving keeps a draft on All scripts. Start from nothing opens Edit script.</text>
+        <a class="node " href="rhrs-prototype.html#newscript" target="_blank" rel="noopener">
+          <rect x="300" y="1090" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="375" y="1118" text-anchor="middle">New script</text>
+          <text class="n-sub"   x="375" y="1137" text-anchor="middle">File · text · nothing</text>
         </a>
-        <a class="node n-solo" href="rhrs-prototype.html#detailmember" target="_blank" rel="noopener">
-          <rect x="536" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
-          <text class="n-title" x="644" y="1103" text-anchor="middle">Script detail — not an admin</text>
+        <path class="edge" d="M450,1120 L476,1120" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#choosefile" target="_blank" rel="noopener">
+          <rect x="476" y="1090" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="1118" text-anchor="middle">Choose a file</text>
+          <text class="n-sub"   x="551" y="1137" text-anchor="middle">PDF, DOCX, EPUB…</text>
         </a>
-        <a class="node n-solo" href="rhrs-prototype.html#castmember" target="_blank" rel="noopener">
-          <rect x="772" y="1074" width="216" height="48" rx="14" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5" stroke-dasharray="2 4"/>
-          <text class="n-title" x="880" y="1103" text-anchor="middle">Cast — not an admin</text>
+        <path class="edge" d="M626,1120 L652,1120" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#kind" target="_blank" rel="noopener">
+          <rect x="652" y="1090" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="727" y="1118" text-anchor="middle">Kind of script</text>
+          <text class="n-sub"   x="727" y="1137" text-anchor="middle">Theatre or screen</text>
         </a>
+        <path class="edge" d="M802,1120 L828,1120" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#reading" target="_blank" rel="noopener">
+          <rect x="828" y="1090" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="1118" text-anchor="middle">Reading the script</text>
+          <text class="n-sub"   x="903" y="1137" text-anchor="middle">Four steps, a bar</text>
+        </a>
+
+        <!-- pasted text is the other way to the same reading -->
+        <path class="edge" d="M375,1150 C375,1180 551,1170 551,1200" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#paste" target="_blank" rel="noopener">
+          <rect x="476" y="1200" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="1228" text-anchor="middle">Paste the text</text>
+          <text class="n-sub"   x="551" y="1247" text-anchor="middle">From a message or a mail</text>
+        </a>
+        <path class="edge" d="M626,1230 C672,1230 727,1190 727,1150" marker-end="url(#arrow)"/>
+        <!-- and the read can fail -->
+        <path class="edge" d="M903,1150 L903,1200" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#cantread" target="_blank" rel="noopener">
+          <rect x="828" y="1200" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="1228" text-anchor="middle">Could not read it</text>
+          <text class="n-sub"   x="903" y="1247" text-anchor="middle">No text, or no characters</text>
+        </a>
+
+        <!-- read → the first pass, round the outside -->
+        <path class="edge" d="M978,1120 L990,1120 L990,1288 L375,1288 L375,1310" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#impchars" target="_blank" rel="noopener">
+          <rect x="300" y="1310" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="375" y="1338" text-anchor="middle">Imported characters</text>
+          <text class="n-sub"   x="375" y="1357" text-anchor="middle">Rename, or complain</text>
+        </a>
+        <path class="edge" d="M450,1340 L476,1340" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#impscenes" target="_blank" rel="noopener">
+          <rect x="476" y="1310" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="1338" text-anchor="middle">Imported scenes</text>
+          <text class="n-sub"   x="551" y="1357" text-anchor="middle">Name them</text>
+        </a>
+        <path class="edge" d="M626,1340 L652,1340" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#impscript" target="_blank" rel="noopener">
+          <rect x="652" y="1310" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="727" y="1338" text-anchor="middle">Imported script</text>
+          <text class="n-sub"   x="727" y="1357" text-anchor="middle">Scene by scene</text>
+        </a>
+        <path class="edge" d="M802,1340 L828,1340" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#finished" target="_blank" rel="noopener">
+          <rect x="828" y="1310" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="1338" text-anchor="middle">Import finished</text>
+          <text class="n-sub"   x="903" y="1357" text-anchor="middle">Cast · invite · open</text>
+        </a>
+
+        <!-- the same complaint loop hangs off every pass -->
+        <path class="edge" d="M375,1370 L375,1420" marker-end="url(#arrow)"/>
+        <a class="node n-overlay" href="rhrs-prototype.html#request" target="_blank" rel="noopener">
+          <rect x="300" y="1420" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#F6CBCA" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text class="n-title" x="375" y="1448" text-anchor="middle">Request edit</text>
+          <text class="n-sub"   x="375" y="1467" text-anchor="middle">What, and where</text>
+        </a>
+        <path class="edge" d="M450,1450 L476,1450" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#reqworking" target="_blank" rel="noopener">
+          <rect x="476" y="1420" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="551" y="1448" text-anchor="middle">Request working</text>
+          <text class="n-sub"   x="551" y="1467" text-anchor="middle">About a minute</text>
+        </a>
+        <path class="edge" d="M626,1450 L652,1450" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#reqfixed" target="_blank" rel="noopener">
+          <rect x="652" y="1420" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="727" y="1448" text-anchor="middle">Request fixed</text>
+          <text class="n-sub"   x="727" y="1467" text-anchor="middle">The list has changed</text>
+        </a>
+        <path class="edge" d="M551,1480 C551,1506 903,1506 903,1480" marker-end="url(#arrow)"/>
+        <a class="node " href="rhrs-prototype.html#reqfailed" target="_blank" rel="noopener">
+          <rect x="828" y="1420" width="150" height="60" rx="15" fill="#FFFFFF" stroke="#DFCCD0" stroke-width="1.5"/>
+          <text class="n-title" x="903" y="1448" text-anchor="middle">Request failed</text>
+          <text class="n-sub"   x="903" y="1467" text-anchor="middle">By hand, here or on the web</text>
+        </a>
+
       </svg>
     </div>
 
@@ -539,7 +623,6 @@
       <span><i class="sw sw-built"></i>Drawn — click to open</span>
       <span><i class="sw sw-overlay"></i>Bottom sheet</span>
       <span><i class="sw sw-planned"></i>Still to design</span>
-      <span><i class="sw sw-solo"></i>Drawn on its own — nothing leads here</span>
     </div>
   </section>
 
@@ -717,19 +800,79 @@
         <span class="r-state st-overlay">Sheet</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim"><a href="rhrs-prototype.html#scenenocast" target="_blank" rel="noopener">Scene — not cast</a></span>
-        <span class="r-what">Two modes, not three: nobody who is not cast has Rehearse, and the line menu loses Rehearse from here with it. In the app the wizard, the microphone on a line and the missing-audio notification go too.</span>
-        <span class="r-state st-solo">On its own</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#newscript" target="_blank" rel="noopener">New script</a></span>
+        <span class="r-what">Three ways in: a file, pasted text, or nothing at all. From the plus on All scripts and the row under All scripts on the dashboard — for whoever runs a script somewhere. Start from nothing makes an untitled script with one scene and opens Edit script on its name.</span>
+        <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim"><a href="rhrs-prototype.html#detailmember" target="_blank" rel="noopener">Script detail — not an admin</a></span>
-        <span class="r-what">The same screen with the alternation glyph in the corner instead of the pencil, opening Who you hear. The Cast card opens the member's Cast.</span>
-        <span class="r-state st-solo">On its own</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#choosefile" target="_blank" rel="noopener">Choose a file</a></span>
+        <span class="r-what">One big target that stands for the system's picker, and the formats it takes. The prototype picks a file for you.</span>
+        <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
-        <span class="r-name cap-trim"><a href="rhrs-prototype.html#castmember" target="_blank" rel="noopener">Cast — not an admin</a></span>
-        <span class="r-what">The cast as a list: no way into a part, nothing to add, the narrator's voice as a line of text. A part with two actors says which one you hear and opens the choice.</span>
-        <span class="r-state st-solo">On its own</span>
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#paste" target="_blank" rel="noopener">Paste the text</a></span>
+        <span class="r-what">A field for the whole script and a note on how names and directions are read; joins the same road at Kind of script.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#kind" target="_blank" rel="noopener">Kind of script</a></span>
+        <span class="r-what">Theatre or screen, and what to bring in as well — staging directions, or acting and filming directions apart. What is switched off is not imported at all.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#reading" target="_blank" rel="noopener">Reading the script</a></span>
+        <span class="r-what">Four steps and a bar. The script exists from here on: leaving keeps a draft on All scripts that opens where you left it.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#cantread" target="_blank" rel="noopener">Could not read it</a></span>
+        <span class="r-what">Two failures, two messages — no text in the file, or text with nobody speaking in it — each offering the way out that would work. Nothing was read, so there is no draft.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#impchars" target="_blank" rel="noopener">Imported characters</a></span>
+        <span class="r-what">The first pass: the names the file gave, each with its line count. A row opens Edit character to rename it, or to delete a heading taken for a name.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#impscenes" target="_blank" rel="noopener">Imported scenes</a></span>
+        <span class="r-what">The second pass: the scenes it split, with the first direction as a hint. A row opens Scene edit on the scene's name.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#impscript" target="_blank" rel="noopener">Imported script</a></span>
+        <span class="r-what">The third pass: scene by scene into the lines. Finish ends the wizard — confirming is not saving, nothing is written twice.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#impscene" target="_blank" rel="noopener">Imported scene</a></span>
+        <span class="r-what">Scene edit while a script is being checked: the name, the rows into Line edit and Direction edit, no adding and no dragging, and Something is wrong here at the bottom. A state of Scene edit, not a screen.</span>
+        <span class="r-state st-built">State</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#request" target="_blank" rel="noopener">Request edit</a></span>
+        <span class="r-what">The same small loop in every pass: what is wrong, where to find it in the file, and — in the lines pass only — whether it applies to the whole script.</span>
+        <span class="r-state st-overlay">Sheet</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#reqworking" target="_blank" rel="noopener">Request working</a></span>
+        <span class="r-what">A bar and a promise of how long. The prototype answers by hand: the first request in a pass comes back fixed, every one after it does not.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#reqfixed" target="_blank" rel="noopener">Request fixed</a></span>
+        <span class="r-what">What changed, and the way back to the list. In the characters pass the fix is real — the heading taken for a name is gone.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#reqfailed" target="_blank" rel="noopener">Request failed</a></span>
+        <span class="r-what">By hand, here or on the web — and, said out loud, that everything else is kept.</span>
+        <span class="r-state st-built">Drawn</span>
+      </div>
+      <div class="row">
+        <span class="r-name cap-trim"><a href="rhrs-prototype.html#finished" target="_blank" rel="noopener">Import finished</a></span>
+        <span class="r-what">The end of one job is the start of the next: the counts, then Cast the parts and Invite the others, then the script itself.</span>
+        <span class="r-state st-built">Drawn</span>
       </div>
       <div class="row">
         <span class="r-name cap-trim">Self tape</span>

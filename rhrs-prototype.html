@@ -770,6 +770,39 @@
      the subtraction is engineering's. */
   .phone.uncast .mode.mode-rehearse { display: none; }
 
+  /* ============ GETTING A SCRIPT IN ============ */
+  /* A row with a glyph in front, for the three ways a script gets in. */
+  .le-row .le-ic { flex: 0 0 auto; display: flex; color: var(--wine); }
+  /* The one big target on Choose a file. Dashed, because it stands for the
+     system's own picker and is not a surface of the app. */
+  .imp-pick {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    width: 100%; border: 1.5px dashed var(--wine-border); border-radius: var(--radius-card);
+    background: none; cursor: pointer; padding: 38px 16px; margin-top: 6px;
+    font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--wine);
+  }
+  .imp-pick:active { transform: scale(0.99); }
+  /* Progress: a bar, and the steps under it saying which one is running. */
+  .imp-bar { height: 6px; border-radius: 3px; background: var(--stone); overflow: hidden; margin: 14px 2px 6px; }
+  .imp-bar .imp-fill { height: 100%; width: 0; background: var(--wine); transition: width .5s ease; }
+  .imp-step {
+    display: flex; align-items: center; gap: 10px; padding: 11px 2px;
+    font-size: 15px; color: var(--text-muted);
+  }
+  .imp-step + .imp-step { border-top: 1px solid var(--divider); }
+  .imp-step .is-ic { flex: 0 0 auto; width: 22px; display: flex; justify-content: center; }
+  .imp-step.done { color: var(--noir); }
+  .imp-step.done .is-ic { color: var(--wine); }
+  .imp-step.now { color: var(--wine); font-weight: 600; }
+  /* A pass's heading: what we found, and what to do about it. */
+  .imp-lede { padding: 6px 2px 14px; }
+  .imp-lede .il-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--noir); }
+  .imp-lede .il-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+  .imp-actions { margin-top: 22px; }
+  /* The two fields of a request sit in the sheet with the sheet's inset. */
+  .request-body { padding: 2px 22px 26px; }
+  .request-body .le-label:first-child { padding-top: 4px; }
+
   /* ============ LINE EDIT ============ */
   /* Which scene this line is in. You can arrive here from a lot of places and
      one line out of context is hard to place. */
@@ -2545,6 +2578,12 @@
         All scripts
         <i class="ph ph-caret-right ic-18"></i>
       </button>
+      <!-- Under All scripts, sunk into the ground the same way: for whoever
+           runs a script somewhere. Hidden for everyone else. -->
+      <button class="dash-alllink" id="dashNew" style="margin-top:-4px;" onclick="openNewScript()">
+        <i class="ph ph-plus ic-18"></i>
+        New script
+      </button>
 
       <div class="dash-row2">
         <div class="dash-shortcut" onclick="toast('Self tape')">
@@ -2588,9 +2627,178 @@
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
       <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">All scripts</span>
-      <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
+      <!-- Two actions, so the title is centred between two 46px groups: the
+           plus is for whoever runs a script somewhere, hidden for everyone else. -->
+      <span style="display:flex;flex:0 0 auto;">
+        <button class="back" id="newScriptBtn" onclick="openNewScript()" aria-label="New script"><i class="ph ph-plus ic-22"></i></button>
+        <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
+      </span>
     </div>
     <div class="list fades" id="scriptsList"></div>
+  </div>
+
+  <!-- ============ SCREENS: GETTING A SCRIPT IN ============
+       A script gets in by being read by the machine and checked by a person, in
+       that order and in three passes: the characters it found, the scenes it
+       split, and the lines. Each pass confirms or complains, and complaining is
+       the same small loop every time. The script exists from the moment it is
+       read — leaving in the middle keeps a draft on All scripts. -->
+  <div class="screen" id="newScriptScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">New script</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades">
+      <button class="le-row" style="margin-bottom:10px;" onclick="openChooseFile()">
+        <span class="le-ic"><i class="ph ph-file-arrow-up ic-22"></i></span>
+        <span class="le-main">
+          <span class="le-top">Upload a file</span>
+          <span class="le-sub">A script you already have</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <button class="le-row" style="margin-bottom:10px;" onclick="openPaste()">
+        <span class="le-ic"><i class="ph ph-clipboard-text ic-22"></i></span>
+        <span class="le-main">
+          <span class="le-top">Paste the text</span>
+          <span class="le-sub">Straight from a message or a mail</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <button class="le-row" onclick="startBlank()">
+        <span class="le-ic"><i class="ph ph-plus ic-22"></i></span>
+        <span class="le-main">
+          <span class="le-top">Start from nothing</span>
+          <span class="le-sub">Write it here</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="chooseFileScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Choose a file</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades">
+      <!-- The prototype has no file picker, so the button picks a file for you. -->
+      <button class="imp-pick" onclick="pickFile()">
+        <i class="ph ph-file-arrow-up ic-32"></i>
+        <span>Choose a file</span>
+      </button>
+      <div class="ac-note">PDF, DOCX, Markdown, TXT, RTF, EPUB and the other e-book formats.</div>
+    </div>
+  </div>
+
+  <div class="screen" id="pasteScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Paste the text</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades">
+      <div class="le-label">The script</div>
+      <div class="le-text"><textarea id="pasteInput" rows="9" placeholder="Paste the whole script here, characters and all." oninput="growTextarea(this)"></textarea></div>
+      <div class="ac-note">Names in capitals before a colon read as characters, a line on its own in brackets as a direction. We check it with you afterwards.</div>
+      <button class="alert-btn fill" style="margin-top:22px;" onclick="pasteContinue()">Continue</button>
+      <button class="alert-btn ghost" onclick="pasteSample()">Paste a sample instead</button>
+    </div>
+  </div>
+
+  <div class="screen" id="kindScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Kind of script</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="kindBody"></div>
+  </div>
+
+  <div class="screen" id="readingScreen">
+    <div class="detail-header">
+      <span class="spacer"></span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Reading your script</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="readingBody"></div>
+  </div>
+
+  <div class="screen" id="cantReadScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Could not read it</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="cantReadBody"></div>
+  </div>
+
+  <div class="screen" id="impCharsScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Imported characters</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="impCharsBody"></div>
+  </div>
+
+  <div class="screen" id="impScenesScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Imported scenes</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="impScenesBody"></div>
+  </div>
+
+  <div class="screen" id="impScriptScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Imported script</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="impScriptBody"></div>
+  </div>
+
+  <div class="screen" id="reqWorkingScreen">
+    <div class="detail-header">
+      <span class="spacer"></span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Looking at it</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades">
+      <div class="imp-bar"><div class="imp-fill" id="reqFill" style="width:0%"></div></div>
+      <div class="ac-note">This takes about a minute on a long script.</div>
+    </div>
+  </div>
+
+  <div class="screen" id="reqFixedScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Fixed</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="reqFixedBody"></div>
+  </div>
+
+  <div class="screen" id="reqFailedScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:20px;font-weight:700;">Could not fix it</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="reqFailedBody"></div>
+  </div>
+
+  <div class="screen" id="impFinishedScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Import finished</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="impFinishedBody"></div>
   </div>
 
   <!-- ============ SCREENS: LOGIN ============
@@ -2902,9 +3110,11 @@
       <span class="spacer"></span>
     </div>
     <div class="list">
+      <!-- The title, in the same field as everything else that is written. -->
+      <div id="editTitle"></div>
       <!-- People and Cast, before the text: a script is the people on it before
            it is a list of scenes, and this is the only place they are managed. -->
-      <button class="le-row" onclick="openPeople()">
+      <button class="le-row" style="margin-top:10px;" onclick="openPeople()">
         <span class="le-main">
           <span class="le-top">People</span>
           <span class="le-sub" id="peopleMeta">4 on this script</span>
@@ -3505,6 +3715,17 @@
     <div class="set-scroll" id="voiceBody"></div>
   </div>
 
+  <!-- ============ SHEET: REQUEST EDIT ============
+       The same small loop in all three passes: what is wrong, where to look for
+       it, and — in the lines pass only — whether it applies to the whole script. -->
+  <div class="settings-sheet" id="requestSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title">
+      <span class="h-title cap-trim">What is wrong?</span>
+    </div>
+    <div class="set-scroll" id="requestBody"></div>
+  </div>
+
   <!-- playback speed, opened from the figure under the scrubber -->
   <div class="settings-sheet" id="speedSheet">
     <div class="sheet-grabber"></div>
@@ -3545,14 +3766,14 @@
      the prototype where a figure is invented, so that the cards are not half
      empty. The first script's are still read off its text. */
   const SCRIPTS = [
-    { id:'s1', title:"I love you, you're fine, but change quickly", assigned:true },
-    { id:'s2', title:"The Cherry Orchard", assigned:true, scenes:[
+    { id:'s1', title:"I love you, you're fine, but change quickly" },
+    { id:'s2', title:"The Cherry Orchard", scenes:[
       { title:"Act I — the nursery",  lines: 96 },
       { title:"Act II — the arrival", lines: 74 },
       { title:"Act III — the sale",   lines: 118 },
       { title:"Act IV — leaving",     lines: 63 }
     ] },
-    { id:'s3', title:"Waiting for Godot", assigned:false, scenes:[
+    { id:'s3', title:"Waiting for Godot", scenes:[
       { title:"Act I",  lines: 212 },
       { title:"Act II", lines: 188 }
     ] }
@@ -3685,7 +3906,12 @@
   SCRIPTS[0].scenes = SCENES;
   /* Whichever script's scenes Script detail and the scene steps are working on. */
   const sceneList = () => currentScript.scenes;
-  const WHOLE_SCRIPT = SCENES.flatMap(sc => [{ scene: sc.title }, ...sc.items]);
+  /* Every scene of a script chained behind a mark with its title. Built when
+     asked, from whichever script it is asked about — WHOLE_SCRIPT below is the
+     open one's. A script with no text yet has nothing to chain. */
+  const wholeOf = s => (s.scenes || []).flatMap(sc => sc.items ? [{ scene: sc.title }, ...sc.items] : []);
+  /* Whether the list on screen is the whole script rather than one scene. */
+  let wholeOpen = false;
 
   /* What the modes are rendering right now: one scene, or the whole script. */
   let SCRIPT = SCENE_1;
@@ -3749,41 +3975,135 @@
      to show every member's version of it, so the panel can make you any of
      these, and everything below reads ME rather than assuming Luky. */
   let ME = 'me';
-  const MEMBERS = [
-    { id: 'me', name: 'Luky Kuky',          role: 'admin',  when: 'Joined 3 September', email: 'nina@example.com' },
-    { id: 'ls', name: 'Luděk Sobota',       role: 'reader', when: 'Joined 12 September' },
-    { id: 'pn', name: 'Petr Novák',         role: 'reader', when: 'Joined 14 September' },
-    { id: 'jk', name: 'Jana Kratochvílová', role: 'editor', when: 'Invited 20 September', invited: true },
+  /* The people: a name and an address each, the same wherever they turn up.
+     What they may do is not theirs to carry — it is per script, on that
+     script's own list. */
+  const PEOPLE = [
+    { id: 'me', name: 'Luky Kuky',          email: 'nina@example.com' },
+    { id: 'ls', name: 'Luděk Sobota' },
+    { id: 'pn', name: 'Petr Novák' },
+    { id: 'jk', name: 'Jana Kratochvílová' },
     /* A reader who holds nothing: the fourth of the four you can be. */
-    { id: 'td', name: 'Tomas Dvorak',       role: 'reader', when: 'Joined 18 September' }
+    { id: 'td', name: 'Tomas Dvorak' }
   ];
-  /* "You" turns over with ME, so it is read, never written. */
-  MEMBERS.forEach(m => Object.defineProperty(m, 'you', { get() { return m.id === ME; } }));
+  const person = id => PEOPLE.find(p => p.id === id);
+  /* One person on one script, with a role there. The name and "you" read
+     through to the person, so a rename reaches every script at once. */
+  function membership(id, role, when, extra = {}) {
+    const m = { id, role, when, ...extra };
+    Object.defineProperty(m, 'name',  { get() { return person(id).name; } });
+    Object.defineProperty(m, 'email', { get() { return person(id).email; } });
+    Object.defineProperty(m, 'you',   { get() { return id === ME; } });
+    return m;
+  }
+  /* The people on whichever script is open: MEMBERS is a view, like SCRIPT. */
   const member = id => MEMBERS.find(m => m.id === id);
   /* A part can be held by more than one person — the alternation a theatre runs
      on — and a person can hold more than one part. Both directions are read from
      this one table rather than kept twice. */
-  const CAST = { Nina: ['me'], Michael: ['ls', 'pn'], Anna: [] };
+  /* ---- what each script is made of, beyond its text ----
+     People with a role, the cast, the voices and who you hear are the script's
+     own: the same person is an admin on one script and a reader on the next,
+     and a part exists only inside its script. MEMBERS, CAST, CHARACTERS, VOICE,
+     HEAR and WHOLE_SCRIPT are views onto whichever script is open, the way
+     SCRIPT is onto a scene — nothing else in the file had to learn that. */
+  function company(s, o) {
+    s.people  = o.people;
+    s.cast    = o.cast;
+    s.voices  = o.voices || {};
+    s.narrator = o.narrator || 'ivy';
+    s.hear    = o.hear || {};
+    s.characters = Object.keys(o.cast).map(name => makeCharacter(s, name));
+    /* Assigned means you hold a part in it — on the script, and on a scene
+       that has a line of yours. Read, never written. */
+    Object.defineProperty(s, 'assigned', { get: () => Object.values(s.cast).some(ids => ids.includes(ME)) });
+    (s.scenes || []).forEach(sceneOwned);
+    return s;
+  }
+  function sceneOwned(sc) {
+    Object.defineProperty(sc, 'assigned', { get: () => (sc.items || []).some(it => it.mine), configurable: true });
+    return sc;
+  }
+  function makeCharacter(s, name) {
+    return {
+      name,
+      /* Counted off the script's text whenever asked, never typed. */
+      get lines() { return wholeOf(s).filter(it => it.who === this.name).length; },
+      /* Read from the cast rather than stored beside it: two answers to one
+         question drift apart the moment anybody is cast. */
+      get mine() { return (s.cast[this.name] || []).includes(ME); },
+      get actors() { return (s.cast[this.name] || []).map(id => s.people.find(m => m.id === id)).filter(Boolean); }
+    };
+  }
+  Object.defineProperties(window, {
+    MEMBERS:      { get: () => currentScript.people },
+    CAST:         { get: () => currentScript.cast },
+    CHARACTERS:   { get: () => currentScript.characters },
+    VOICE:        { get: () => currentScript.voices },
+    HEAR:         { get: () => currentScript.hear },
+    WHOLE_SCRIPT: { get: () => wholeOf(currentScript) }
+  });
   const castOf  = name => (CAST[name] || []).map(member).filter(Boolean);
   const partsOf = id => Object.keys(CAST).filter(n => (CAST[n] || []).includes(id));
-  /* Whose line it is, read from the cast rather than written on the line: it
-     turns over with ME and with casting. The mine flags in the demo data were
-     the starting cast and nothing more, so they go. */
-  function ownLine(it) {
+  /* Whose line it is, read from its script's cast rather than written on the
+     line: it turns over with ME and with casting. The line remembers which
+     script it belongs to, so a count across scripts asks the right cast. The
+     mine flags in the demo data were the starting cast and nothing more. */
+  function ownLine(it, s) {
     if (it.who) {
       delete it.mine;
-      Object.defineProperty(it, 'mine', { get() { return (CAST[it.who] || []).includes(ME); }, configurable: true });
+      Object.defineProperty(it, 'mine', { get() { return (s.cast[it.who] || []).includes(ME); }, configurable: true });
+      Object.defineProperty(it, 'sid', { value: s.id, configurable: true });
     }
     return it;
   }
-  SCENE_LISTS.forEach(list => list.forEach(ownLine));
+  /* A line's handle across scripts: takes and recordings hang off it. */
+  const lineRef = it => (it.sid || 's1') + ':' + it.key;
+  SCENE_LISTS.forEach(list => list.forEach(it => ownLine(it, SCRIPTS[0])));
+
+  company(SCRIPTS[0], {
+    people: [
+      membership('me', 'admin',  'Joined 3 September'),
+      membership('ls', 'reader', 'Joined 12 September'),
+      membership('pn', 'reader', 'Joined 14 September'),
+      membership('jk', 'editor', 'Invited 20 September', { invited: true }),
+      membership('td', 'reader', 'Joined 18 September')
+    ],
+    cast:   { Nina: ['me'], Michael: ['ls', 'pn'], Anna: [] },
+    voices: { Nina: 'mara', Michael: 'rufus', Anna: 'ivy' },
+    narrator: 'ivy',
+    hear:   { Michael: 'ls' }
+  });
+  /* The other two have no text yet, so their parts have no line counts. They
+     do have people, and not the same ones: Luky runs one and only reads the
+     other, which is what a role per script means. */
+  company(SCRIPTS[1], {
+    people: [
+      membership('me', 'admin',  'Joined 1 September'),
+      membership('jk', 'editor', 'Joined 5 September'),
+      membership('ls', 'reader', 'Joined 6 September')
+    ],
+    cast:   { Ranevskaya: ['jk'], Lopakhin: ['me'], Anya: [], Trofimov: ['ls'] },
+    voices: { Ranevskaya: 'ivy', Lopakhin: 'rufus', Anya: 'mara', Trofimov: 'arto' }
+  });
+  company(SCRIPTS[2], {
+    people: [
+      membership('pn', 'admin',  'Joined 28 August'),
+      membership('me', 'reader', 'Joined 2 September')
+    ],
+    cast:   { Vladimir: ['pn'], Estragon: [], Pozzo: [], Lucky: [] },
+    voices: { Vladimir: 'arto', Estragon: 'rufus', Pozzo: 'mara', Lucky: 'ivy' }
+  });
+  /* The scripts the member looking is on: their library, and all they see. */
+  const myScripts = () => SCRIPTS.filter(s => s.people.some(m => m.id === ME));
 
   /* ---- what the member looking may do ----
      The permission table from the wireframes, as four questions. Everything
      that differs by role or by casting asks one of them, and nothing else knows
      who is looking. Controls disappear; facts stay; where silence would
      confuse, a sentence says who does it. */
-  const me = () => member(ME) || MEMBERS[0];
+  /* On a script they are not on, a member has no role and nothing follows. */
+  const me = () => member(ME) || { id: ME, role: null, get name() { return person(ME).name; } };
   const RANK = { reader: 0, editor: 1, admin: 2 };
   const can = {
     /* The whole script: any line's text, directions, adding and deleting
@@ -3797,25 +4117,14 @@
     /* One line's text: the whole script, or your own line when you hold the part. */
     line:  it => RANK[me().role] >= 1 || !!it.mine
   };
-  /* Assigned means you hold a part in it: on the script, and on a scene that
-     has a line of yours. Read, never written. */
-  Object.defineProperty(SCRIPTS[0], 'assigned', { get: () => can.act() });
-  SCENES.forEach(sc => Object.defineProperty(sc, 'assigned', { get: () => (sc.items || []).some(it => it.mine) }));
+  /* Somebody who runs a script somewhere is who a new script is for. */
+  const adminSomewhere = () => SCRIPTS.some(s => s.people.some(m => m.id === ME && m.role === 'admin'));
   /* Who holds a part, said in a line: you first, because that is the thing you
      are looking for, and "Not cast" rather than an empty space. */
   const castLine = name => {
     const who = castOf(name);
     return who.length ? who.map(m => m.you ? 'you' : m.name).join(' · ') : 'Not cast';
   };
-  const CHARACTERS = ['Nina', 'Michael', 'Anna'].map(name => ({
-    name,
-    lines: WHOLE_SCRIPT.filter(it => it.who === name).length,
-    /* Read from the cast rather than stored beside it: two answers to one
-       question drift apart the moment anybody is cast. */
-    get mine() { return (CAST[this.name] || []).includes(ME); },
-    get actors() { return castOf(this.name); }
-  }));
-
   /* ---- voices ----
      What a part sounds like before anybody has recorded it, and what reads the
      directions aloud. The script's, not yours: an admin picks them and everyone
@@ -3828,14 +4137,12 @@
     { id:'mara',  name:'Mara',  line:'Dry, level' }
   ];
   const voiceById = id => VOICES.find(v => v.id === id);
-  /* One per part, keyed by the part's name the way CAST is, and one for the
+  /* One per part, on the script (VOICE is the open script's), and one for the
      narrator — `null` as the part means the narrator throughout. A part nobody
      has chosen for falls back to the first voice: no line is ever silent. */
-  const VOICE = { Nina:'mara', Michael:'rufus', Anna:'ivy' };
-  let narratorVoice = 'ivy';
-  const voiceOf = name => voiceById(name ? VOICE[name] : narratorVoice) || VOICES[0];
+  const voiceOf = name => voiceById(name ? VOICE[name] : currentScript.narrator) || VOICES[0];
   function setVoice(name, id) {
-    if (name) VOICE[name] = id; else narratorVoice = id;
+    if (name) VOICE[name] = id; else currentScript.narrator = id;
   }
 
   /* ---- who you hear ----
@@ -3848,7 +4155,6 @@
      recorded it — otherwise the part's voice. A take belongs to whoever recorded
      it: Audio edit shows you your own and nobody else's, and the wizard counts
      only the lines you owe, so two alternates each see their own count. */
-  const HEAR = { Michael: 'ls' };
   const alternated = () => CHARACTERS.filter(c => castOf(c.name).length > 1);
   function hearIn(name) {
     const who = castOf(name);
@@ -3860,12 +4166,12 @@
      first two, because a second actor in a part can be part-way through. */
   const RECORDED = {};
   const recSet = id => RECORDED[id] || (RECORDED[id] = new Set());
-  WHOLE_SCRIPT.forEach(it => { if (it.who === 'Nina' && it.rec !== false) recSet('me').add(it.key); });
-  WHOLE_SCRIPT.filter(it => it.who === 'Michael').forEach((it, i) => {
-    recSet('ls').add(it.key);
-    if (i < 2) recSet('pn').add(it.key);
+  wholeOf(SCRIPTS[0]).forEach(it => { if (it.who === 'Nina' && it.rec !== false) recSet('me').add(lineRef(it)); });
+  wholeOf(SCRIPTS[0]).filter(it => it.who === 'Michael').forEach((it, i) => {
+    recSet('ls').add(lineRef(it));
+    if (i < 2) recSet('pn').add(lineRef(it));
   });
-  const recordedBy = (id, line) => recSet(id).has(line.key);
+  const recordedBy = (id, line) => recSet(id).has(lineRef(line));
   const recordedCount = (id, name) => WHOLE_SCRIPT.filter(it => it.who === name && recordedBy(id, it)).length;
   /* What plays on this line for you, said in a sentence: the take of the actor
      you hear, or the part's voice and whose take it is standing in for. It sits
@@ -3972,7 +4278,7 @@
   const TAKES = {};
   const WHEN = ['Just now', '2 hours ago', 'Yesterday', 'Tuesday', 'Last week'];
   /* Keyed by member and line: two actors in one part each have their own. */
-  const takeKey = (line, id = ME) => id + ':' + line.key;
+  const takeKey = (line, id = ME) => id + ':' + lineRef(line);
   function takesFor(line, id = ME) {
     const k = takeKey(line, id);
     if (!TAKES[k]) {
@@ -3994,7 +4300,7 @@
     const t = takesFor(line);
     t.forEach(x => { x.use = false; });
     t.unshift({ id: takeKey(line) + '-' + Date.now(), len: takeLen(line), when: 'Just now', use: true });
-    recSet(ME).add(line.key);
+    recSet(ME).add(lineRef(line));
     return t[0];
   }
   const takeInUse = (line, id = ME) => takesFor(line, id).find(t => t.use);
@@ -4062,8 +4368,24 @@
     /* The app never leads here — a link does — so in the prototype it lets go
        to the dashboard, the way the login does. */
     joinScreen:           'dashboardScreen',
-    sceneEditScreen:      'editScriptScreen',
-    characterScreen:      'castScreen',
+    /* Opened from Edit script, and from the import's passes — so they remember. */
+    sceneEditScreen:      'origin',
+    characterScreen:      'origin',
+
+    /* Getting a script in. Back out of a pass is leaving: the draft waits on
+       All scripts. Back between the passes walks them in order. */
+    newScriptScreen:      'scriptsScreen',
+    chooseFileScreen:     'newScriptScreen',
+    pasteScreen:          'newScriptScreen',
+    kindScreen:           'origin',
+    readingScreen:        'scriptsScreen',
+    cantReadScreen:       'chooseFileScreen',
+    impCharsScreen:       'scriptsScreen',
+    impScenesScreen:      'impCharsScreen',
+    impScriptScreen:      'impScenesScreen',
+    reqFixedScreen:       'origin',
+    reqFailedScreen:      'origin',
+    impFinishedScreen:    'scriptsScreen',
 
     /* The detours. */
     lineScreen:           'origin',
@@ -4092,7 +4414,12 @@
     accountScreen:    'globalSettingsScreen',
     personScreen:     'peopleScreen',
     castScreen:       'editScriptScreen',
-    whoYouHearScreen: 'detailScreen'
+    whoYouHearScreen: 'detailScreen',
+    sceneEditScreen:  'editScriptScreen',
+    characterScreen:  'castScreen',
+    kindScreen:       'chooseFileScreen',
+    reqFixedScreen:   'scriptsScreen',
+    reqFailedScreen:  'scriptsScreen'
   };
   /* Landing on a screen again is not the same as never having left it: counts
      move, takes are added, a name is changed. Each place says how to redraw. */
@@ -4105,6 +4432,11 @@
     personScreen:       () => renderPerson(),
     castScreen:         () => renderCast(),
     whoYouHearScreen:   () => renderWhoYouHear(),
+    kindScreen:         () => renderKind(),
+    impCharsScreen:     () => renderImpChars(),
+    impScenesScreen:    () => renderImpScenes(),
+    impScriptScreen:    () => renderImpScript(),
+    impFinishedScreen:  () => renderImpFinished(),
     joinScreen:         () => renderJoin(),
     sceneEditScreen:    () => renderSceneEdit(),
     characterScreen:    () => { editRender = renderCharacter; renderCharacter(); },
@@ -4174,7 +4506,10 @@
     const sc = sceneList().find(x => x.title === name);
     /* A scene of a script that has no text yet still opens — on the one scene
        that is written. Whole script is the only name that is not a scene. */
-    SCRIPT = sc ? (sc.items || SCENE_1) : WHOLE_SCRIPT;
+    /* A script with no text yet chains the one written scene, like its scenes
+       open on it. */
+    SCRIPT = sc ? (sc.items || SCENE_1) : (wholeOf(currentScript).length ? wholeOf(currentScript) : wholeOf(SCRIPTS[0]));
+    wholeOpen = !sc;
     currentScene = name;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
@@ -4281,7 +4616,7 @@
      once. Null means there is no next: the last scene of the single-scene flow,
      and the whole-script flow, which has just run through all of them. */
   function nextSceneTitle() {
-    if (SCRIPT === WHOLE_SCRIPT) return null;
+    if (wholeOpen) return null;
     const list = sceneList();
     const i = list.findIndex(sc => sc.title === currentScene);
     return (i >= 0 && list[i + 1]) ? list[i + 1].title : null;
@@ -4319,7 +4654,7 @@
      — the whole script already runs the scenes together behind their marks — and
      only when there is a scene before this one. */
   function prevSceneTitle() {
-    if (SCRIPT === WHOLE_SCRIPT) return null;
+    if (wholeOpen) return null;
     const list = sceneList();
     const i = list.findIndex(sc => sc.title === currentScene);
     return i > 0 ? list[i - 1].title : null;
@@ -4953,6 +5288,7 @@
   function closeSheet() {
     document.getElementById('scrim').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
+    document.getElementById('requestSheet').classList.remove('open');
     /* The other users of this sheet — casting, changing a character — set the
        name and the line but know nothing of the source, so it is cleared here. */
     document.getElementById('ctxSource').innerHTML = '';
@@ -5045,17 +5381,20 @@
      LIST RENDERERS
      ============================================================ */
   function renderScripts() {
-    document.getElementById('scriptsList').innerHTML = SCRIPTS.map(s => `
-      <div class="card" onclick="openScript('${s.id}')">
+    document.getElementById('newScriptBtn').style.visibility = adminSomewhere() ? '' : 'hidden';
+    /* Only the scripts you are on: membership belongs to a script. An import
+       left half-way waits here as a draft and opens where it was left. */
+    document.getElementById('scriptsList').innerHTML = myScripts().map(s => `
+      <div class="card" onclick="${s.draft ? `resumeImport('${s.id}')` : `openScript('${s.id}')`}">
         <div class="card-main">
           <div class="card-title">${s.title}</div>
           <div class="card-meta">
-            <span class="meta-lines">${s.scenes.length} scenes</span>
-            ${s.assigned ? '<span class="badge">Assigned</span>' : ''}
+            <span class="meta-lines">${s.scenes.length} scene${s.scenes.length === 1 ? '' : 's'}</span>
+            ${s.draft ? '<span class="badge quiet">Draft · import not checked</span>' : s.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
-      </div>`).join('');
+      </div>`).join('') || '<div class="ae-empty">You are not on any script yet</div>';
   }
   function renderScenes() {
     /* What you came back for goes first and wears the coral mark — it is your
@@ -5136,26 +5475,33 @@
      rather than stacking it, so Back from the scene returns to the dashboard you
      actually came from. The three boxes under it do the opposite on purpose: they
      open Script detail, where Where you left off is waiting. */
+  /* Where you left off is in the scripts you are on — the first of them. */
+  const lastScript = () => myScripts().find(s => !s.draft);
+  const lastSceneOf = s => LAST_SCENE[s.id] || (s.scenes[0] && s.scenes[0].title);
   function continueLastScene() {
-    const s = SCRIPTS[0];
+    const s = lastScript();
+    if (!s) return;
     currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
     renderScenes();
-    openScene(LAST_SCENE[s.id]);
+    openScene(lastSceneOf(s));
   }
   function renderContinue() {
-    const s = SCRIPTS[0];
+    const s = lastScript();
+    document.getElementById('dashContinue').hidden = !s;
+    if (!s) return;
     document.getElementById('dashContinue').innerHTML = `
       <span class="dc-main">
         <span class="dc-over">Where you left off</span>
-        <span class="dc-title">${LAST_SCENE[s.id]}</span>
+        <span class="dc-title">${lastSceneOf(s)}</span>
         <span class="dc-sub">${s.title}</span>
       </span>
       <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
   }
   function renderRecent() {
+    document.getElementById('dashNew').hidden = !adminSomewhere();
     const scenesByScript = LAST_SCENE;
-    document.getElementById('recentList').innerHTML = SCRIPTS.slice(0, 3).map(s => `
+    document.getElementById('recentList').innerHTML = myScripts().filter(s => !s.draft).slice(0, 3).map(s => `
       <button class="dash-recent" onclick="openScript('${s.id}')">
         <span class="r-main">
           <span class="r-title">${s.title}</span>
@@ -5197,7 +5543,7 @@
         <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;">
           <span class="le-main">
             <span class="le-top">${m.you ? 'You' : m.name}</span>
-            <span class="le-sub">${recordedCount(m.id, c.name)} of ${c.lines} lines recorded</span>
+            <span class="le-sub">${c.lines ? recordedCount(m.id, c.name) + ' of ' + c.lines + ' lines recorded' : 'Nothing to record yet'}</span>
           </span>
           ${admin ? `<button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
@@ -5225,7 +5571,7 @@
         : `<div class="le-row" style="cursor:default;">${voiceMain}</div>`}
 
       ${edits ? `
-      <button class="le-danger" onclick="toast('Character deleted')">
+      <button class="le-danger" onclick="openAlert('deleteCharacter')">
         <i class="ph ph-trash ic-20"></i>Delete character
       </button>` : ''}`);
     growTextarea(document.getElementById('leInput'));
@@ -5248,6 +5594,8 @@
   }
 
   function openEditScript() {
+    editingKey = null;
+    editRender = renderEditMeta;
     renderEditMeta();
     renderEditScenes();
     showScreen('editScriptScreen');
@@ -5255,6 +5603,9 @@
   /* The two rows above the scenes count what is behind them, so the screen says
      how big the job is before you open it. */
   function renderEditMeta() {
+    document.getElementById('editTitle').innerHTML =
+      editSection('title', 'Title', '', currentScript.title, 'Name the script', !can.edit());
+    growTextarea(document.getElementById('leInput'));
     document.getElementById('deleteScriptBtn').hidden = !can.admin();
     const left = MEMBERS.filter(m => m.invited).length;
     document.getElementById('peopleMeta').textContent =
@@ -5323,7 +5674,7 @@
         <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;">
           <span class="le-main">
             <span class="le-top cap-trim">${p}</span>
-            <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines || 0} lines · rehearses and records them</span>
+            <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines ? (CHARACTERS.find(c => c.name === p) || {}).lines + ' lines · ' : ''}rehearses and records them</span>
           </span>
           ${admin ? `<button class="pe-x" onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
@@ -5455,7 +5806,7 @@
     if (!el) return;
     const admin = can.admin(), edits = can.edit();
     const chev = '<span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>';
-    const partSub = c => `${c.lines} lines · ${castLine(c.name)}${
+    const partSub = c => `${c.lines ? c.lines + ' lines · ' : ''}${castLine(c.name)}${
       /* An uncast part is only its voice, so the row says which. */
       castOf(c.name).length ? '' : ' · voice: ' + voiceOf(c.name).name}`;
     const narrator = `
@@ -5515,7 +5866,7 @@
           <button class="le-row ${m.id === heard.id ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="hear('${c.name}', '${m.id}')">
             <span class="le-main">
               <span class="le-top">${m.you ? 'You' : m.name}</span>
-              <span class="le-sub">${recordedCount(m.id, c.name)} of ${c.lines} lines recorded</span>
+              <span class="le-sub">${c.lines ? recordedCount(m.id, c.name) + ' of ' + c.lines + ' lines recorded' : 'Nothing to record yet'}</span>
             </span>
             ${m.id === heard.id ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>' : ''}
           </button>`).join('');
@@ -5557,7 +5908,7 @@
     return (WHOLE_SCRIPT.find(x => x.stage) || {}).stage || (WHOLE_SCRIPT.find(x => x.dir) || {}).dir || '';
   }
   function renderVoicePicker() {
-    const name = voiceFor, chosen = name ? VOICE[name] : narratorVoice;
+    const name = voiceFor, chosen = name ? VOICE[name] : currentScript.narrator;
     const first = previewLine();
     voiceLen = genLen({ text: first });
     document.getElementById('voiceTitle').textContent = name ? 'Voice for ' + name : 'Voice for the narrator';
@@ -5605,7 +5956,7 @@
   }
   function vpStop() { clearInterval(vpTick); vpPlaying = null; }
   function chooseVoice(id) {
-    if ((voiceFor ? VOICE[voiceFor] : narratorVoice) === id) return;
+    if ((voiceFor ? VOICE[voiceFor] : currentScript.narrator) === id) return;
     setVoice(voiceFor, id);
     renderVoicePicker();
     /* The rows under the sheet name the voice too. */
@@ -5694,7 +6045,7 @@
         <div class="pe-name cap-trim">Join this script</div>
         <div class="pe-when">${from.name} invited you</div>
       </div>
-      <div class="le-text" style="cursor:default;">${SCRIPTS[0].title}</div>
+      <div class="le-text" style="cursor:default;">${currentScript.title}</div>
 
       <div class="le-label">Your role</div>
       <div class="le-row">
@@ -5719,6 +6070,390 @@
   }
 
   /* ============================================================
+     GETTING A SCRIPT IN
+     ============================================================ */
+  /* One import at a time. The script it makes is a real script from the
+     moment the reading starts — a draft on All scripts until the passes are
+     done — so leaving keeps it and coming back opens the pass you left. */
+  let IMPORT = null;
+  let scriptSeq = 10;
+  const DEMO_FILE = 'change-quickly-v3.pdf';
+  const PASS_SCREEN = { characters: 'impCharsScreen', scenes: 'impScenesScreen', script: 'impScriptScreen' };
+
+  function openNewScript() {
+    showScreen('newScriptScreen');
+  }
+  function openChooseFile() {
+    IMPORT = { source: 'file', file: null, text: '', kind: 'theatre',
+               bring: { staging: true, acting: true, filming: false }, requests: {}, script: null };
+    showScreen('chooseFileScreen');
+  }
+  /* No file picker in a prototype: the button picks one for you and moves on. */
+  function pickFile() {
+    if (!IMPORT || IMPORT.source !== 'file') openChooseFile();
+    IMPORT.file = DEMO_FILE;
+    openKind();
+  }
+  function openPaste() {
+    IMPORT = { source: 'paste', file: null, text: '', kind: 'theatre',
+               bring: { staging: true, acting: true, filming: false }, requests: {}, script: null };
+    document.getElementById('pasteInput').value = '';
+    showScreen('pasteScreen');
+    setTimeout(() => document.getElementById('pasteInput').focus(), 60);
+  }
+  function pasteSample() {
+    const el = document.getElementById('pasteInput');
+    el.value = SCENE_1.slice(0, 8).map(it => it.who ? it.who.toUpperCase() + ': ' + it.text : '(' + it.stage + ')').join('\n');
+    growTextarea(el);
+  }
+  function pasteContinue() {
+    const text = document.getElementById('pasteInput').value.trim();
+    if (!text) return toast('Paste the script first');
+    IMPORT.text = text;
+    openKind();
+  }
+  /* Starting from nothing is a script with a name and one empty scene, opened
+     straight into naming it — there is nothing to read and nothing to check. */
+  function startBlank() {
+    const s = { id: 's' + (++scriptSeq), title: 'Untitled script', scenes: [newScene('Scene 1')] };
+    company(s, { people: [membership(ME, 'admin', 'Just now')], cast: {} });
+    SCRIPTS.push(s);
+    openScript(s.id);
+    openEditScript();
+    editOpen('title');
+  }
+
+  /* ---- the kind of script ---- */
+  function openKind() {
+    renderKind();
+    showScreen('kindScreen');
+  }
+  function setKind(kind) { IMPORT.kind = kind; renderKind(); }
+  function toggleBring(key, btn) { IMPORT.bring[key] = !IMPORT.bring[key]; btn.classList.toggle('on', IMPORT.bring[key]); }
+  function renderKind() {
+    if (!IMPORT) return;
+    const check = '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>';
+    const kindRow = (key, label, sub) => `
+      <button class="le-row ${IMPORT.kind === key ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="setKind('${key}')">
+        <span class="le-main"><span class="le-top">${label}</span><span class="le-sub">${sub}</span></span>
+        ${IMPORT.kind === key ? check : ''}
+      </button>`;
+    const bringRow = (key, label, sub) => `
+      <div class="le-row" style="margin-bottom:10px;">
+        <span class="le-main"><span class="le-top">${label}</span><span class="le-sub">${sub}</span></span>
+        <button class="toggle ${IMPORT.bring[key] ? 'on' : ''}" onclick="toggleBring('${key}', this)" aria-label="${label}"></button>
+      </div>`;
+    document.getElementById('kindBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">What kind of script is it?</div>
+        <div class="il-sub">${IMPORT.source === 'file' ? IMPORT.file : 'The text you pasted'}</div>
+      </div>
+      ${kindRow('theatre', 'Theatre', 'A stage play')}
+      ${kindRow('screen', 'Screen', 'Film, television, a series')}
+      <div class="le-label">Bring in as well</div>
+      ${IMPORT.kind === 'theatre'
+        ? bringRow('staging', 'Staging directions', 'Entrances, business, the set')
+        : bringRow('acting', 'Acting directions', 'What the actor does and how') +
+          bringRow('filming', 'Filming directions', 'Shots, cuts, camera — never for the actor')}
+      <div class="ac-note">What is switched off here is not imported at all — it is not hidden. Musicals and opera are not handled.</div>
+      <div class="imp-actions">
+        <button class="alert-btn fill" onclick="startReading()">${IMPORT.source === 'file' ? 'Upload' : 'Read it'}</button>
+      </div>`;
+  }
+
+  /* ---- reading ---- */
+  const READ_STEPS = ['Read the file', 'Find the characters', 'Split the scenes', 'Sort out the directions'];
+  let readTimer = null, readStep = 0;
+  function startReading() {
+    if (!IMPORT.script) IMPORT.script = createImport();
+    IMPORT.script.draft = { pass: 'reading' };
+    readStep = 0;
+    renderReading();
+    showScreen('readingScreen');
+    clearInterval(readTimer);
+    readTimer = setInterval(() => {
+      readStep++;
+      if (readStep > READ_STEPS.length) {
+        clearInterval(readTimer);
+        /* Left the screen meanwhile? The reading still finished: the draft
+           waits on All scripts at its first pass. */
+        IMPORT.script.draft = { pass: 'characters' };
+        if (activeScreen()?.id === 'readingScreen') goPass('characters');
+        return;
+      }
+      renderReading();
+    }, 900);
+  }
+  function renderReading() {
+    const pct = Math.min(100, Math.round(readStep / READ_STEPS.length * 100));
+    document.getElementById('readingBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">Reading your script</div>
+        <div class="il-sub">${IMPORT.source === 'file' ? IMPORT.file : 'The text you pasted'}</div>
+      </div>
+      <div class="imp-bar"><div class="imp-fill" style="width:${pct}%"></div></div>
+      <div class="ac-note" style="padding-bottom:14px;">${readStep < READ_STEPS.length ? READ_STEPS[readStep] + '…' : 'Nearly there…'}</div>
+      ${READ_STEPS.map((label, i) => `
+      <div class="imp-step ${i < readStep ? 'done' : i === readStep ? 'now' : ''}">
+        <span class="is-ic">${i < readStep ? '<i class="ph-bold ph-check ic-18"></i>' : i === readStep ? '<i class="ph ph-circle-dashed ic-18"></i>' : ''}</span>${label}
+      </div>`).join('')}`;
+  }
+  /* The two ways a read can fail, each saying what it saw and offering the
+     way out that would work. Nothing was read, so there is no draft to keep. */
+  function showCantRead(why) {
+    clearInterval(readTimer);
+    if (IMPORT && IMPORT.script) { SCRIPTS.splice(SCRIPTS.indexOf(IMPORT.script), 1); IMPORT.script = null; }
+    document.getElementById('cantReadBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">We could not read this file</div>
+        <div class="il-sub">${why === 'prose'
+          ? 'There is text in it, but no characters — it reads like prose, a synopsis, or the wrong document.'
+          : 'There is no text in it — it looks like a scan or a photograph of the pages.'}</div>
+      </div>
+      <div class="imp-actions">
+        <button class="alert-btn fill" onclick="openChooseFile()">Choose another file</button>
+        <button class="alert-btn ghost" onclick="openPaste()">Paste the text instead</button>
+      </div>`;
+    showScreen('cantReadScreen');
+  }
+
+  /* ---- the script the reading makes ----
+     The prototype cannot read a file, so it reads the demo script again: a
+     copy of its scenes under the file's name, uncast, with the heading the file
+     would have taken for a character. Directions come in or stay out as the
+     toggles said — out means not imported, not hidden. */
+  function createImport() {
+    const s = { id: 's' + (++scriptSeq), scenes: [],
+                title: IMPORT.source === 'file' ? IMPORT.file.replace(/\.[^.]+$/, '') : 'Pasted script' };
+    const keepDirs = IMPORT.kind === 'theatre' ? IMPORT.bring.staging : IMPORT.bring.acting;
+    const keepStage = IMPORT.kind === 'theatre' ? IMPORT.bring.staging : IMPORT.bring.filming;
+    SCENES.forEach((src, i) => {
+      const sc = newScene(src.title);
+      (src.items || []).forEach(it => {
+        if (it.stage && !keepStage) return;
+        const copy = it.who ? { who: it.who, text: it.text } : { stage: it.stage };
+        if (it.who && it.dir && keepDirs) copy.dir = it.dir;
+        sc.items.push(copy);
+      });
+      s.scenes.push(sc);
+    });
+    /* The heading read as a name: a character with one line, to be renamed,
+       deleted, or complained about. */
+    s.scenes[0].items.unshift({ who: 'ACT ONE', text: 'ACT ONE' });
+    s.scenes.forEach((sc, i) => {
+      sc.items.forEach((it, n) => { it.key = (i + 1) + (it.who ? '-' : '-d') + (n + 1); ownLine(it, s); });
+      sc.lines = sc.items.filter(it => it.who).length;
+    });
+    const names = [...new Set(s.scenes.flatMap(sc => sc.items.filter(it => it.who).map(it => it.who)))];
+    const cast = {}, voices = {};
+    names.forEach((n, i) => { cast[n] = []; voices[n] = VOICES[i % VOICES.length].id; });
+    company(s, { people: [membership(ME, 'admin', 'Just now')], cast, voices });
+    SCRIPTS.push(s);
+    return s;
+  }
+
+  /* ---- the three passes ---- */
+  function goPass(pass) {
+    if (!IMPORT || !IMPORT.script) return;
+    IMPORT.pass = pass;
+    IMPORT.script.draft = { pass };
+    currentScript = IMPORT.script;
+    document.getElementById('detailTitle').textContent = currentScript.title;
+    REDRAW[PASS_SCREEN[pass]]();
+    showScreen(PASS_SCREEN[pass]);
+  }
+  /* A draft on All scripts opens where it was left. */
+  function resumeImport(id) {
+    const s = SCRIPTS.find(x => x.id === id);
+    if (!s) return;
+    IMPORT = { source: 'file', file: s.title + '.pdf', text: '', kind: 'theatre',
+               bring: { staging: true, acting: true, filming: false }, requests: {}, script: s };
+    if (!s.draft || s.draft.pass === 'reading') return startReading();
+    goPass(s.draft.pass);
+  }
+  const passActions = (pass, yes) => `
+      <div class="imp-actions">
+        <button class="alert-btn ghost" onclick="openRequest('${pass}')">Something else is wrong</button>
+        <button class="alert-btn fill" onclick="${yes}">These are right</button>
+      </div>`;
+  function renderImpChars() {
+    if (!IMPORT || !IMPORT.script) return;
+    document.getElementById('impCharsBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">The characters we found</div>
+        <div class="il-sub">Rename anyone the file got wrong. A heading taken for a name can be deleted from its own page.</div>
+      </div>` +
+      CHARACTERS.map(c => `
+      <button class="le-row" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">
+        <span class="le-main">
+          <span class="le-top cap-trim">${c.name}</span>
+          <span class="le-sub">${c.lines} line${c.lines === 1 ? '' : 's'}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-pencil-simple ic-20"></i></span>
+      </button>`).join('') + passActions('characters', "goPass('scenes')");
+  }
+  function renderImpScenes() {
+    if (!IMPORT || !IMPORT.script) return;
+    document.getElementById('impScenesBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">The scenes we found</div>
+        <div class="il-sub">Rename them if the file did not.</div>
+      </div>` +
+      sceneList().map((sc, i) => {
+        const first = (sc.items || []).find(it => it.stage);
+        return `
+      <button class="le-row" style="margin-bottom:10px;" onclick="openSceneEdit(${i}); editOpen('scenename')">
+        <span class="le-main">
+          <span class="le-top cap-trim">${sc.title}</span>
+          <span class="le-sub">${sc.lines} lines${first ? ' · ' + shorten(first.stage) : ''}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-pencil-simple ic-20"></i></span>
+      </button>`;
+      }).join('') + passActions('scenes', "goPass('script')");
+  }
+  function renderImpScript() {
+    if (!IMPORT || !IMPORT.script) return;
+    document.getElementById('impScriptBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">The script</div>
+        <div class="il-sub">Look through it scene by scene. A row opens the line; a direction opens the direction.</div>
+      </div>` +
+      sceneList().map((sc, i) => {
+        const dirs = (sc.items || []).filter(it => it.stage || it.dir).length;
+        return `
+      <button class="le-row" style="margin-bottom:10px;" onclick="openSceneEdit(${i})">
+        <span class="le-main">
+          <span class="le-top cap-trim">${sc.title}</span>
+          <span class="le-sub">${sc.lines} lines · ${dirs} direction${dirs === 1 ? '' : 's'}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>`;
+      }).join('') + `
+      <div class="imp-actions">
+        <button class="alert-btn fill" onclick="finishImport()">Finish</button>
+      </div>`;
+  }
+
+  /* ---- something is wrong: the same loop three times ---- */
+  function openRequest(pass) {
+    IMPORT.pass = pass;
+    document.getElementById('requestBody').innerHTML = `
+      <div class="request-body">
+        <div class="le-label">What is wrong?</div>
+        <div class="le-text"><textarea id="reqWhat" rows="3" placeholder="Every second line is glued to the one above it…" oninput="growTextarea(this)"></textarea></div>
+        <div class="le-label">Where can we find it in the file?</div>
+        <div class="le-text"><textarea id="reqWhere" rows="2" placeholder="Page 4, the argument in the kitchen." oninput="growTextarea(this)"></textarea></div>
+        ${pass === 'script' ? `
+        <div class="le-row" style="margin-top:14px;">
+          <span class="le-main"><span class="le-top">Apply to the whole script</span><span class="le-sub">Not just this scene</span></span>
+          <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Apply to the whole script"></button>
+        </div>` : ''}
+        <button class="alert-btn fill" style="margin-top:18px;" onclick="sendRequest()">Send</button>
+      </div>`;
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('requestSheet').classList.add('open');
+    setTimeout(() => document.getElementById('reqWhat').focus(), 120);
+  }
+  /* No server to answer, so the prototype answers by hand, the way the login
+     does with its codes: the first request in a pass comes back fixed, every
+     one after it does not. Both ends are worth looking at. */
+  let reqTimer = null;
+  function sendRequest() {
+    const what = document.getElementById('reqWhat').value.trim();
+    if (!what) return toast('Say what is wrong first');
+    IMPORT.requests[IMPORT.pass] = (IMPORT.requests[IMPORT.pass] || 0) + 1;
+    IMPORT.lastRequest = what;
+    closeSheet();
+    showScreen('reqWorkingScreen');
+    document.getElementById('reqFill').style.width = '0%';
+    requestAnimationFrame(() => setTimeout(() => { document.getElementById('reqFill').style.width = '85%'; }, 50));
+    clearTimeout(reqTimer);
+    reqTimer = setTimeout(() => showRequestEnd(IMPORT.requests[IMPORT.pass] === 1), 1700);
+  }
+  function showRequestEnd(fixed) {
+    if (fixed && IMPORT.pass === 'characters' && CHARACTERS.some(c => c.name === 'ACT ONE')) {
+      /* The one fix the prototype can actually make. */
+      charEditing = 'ACT ONE';
+      const i = CHARACTERS.findIndex(c => c.name === 'ACT ONE');
+      CHARACTERS.splice(i, 1); delete CAST['ACT ONE']; delete VOICE['ACT ONE'];
+      sceneList().forEach(sc => { sc.items = sc.items.filter(it => it.who !== 'ACT ONE'); sc.lines = sc.items.filter(it => it.who).length; });
+      charEditing = null;
+    }
+    const back = PASS_SCREEN[IMPORT.pass];
+    if (fixed) {
+      document.getElementById('reqFixedBody').innerHTML = `
+        <div class="imp-lede">
+          <div class="il-title">Fixed</div>
+          <div class="il-sub">${IMPORT.pass === 'characters'
+            ? 'ACT ONE was a heading, not a character — it is gone, and its line with it. Have a look, the list has changed.'
+            : 'We did what you asked' + (IMPORT.lastRequest ? ' — \u201C' + shorten(IMPORT.lastRequest) + '\u201D' : '') + '. Have a look, the list has changed.'}</div>
+        </div>
+        <div class="imp-actions">
+          <button class="alert-btn fill" onclick="goPass('${IMPORT.pass}')">Back to the list</button>
+          <button class="alert-btn ghost" onclick="openRequest('${IMPORT.pass}')">Something else is wrong</button>
+        </div>`;
+      showScreen('reqFixedScreen');
+      cameFrom.reqFixedScreen = back;
+    } else {
+      document.getElementById('reqFailedBody').innerHTML = `
+        <div class="imp-lede">
+          <div class="il-title">We could not fix this one</div>
+          <div class="il-sub">You will have to correct it by hand, here or on the web. Everything else we did is kept.</div>
+        </div>
+        <div class="imp-actions">
+          <button class="alert-btn fill" onclick="goPass('${IMPORT.pass}')">Carry on</button>
+          <button class="alert-btn ghost" onclick="openRequest('${IMPORT.pass}')">Send another request</button>
+        </div>`;
+      showScreen('reqFailedScreen');
+      cameFrom.reqFailedScreen = back;
+    }
+  }
+
+  /* ---- the end, which is the start of the next job ---- */
+  function finishImport() {
+    delete IMPORT.script.draft;
+    renderImpFinished();
+    showScreen('impFinishedScreen');
+  }
+  function renderImpFinished() {
+    const s = currentScript;
+    const lines = wholeOf(s).filter(it => it.who).length;
+    const uncast = CHARACTERS.filter(c => !castOf(c.name).length).length;
+    document.getElementById('impFinishedBody').innerHTML = `
+      <div class="imp-lede">
+        <div class="il-title">Your script is in</div>
+        <div class="il-sub">${CHARACTERS.length} character${CHARACTERS.length === 1 ? '' : 's'} · ${s.scenes.length} scene${s.scenes.length === 1 ? '' : 's'} · ${lines} line${lines === 1 ? '' : 's'}</div>
+      </div>
+      <button class="le-row" style="margin-bottom:10px;" onclick="openCast()">
+        <span class="le-main">
+          <span class="le-top">Cast the parts</span>
+          <span class="le-sub">${uncast ? (uncast === CHARACTERS.length ? 'Nobody is cast yet' : uncast + ' not cast') : 'Everybody is cast'}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <button class="le-row" onclick="openPeople()">
+        <span class="le-main">
+          <span class="le-top">Invite the others</span>
+          <span class="le-sub">They join with a link</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <div class="imp-actions">
+        <button class="alert-btn fill" onclick="openScript('${s.id}')">Open the script</button>
+      </div>`;
+  }
+  /* The panel's way into any step: an import in progress, made if there is none. */
+  function demoImport(pass) {
+    showScreen('scriptsScreen');
+    if (!IMPORT || !IMPORT.script || !SCRIPTS.includes(IMPORT.script) || !IMPORT.script.draft) {
+      IMPORT = { source: 'file', file: DEMO_FILE, text: '', kind: 'theatre',
+                 bring: { staging: true, acting: true, filming: false }, requests: {}, script: null };
+      IMPORT.script = createImport();
+    }
+    goPass(pass);
+  }
+
+  /* ============================================================
      NOTIFICATIONS
      ============================================================ */
   /* Two kinds so far. The missing-audio one names the script and the scene,
@@ -5736,8 +6471,11 @@
 
   /* Which scenes the missing audio is in. One scene can be named; more than one
      is a number, because a list of four titles in a notification is a wall. */
-  function notifWhere() {
-    const left = (SCRIPTS[0].scenes || []).filter(sc => sceneMissing(sc));
+  /* The scripts you owe lines on. A line knows its own script's cast, so this
+     is right whichever script happens to be open. */
+  const owedOn = () => myScripts().filter(s => !s.draft && scriptMissing(s) > 0);
+  function notifWhere(s) {
+    const left = (s.scenes || []).filter(sc => sceneMissing(sc));
     return left.length === 1 ? left[0].title : left.length + ' scenes';
   }
   function renderNotifications() {
@@ -5748,7 +6486,8 @@
     }
     list.innerHTML = NOTIFS.map(n => {
       if (n.kind === 'missing') {
-        const count = scriptMissing(SCRIPTS[0]);
+        const s = owedOn()[0];
+        const count = s ? scriptMissing(s) : 0;
         /* Nothing left to record means nothing to say about it. */
         if (!count) return '';
         return `<button class="notif mine go" onclick="notifOpenWizard()">
@@ -5756,7 +6495,7 @@
           <span class="n-main">
             <span class="n-title">Lines you still need to record</span>
             <span class="n-body">${count} of your lines have no audio yet.</span>
-            <span class="n-where">${notifWhere()} · ${SCRIPTS[0].title}</span>
+            <span class="n-where">${notifWhere(s)} · ${s.title}</span>
             <span class="n-time">${n.time}</span>
           </span>
           <span class="n-right">
@@ -5779,7 +6518,7 @@
   /* The dot is whether anything is unread, not a decoration switched on by hand. */
   function paintBellDot() {
     document.getElementById('bellDot').hidden =
-      !NOTIFS.some(n => !n.read && (n.kind !== 'missing' || scriptMissing(SCRIPTS[0])));
+      !NOTIFS.some(n => !n.read && (n.kind !== 'missing' || owedOn().length));
   }
 
   /* Both buttons and the shake end up in the same place. There is no feedback
@@ -5801,7 +6540,7 @@
       icon: 'ph-fill ph-warning',
       title: 'Delete this script?',
       text: 'Every scene, every line, every note and every take goes with it, for everyone in the cast. This cannot be undone.',
-      primary: 'Delete script', act: "closeSheet(); toast('Script deleted')",
+      primary: 'Delete script', act: 'deleteScript()',
       ghost: 'Keep it'
     },
     deleteLine: {
@@ -5829,6 +6568,15 @@
       text: 'They lose the script and any part they held comes free. What they recorded stays — the takes belong to the script, not to the person.',
       primary: 'Remove', act: 'removeMember()',
       ghost: 'Keep them'
+    },
+    /* A part and every line it says. Said plainly, because a character that
+       the import got wrong — a heading read as a name — is deleted here. */
+    deleteCharacter: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete this character?',
+      text: 'The part goes, and every line it says goes with it, for everyone on the script. This cannot be undone.',
+      primary: 'Delete character', act: 'deleteCharacter()',
+      ghost: 'Keep it'
     },
     deleteDirection: {
       icon: 'ph-fill ph-warning',
@@ -6487,6 +7235,44 @@
     detail:     { label:'Script detail',    group:'library', screen:'detailScreen', st:'wip',
                   go: () => openScript('s1') },
 
+    /* ---- getting a script in ---- */
+    newscript:  { label:'New script',       group:'import', screen:'newScriptScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); } },
+    choosefile: { label:'Choose a file',    group:'import', screen:'chooseFileScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openChooseFile(); } },
+    paste:      { label:'Paste the text',   group:'import', screen:'pasteScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openPaste(); } },
+    kind:       { label:'Kind of script',   group:'import', screen:'kindScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openChooseFile(); pickFile(); } },
+    reading:    { label:'Reading the script', group:'import', screen:'readingScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openChooseFile(); pickFile(); startReading(); } },
+    cantread:   { label:'Could not read it', group:'import', screen:'cantReadScreen', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openChooseFile(); showCantRead('scan'); } },
+    /* The same screen for a file with text but nobody speaking in it. */
+    cantread2:  { label:'Could not read it — no characters', group:'import', st:'wip',
+                  go: () => { showScreen('scriptsScreen'); openNewScript(); openChooseFile(); showCantRead('prose'); } },
+    impchars:   { label:'Imported characters', group:'import', screen:'impCharsScreen', st:'wip',
+                  go: () => demoImport('characters') },
+    impscenes:  { label:'Imported scenes',  group:'import', screen:'impScenesScreen', st:'wip',
+                  go: () => demoImport('scenes') },
+    impscript:  { label:'Imported script',  group:'import', screen:'impScriptScreen', st:'wip',
+                  go: () => demoImport('script') },
+    /* Scene edit while the script is being checked: no adding, no dragging,
+       and Something is wrong here at the bottom. A state, not a screen. */
+    impscene:   { label:'Imported scene',   group:'import', st:'wip',
+                  go: () => { demoImport('script'); openSceneEdit(0); } },
+    request:    { label:'Request edit',     group:'import', st:'wip',
+                  go: () => { demoImport('script'); openSceneEdit(0); openRequest('script'); } },
+    reqworking: { label:'Request working',  group:'import', screen:'reqWorkingScreen', st:'wip',
+                  go: () => { demoImport('script'); showScreen('reqWorkingScreen');
+                              document.getElementById('reqFill').style.width = '40%'; } },
+    reqfixed:   { label:'Request fixed',    group:'import', screen:'reqFixedScreen', st:'wip',
+                  go: () => { demoImport('script'); IMPORT.lastRequest = 'Every second line is glued to the one above it'; showRequestEnd(true); } },
+    reqfailed:  { label:'Request failed',   group:'import', screen:'reqFailedScreen', st:'wip',
+                  go: () => { demoImport('script'); showRequestEnd(false); } },
+    finished:   { label:'Import finished',  group:'import', screen:'impFinishedScreen', st:'wip',
+                  go: () => { demoImport('script'); finishImport(); } },
+
     /* ---- who is on the script ---- */
     people:     { label:'People',           group:'people', screen:'peopleScreen', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); } },
@@ -6696,9 +7482,22 @@
         </button>
         ${grip('scene')}
       </div>`).join('') + `</div>` +
-      `<button class="se-add" onclick="toast('Add scene')">
+      `<button class="se-add" onclick="addScene()">
         <i class="ph ph-plus ic-18"></i>Add scene
       </button>`;
+  }
+  /* A new scene is a name and nothing under it yet; it opens straight into
+     naming, the way a new character opens into its name. */
+  function newScene(title) {
+    return sceneOwned({ title, lines: 0, items: [] });
+  }
+  function addScene() {
+    const list = sceneList();
+    list.push(newScene('Scene ' + (list.length + 1)));
+    renderEditScenes();
+    renderScenes();
+    openSceneEdit(list.length - 1);
+    editOpen('scenename');
   }
 
   let sceneEditIdx = 0;
@@ -6706,9 +7505,14 @@
     sceneEditIdx = i;
     const sc = sceneList()[i];
     /* The rows here hand their index to Line edit, which reads the list the app
-       is on — so opening a scene for editing is opening that list. */
-    SCRIPT = sc.items || SCENE_1;
+       is on — so opening a scene for editing is opening that list. A scene with
+       no text of its own gets a list of its own here, not the written scene's. */
+    if (!sc.items) sc.items = [];
+    SCRIPT = sc.items;
+    wholeOpen = false;
     currentScene = sc.title;
+    editingKey = null;
+    editRender = renderSceneEdit;
     document.getElementById('sceneEditTitle').textContent = sc.title;
     renderSceneEdit();
     showScreen('sceneEditScreen');
@@ -6716,7 +7520,12 @@
   function renderSceneEdit() {
     const sc = sceneList()[sceneEditIdx];
     const items = sc.items || SCENE_1;
+    const checking = !!currentScript.draft;
+    /* The name first, in the field everything else is written in, then the
+       lines under their own label. */
     document.getElementById('sceneEditList').innerHTML =
+      editSection('scenename', 'Scene name', '', sc.title, 'Name the scene', !can.edit()) +
+      `<div class="le-label">Lines</div>` +
       `<div class="se-list">` + items.map((it, i) => {
       /* A standalone direction is an item of the scene like a line is, so it sits
          in the same list and moves the same way — it just has no one to say it,
@@ -6726,9 +7535,11 @@
       /* A direction carries no name: the glyph already says what it is, and
          "Stage direction" written above every one of them was a label for the
          kind rather than a heading for the row. */
-      return `<div class="se-ins"><button onclick="openAddSheet(${i})" aria-label="Add here">
+      /* While the import is being checked there is nothing to add between the
+         rows and nothing to drag: what is wrong is said, not fixed by hand. */
+      return (checking ? '' : `<div class="se-ins"><button onclick="openAddSheet(${i})" aria-label="Add here">
           <i class="ph-bold ph-plus ic-14"></i>
-        </button></div>
+        </button></div>`) + `
       <div class="se-row ${kind}">
         <button class="se-open" onclick="${it.who ? `openLineEdit(${i})` : `openDirEdit(${i})`}">
           ${it.who ? '' : '<span class="se-ic"><i class="ph-fill ph-note ic-18"></i></span>'}
@@ -6738,15 +7549,19 @@
           </span>
           <span class="se-chev"><i class="ph ph-pencil-simple ic-18"></i></span>
         </button>
-        ${grip('item')}
+        ${checking ? '' : grip('item')}
       </div>`;
-    }).join('') + `</div>` +
-      `<button class="se-add" onclick="openAddLine(${items.length})">
+    }).join('') + `</div>` + (checking ? `
+      <button class="se-add" onclick="openRequest('script')">
+        <i class="ph ph-warning-circle ic-18"></i>Something is wrong here
+      </button>` : `
+      <button class="se-add" onclick="openAddLine(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add line
       </button>
       <button class="se-add" onclick="openAddDirection(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add direction
-      </button>`;
+      </button>`);
+    growTextarea(document.getElementById('leInput'));
   }
   /* ============================================================
      LINE EDIT
@@ -6772,7 +7587,7 @@
     closeSheet();
     lineAddAt = at;
     const own = CHARACTERS.find(c => c.mine) || CHARACTERS[0];
-    lineDraft = ownLine({ who: own.name, text: '' });
+    lineDraft = ownLine({ who: own.name, text: '' }, currentScript);
     editRender = renderLineEdit;
     editingKey = 'text';
     renderLineEdit();
@@ -6783,14 +7598,14 @@
      its own rather than a number that says where it happens to sit. */
   let keySeq = 0;
   function commitLine(text) {
-    const sc = SCENE_LISTS.indexOf(SCRIPT) + 1;
+    const sc = sceneList().findIndex(x => x.items === SCRIPT) + 1;
     const line = lineDraft;
     line.text = text;
     line.key = (sc || 1) + '-n' + (++keySeq);
     SCRIPT.splice(lineAddAt, 0, line);
     lineEditIdx = SCRIPT.indexOf(line);
     lineDraft = null;
-    SCENES.forEach(x => { x.lines = x.items.filter(it => it.who).length; });
+    sceneList().forEach(x => { if (x.items) x.lines = x.items.filter(it => it.who).length; });
     renderSceneEdit();
     renderScenes();
     toast('Line added');
@@ -6821,7 +7636,7 @@
       </div>`}
 
       ${editSection('text', 'Line', '', line.text, 'Add the line', !can.line(line))}
-      ${adding ? `
+      ${currentScript.draft ? '' : adding ? `
       <div class="ac-note">Until somebody records it, everyone hears this line
         read by the app — so it is in the scene the moment you save it.</div>` : !line.mine ? `
       <div class="le-label">Audio</div>
@@ -6914,6 +7729,22 @@
       if (!v) return toast('A name is how the others find you');
       ACCOUNT.name = v;
     },
+    /* The script's title and a scene's name: the same field, their own save. */
+    title: v => {
+      if (!v) return toast('A script needs a name');
+      currentScript.title = v;
+      document.getElementById('detailTitle').textContent = v;
+      renderScripts(); renderRecent(); renderContinue();
+    },
+    scenename: v => {
+      if (!v) return toast('A scene needs a name');
+      const sc = sceneList()[sceneEditIdx];
+      if (LAST_SCENE[currentScript.id] === sc.title) LAST_SCENE[currentScript.id] = v;
+      sc.title = v; currentScene = v;
+      document.getElementById('sceneEditTitle').textContent = v;
+      document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = v);
+      renderEditScenes(); renderScenes();
+    },
     charname: v => {
       if (!v) return toast('Give the character a name');
       const ch = CHARACTERS.find(x => x.name === charEditing);
@@ -6928,8 +7759,7 @@
         ch.name = v; charEditing = v;
       } else {
         CAST[v] = [];
-        CHARACTERS.push({ name: v, lines: 0, get mine() { return (CAST[this.name] || []).includes(ME); },
-                          get actors() { return castOf(this.name); } });
+        CHARACTERS.push(makeCharacter(currentScript, v));
         charEditing = v;
       }
       renderCast();
@@ -7049,7 +7879,7 @@
     /* Read off the scene in the key and the line's place in that scene as it
        stands now, so a line that was added or moved still says where it is. */
     const sc = Number(line.key.split('-')[0]);
-    const items = SCENE_LISTS[sc - 1] || [];
+    const items = (sceneList()[sc - 1] || {}).items || [];
     const at = items.indexOf(line);
     const n = at < 0 ? 0 : items.slice(0, at + 1).filter(it => it.who).length;
     return '#' + String(sc).padStart(3, '0') + '-' + String(n).padStart(4, '0');
@@ -7061,7 +7891,7 @@
     const it = SCRIPT[idx];
     if (!it || !it.key) return '#000-D00';
     const sc = Number(it.key.split('-')[0]);
-    const items = SCENE_LISTS[sc - 1] || [];
+    const items = (sceneList()[sc - 1] || {}).items || [];
     const at = items.indexOf(it);
     const n = at < 0 ? 0 : items.slice(0, at + 1).filter(x => x.stage).length;
     return '#' + String(sc).padStart(3, '0') + '-D' + String(n).padStart(2, '0');
@@ -7243,7 +8073,7 @@
     const key = takeKey(SCRIPT[audioIdx]);
     TAKES[key] = takes.filter(t => t.id !== id);
     if (gone.use && TAKES[key][0]) TAKES[key][0].use = true;
-    if (!TAKES[key].length) recSet(ME).delete(SCRIPT[audioIdx].key);
+    if (!TAKES[key].length) recSet(ME).delete(lineRef(SCRIPT[audioIdx]));
     renderAudioEdit();
     renderScenes();
   }
@@ -7306,7 +8136,7 @@
              ?? lineIdx()[0];
     const line = SCRIPT[idx];
     line.note = undefined; line.dir = undefined;
-    recSet(ME).delete(line.key);
+    recSet(ME).delete(lineRef(line));
     TAKES[takeKey(line)] = [];
     return idx;
   }
@@ -7338,7 +8168,7 @@
     setTimeout(() => document.getElementById('leInput')?.focus(), 60);
   }
   function commitDirection(text) {
-    const sc = SCENE_LISTS.indexOf(SCRIPT) + 1;
+    const sc = sceneList().findIndex(x => x.items === SCRIPT) + 1;
     const it = dirDraft;
     it.stage = text;
     it.key = (sc || 1) + '-dn' + (++keySeq);
@@ -7380,6 +8210,33 @@
     goBack();
     toast('Direction deleted');
   }
+  /* The part and its lines, out of every scene of this script. */
+  function deleteCharacter() {
+    closeSheet();
+    const name = charEditing;
+    const i = CHARACTERS.findIndex(c => c.name === name);
+    if (i >= 0) CHARACTERS.splice(i, 1);
+    delete CAST[name]; delete VOICE[name]; delete HEAR[name];
+    sceneList().forEach(sc => {
+      if (!sc.items) return;
+      for (let k = sc.items.length - 1; k >= 0; k--) if (sc.items[k].who === name) sc.items.splice(k, 1);
+      sc.lines = sc.items.filter(it => it.who).length;
+    });
+    charEditing = null;
+    renderCast(); renderScenes(); renderEditMeta();
+    goBack();
+    toast(name + ' deleted');
+  }
+  /* The script, out of everyone's library. */
+  function deleteScript() {
+    closeSheet();
+    const gone = currentScript;
+    SCRIPTS.splice(SCRIPTS.indexOf(gone), 1);
+    currentScript = myScripts()[0] || SCRIPTS[0];
+    showScreen('scriptsScreen');
+    renderScripts(); renderRecent(); renderContinue(); paintBellDot();
+    toast('Script deleted');
+  }
 
   /* ============================================================
      ACCOUNT
@@ -7388,11 +8245,11 @@
      against your lines, and the address is where the sign-in code goes. */
   /* Whoever is looking — the panel can make you any member, and this follows. */
   const ACCOUNT = {
-    get name() { return me().name; },
-    set name(v) { me().name = v; },
+    get name() { return person(ME).name; },
+    set name(v) { person(ME).name = v; },
     get email() {
-      const m = me();
-      return m.email || m.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@example.com';
+      const p = person(ME);
+      return p.email || p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@example.com';
     }
   };
 
@@ -7445,6 +8302,7 @@
     ['Getting in',          'entry'],
     ['Home',                'home'],
     ['Scripts',             'library'],
+    ['Getting a script in', 'import'],
     ['People',              'people'],
     ['One scene, three modes', 'scene'],
     ['Recording',           'recording'],
@@ -7476,21 +8334,28 @@
     if (!el) return;
     el.innerHTML = `<span class="panel-label">You are</span>
       <span class="pv-wrap">
-        <select class="pv-select" onchange="becomeMember(this.value)" aria-label="Who is looking">${MEMBERS.map(m => {
-          const parts = partsOf(m.id);
-          return `<option value="${m.id}" ${m.id === ME ? 'selected' : ''}>${m.name} — ${ROLES[m.role].label} · ${parts.length ? parts.join(', ') : 'not cast'}</option>`;
+        <select class="pv-select" onchange="becomeMember(this.value)" aria-label="Who is looking">${PEOPLE.map(p => {
+          /* Their role and part on the script that is open — it differs per script. */
+          const m = currentScript.people.find(x => x.id === p.id);
+          const parts = m ? partsOf(p.id) : [];
+          const sub = m ? ROLES[m.role].label + ' · ' + (parts.length ? parts.join(', ') : 'not cast') : 'not on this script';
+          return `<option value="${p.id}" ${p.id === ME ? 'selected' : ''}>${p.name} — ${sub}</option>`;
         }).join('')}</select>
         <i class="ph ph-caret-down ic-16"></i>
       </span>`;
   }
   const OWN_SCREENS = ['wizardScenesScreen', 'wizardScreen', 'evaluationScreen', 'lineScreen', 'dirScreen', 'audioScreen'];
   function becomeMember(id) {
-    if (!member(id) || id === ME) return;
+    if (!person(id) || id === ME) return;
     ME = id;
     closeSheet();
     editingKey = null;
     const here = activeScreen()?.id;
-    if (Object.values(MODE_SCREENS).includes(here)) openScene(currentScene || DEMO_SCENE);
+    /* Not on the script that was open: their own library is where they start. */
+    if (!currentScript.people.some(m => m.id === ME) && here !== 'dashboardScreen') {
+      paintViewer(); showScreen('scriptsScreen'); REDRAW.scriptsScreen();
+    }
+    else if (Object.values(MODE_SCREENS).includes(here)) openScene(currentScene || DEMO_SCENE);
     else if (OWN_SCREENS.includes(here)) openScript(currentScript.id);
     else { paintViewer(); if (REDRAW[here]) REDRAW[here](); }
     renderPanel();
