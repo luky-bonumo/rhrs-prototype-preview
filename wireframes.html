@@ -125,6 +125,19 @@
     font-size: 10.5px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
     color: var(--wf-dim);
   }
+  /* The name of the screen, and the one thing on this page worth lifting off it:
+     it is what the screen is called in conversation, what it will be called in
+     the prototype's own table, and what its link will be. Tap it and it is on
+     the clipboard. DM Sans with a little tracking rather than a monospace —
+     there is no monospace anywhere in this project. */
+  .wf-id {
+    border: none; background: var(--wf-fill); color: var(--wf-ink);
+    border-radius: 999px; padding: 2px 9px; cursor: pointer;
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.4px; text-transform: none;
+  }
+  .wf-id:hover { background: var(--wf-line); }
+  .wf-id.copied { background: var(--wf-ink); color: var(--wf-card); }
   .wf-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; }
   .wf-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
   .wf-sub { font-size: 12.5px; color: var(--wf-dim); }
@@ -252,7 +265,14 @@
       <span><i class="box dash"></i>a sheet, over whatever you are on</span>
       <span><i class="box fill"></i>text that is not the point here</span>
       <span><i class="ph ph-arrow-right"></i>what takes you on</span>
+      <span><i class="ph ph-hand-tap"></i>tap a name to copy it</span>
     </div>
+    <p class="note-line">
+      <b>Every box is named.</b> The pill in its header is what that screen is called — here,
+      in conversation, in the prototype's own table of screens, and in the link that opens it
+      (<b>people</b> becomes <b>#people</b>). One name per screen, carried through, so nobody
+      has to say "that one with the list of people, you know the one". Tap it to copy it.
+    </p>
     <p class="note-line">
       <b>The app is drawn for an admin.</b> Everything can be done here; taking things away
       from the roles that may not do them is engineering's job, not a second set of screens.
@@ -300,7 +320,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>exists</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">detail</button><span>exists</span></div>
           <div class="wf-body">
             <div class="wf-title">Script detail</div>
             <div class="wf-bar mid"></div>
@@ -313,7 +333,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>People</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">people</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">People</div>
             <div class="wf-row"><span class="grow">Luky Kuky<span class="r-sub">Admin · Nina</span></span><span class="wf-chip">you</span></div>
@@ -326,18 +346,18 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>a person</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">person</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Luděk Sobota</div>
             <div class="wf-sub">Joined 12 September</div>
+            <div class="wf-label">Parts</div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">9 lines</span></span><i class="ph ph-x"></i></div>
+            <div class="wf-btn">Cast in a part</div>
             <div class="wf-label">Role</div>
             <div class="wf-row"><span class="grow">Reader<span class="r-sub">Reads and listens. No rehearsing.</span></span></div>
             <div class="wf-row on"><span class="grow">Assigned member<span class="r-sub">Their own lines: text, audio, notes.</span></span><i class="ph ph-check"></i></div>
             <div class="wf-row"><span class="grow">Editor<span class="r-sub">The whole script, except casting.</span></span></div>
             <div class="wf-row"><span class="grow">Admin<span class="r-sub">Everything, including people.</span></span></div>
-            <div class="wf-label">Parts</div>
-            <div class="wf-row"><span class="grow">Michael</span><i class="ph ph-x"></i></div>
-            <div class="wf-btn">Cast in a part</div>
             <div class="wf-btn ghost">Remove from the script</div>
           </div>
         </div>
@@ -353,7 +373,7 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-kind"><span>Sheet</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">invite</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Invite someone</div>
             <div class="wf-text">Anyone with this link can join the script as the role you pick.</div>
@@ -369,7 +389,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>they open it</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">join</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Join this script</div>
             <div class="wf-text">Luky Kuky invited you to <b>I love you, you're fine, but change quickly</b>.</div>
@@ -391,7 +411,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>on its own</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">readerscene</button><span>on its own</span></div>
           <div class="wf-body">
             <div class="wf-title">A reader's scene</div>
             <div class="wf-bar"></div>
@@ -431,7 +451,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">cast</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Cast</div>
             <div class="wf-label">Read aloud by</div>
@@ -447,7 +467,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>a part</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>exists, rebuilt</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">character</button><span>exists, rebuilt</span></div>
           <div class="wf-body">
             <div class="wf-title">Michael</div>
             <div class="wf-label">Name</div>
@@ -466,7 +486,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>voice</div>
 
         <div class="wf sheet">
-          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-kind"><span>Sheet</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">voices</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Voice for Michael</div>
             <div class="wf-text">Heard until somebody records the line, and behind every direction if this is the narrator.</div>
@@ -499,7 +519,7 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><span>Sheet</span><span>exists, one row added</span></div>
+          <div class="wf-kind"><span>Sheet</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">modeset</button><span>exists, one row added</span></div>
           <div class="wf-body">
             <div class="wf-title">Listen settings</div>
             <div class="wf-bar mid"></div>
@@ -512,7 +532,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">whohear</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">Who you hear</div>
             <div class="wf-text">Some parts are played by more than one actor. Pick the one you want to hear — it changes nothing for anybody else.</div>
@@ -524,7 +544,7 @@
         <div class="arrow"><i class="ph ph-arrow-left"></i>also from</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>on its own</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">detailalt</button><span>on its own</span></div>
           <div class="wf-body">
             <div class="wf-title">Script detail — not an admin</div>
             <div class="wf-row flat"><span class="grow">Top right, where an admin has the pencil</span><i class="ph ph-users-three"></i></div>
@@ -565,7 +585,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>1</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">newscript</button><span>1</span></div>
           <div class="wf-body">
             <div class="wf-title">New script</div>
             <div class="wf-row"><i class="ph ph-file-arrow-up"></i><span class="grow">Upload a file<span class="r-sub">A script you already have</span></span><i class="ph ph-caret-right"></i></div>
@@ -577,7 +597,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>2</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">uploadfile</button><span>2</span></div>
           <div class="wf-body">
             <div class="wf-title">Choose a file</div>
             <div class="wf-btn big">Choose a file</div>
@@ -588,7 +608,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>3</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">uploadkind</button><span>3</span></div>
           <div class="wf-body">
             <div class="wf-title">What kind of script is it?</div>
             <div class="wf-row on"><span class="grow">Theatre<span class="r-sub">A stage play</span></span><i class="ph ph-check"></i></div>
@@ -611,7 +631,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>4</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">uploading</button><span>4</span></div>
           <div class="wf-body">
             <div class="wf-title">Reading your script</div>
             <div class="wf-bar mid"></div>
@@ -626,7 +646,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>it can fail</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>State</span><span>4b</span></div>
+          <div class="wf-kind"><span>State</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">uploadfail</button><span>4b</span></div>
           <div class="wf-body">
             <div class="wf-title">We could not read this file</div>
             <div class="wf-text">There is no text in it — it looks like a scan or a photograph of the pages.</div>
@@ -648,7 +668,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>5</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">impchars</button><span>5</span></div>
           <div class="wf-body">
             <div class="wf-title">The characters we found</div>
             <div class="wf-sub">Rename anyone the file got wrong.</div>
@@ -664,7 +684,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>6</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">impscenes</button><span>6</span></div>
           <div class="wf-body">
             <div class="wf-title">The scenes we found</div>
             <div class="wf-sub">Rename them if the file did not.</div>
@@ -679,7 +699,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>7</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">impscript</button><span>7</span></div>
           <div class="wf-body">
             <div class="wf-title">The script</div>
             <div class="wf-sub">Look through it scene by scene.</div>
@@ -692,7 +712,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>into a scene</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>7b</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">impscene</button><span>7b</span></div>
           <div class="wf-body">
             <div class="wf-title">Opening — the kitchen</div>
             <div class="wf-row"><span class="grow">Direction<span class="r-sub">A kitchen, ten past two in the…</span></span><i class="ph ph-pencil-simple"></i></div>
@@ -715,7 +735,7 @@
       <h3>Something is wrong — the same loop three times</h3>
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-kind"><span>Sheet</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">reqedit</button><span>new</span></div>
           <div class="wf-body">
             <div class="wf-title">What is wrong?</div>
             <div class="wf-field">Every second line is glued to the one above it…</div>
@@ -729,7 +749,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>State</span><span>working</span></div>
+          <div class="wf-kind"><span>State</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">reqworking</button><span>working</span></div>
           <div class="wf-body">
             <div class="wf-title">Looking at it</div>
             <div class="wf-bar short"></div>
@@ -740,7 +760,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>two ends</div>
 
         <div class="wf">
-          <div class="wf-kind"><span>State</span><span>done</span></div>
+          <div class="wf-kind"><span>State</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">reqfixed</button><span>done</span></div>
           <div class="wf-body">
             <div class="wf-title">Fixed</div>
             <div class="wf-text">We split the glued lines. Have a look — the list below has changed.</div>
@@ -752,7 +772,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><span>State</span><span>not done</span></div>
+          <div class="wf-kind"><span>State</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">reqfailed</button><span>not done</span></div>
           <div class="wf-body">
             <div class="wf-title">We could not fix this one</div>
             <div class="wf-text">You will have to correct it by hand, here or on the web. Everything else we did is kept.</div>
@@ -773,7 +793,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><span>Screen</span><span>8</span></div>
+          <div class="wf-kind"><span>Screen</span><button class="wf-id" onclick="copyName(this)" title="Copy this name">uploaddone</button><span>8</span></div>
           <div class="wf-body">
             <div class="wf-title">Your script is in</div>
             <div class="wf-sub">3 characters · 5 scenes · 130 lines</div>
@@ -820,6 +840,26 @@
 </footer>
 
 <script>
+  /* Lift the name off the page. Clipboard access is blocked in some embedded
+     viewers, so there is a throwaway textarea to fall back on. */
+  function copyName(btn) {
+    const name = btn.textContent.trim();
+    const done = () => {
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 900);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(name).then(done, () => fallback(name, done));
+    } else fallback(name, done);
+  }
+  function fallback(text, done) {
+    const el = document.createElement('textarea');
+    el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    document.body.removeChild(el);
+  }
+
   function setTheme(mode) {
     document.documentElement.dataset.theme = mode;
     document.getElementById('themeLight').classList.toggle('on', mode === 'light');
