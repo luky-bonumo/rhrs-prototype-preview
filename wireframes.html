@@ -576,6 +576,31 @@
         </div>
       </div>
 
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Cast — not an admin</button><span>on its own</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Cast</div>
+            <div class="wf-label">Read aloud by</div>
+            <div class="wf-row"><span class="grow">Narrator<span class="r-sub">Reads the directions · voice: Ivy</span></span></div>
+            <div class="wf-label">Parts</div>
+            <div class="wf-row"><span class="grow">Nina<span class="r-sub">20 lines · you</span></span></div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">18 lines · Luděk Sobota · Petr Novák</span><span class="r-sub"><b>You hear Luděk Sobota</b></span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Anna<span class="r-sub">14 lines · Not cast · voice: Ivy</span></span></div>
+            <div class="wf-sub">The director casts the parts. Where a part has two actors, you choose which of them you hear — nobody else is affected.</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>The same list as the admin's, with nothing to do to it:</b> no way into a part,
+          nothing to add, the narrator's voice as a line of text. The one thing a member changes
+          is theirs alone — which of two alternates they hear — so the alternated part says who
+          that is and opens <b>Who you hear</b>. Reached from the Cast card of a member's Script
+          detail; an editor has the pencil but cannot cast, so this is theirs too.<br><br>
+          Decided 22 September, after the prototype: the words on it are here to be argued with.
+        </div>
+      </div>
+
       <h3>Who you hear — one screen, four ways in</h3>
       <p class="note-line">
         Choosing an alternate is not editing the script: it is how <i>this</i> production sounds
@@ -633,6 +658,87 @@
           otherwise the generated voice. A take still belongs to whoever recorded it, Audio edit
           shows you your own and nobody else's, and the Recording wizard counts only the lines
           <i>you</i> owe — two alternates each see their own count.
+        </div>
+      </div>
+
+      <h3>The voice, where the audio is</h3>
+      <p class="note-line">
+        <b>A take belongs to the actor who recorded it; the voice belongs to the part.</b> Audio
+        edit shows your takes and nobody else's, so a second actor in the part never appears in
+        it — what they change is what a <i>listener</i> hears, and the listener chooses between
+        actors in Who you hear, never between takes. Two things follow. The generated voice can
+        be named wherever it is played, because there is one per part however many actors hold
+        it. And the place to say what you will actually hear on a line is the line's own menu —
+        under the three dots, where a question about one line is asked — not every card in Listen.
+      </p>
+
+      <div class="flow">
+        <div class="wf sheet">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line menu</button><span>exists, one line added</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Michael</div>
+            <div class="wf-sub">I'm eating.</div>
+            <div class="wf-row flat"><i class="ph ph-speaker-high"></i><span class="grow"><b>You hear Luděk Sobota's take</b></span></div>
+            <div class="wf-row"><i class="ph ph-headphones"></i><span class="grow">Listen from here</span></div>
+            <div class="wf-row"><i class="ph ph-microphone"></i><span class="grow">Rehearse from here</span></div>
+            <div class="wf-row on"><i class="ph ph-users-three"></i><span class="grow">Who you hear<span class="r-sub">Only when the part has two actors</span></span></div>
+            <div class="wf-row"><i class="ph ph-pencil-simple"></i><span class="grow">Edit line</span></div>
+            <div class="wf-row"><i class="ph ph-note"></i><span class="grow">Add / edit private note</span></div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>One line under the text, four things it can say:</b><br>
+          <i>You hear Luděk Sobota's take</i> — the actor you chose has recorded it.<br>
+          <i>You hear the voice Rufus — Petr Novák hasn't recorded this line yet</i> — the voice
+          is standing in, and it says for whom.<br>
+          <i>You hear your take · Tuesday</i> and <i>You hear the voice Mara until you record this
+          line</i> — on your own lines.<br>
+          <i>Read by the narrator · Ivy</i> — on a direction.<br><br>
+          <b>Built 22 September</b> — this box is the record of it, and of the row <i>Who you
+          hear</i> that joins the menu on an alternated part.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Audio edit</button><span>exists, one line changed</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Nina</div>
+            <div class="wf-sub">You're eating.</div>
+            <div class="wf-btn">Record a new take</div>
+            <div class="wf-label">Takes</div>
+            <div class="wf-row on"><i class="ph ph-play"></i><span class="grow">Tuesday<span class="r-sub">0:04</span></span><span class="wf-chip solid">In use</span></div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Last week<span class="r-sub">0:05</span></span><span class="wf-chip">Use</span></div>
+            <div class="wf-label">Default</div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Generated voice<span class="r-sub"><b>Mara</b> · 0:03</span></span></div>
+            <div class="wf-sub">Made from the text, so the line is never silent. It cannot be deleted and it does not count as a take — record one and it takes over.</div>
+            <div class="wf-sub"><b>Petr Novák holds this part too.</b> Whoever listens chooses which of you they hear.</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-left"></i>the takes button</div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line edit</button><span>exists, one line changed</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Line</div>
+            <div class="wf-row"><span class="grow">Nina<span class="r-sub">Your part</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-label">Line</div>
+            <div class="wf-field">You're eating.</div>
+            <div class="wf-label">Audio</div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Generated voice<span class="r-sub"><b>Mara</b> · 0:03 · until you record one</span></span><span class="wf-chip">2 takes</span></div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Two changes, both one line.</b> The <i>Default</i> row names the voice the admin gave
+          the part — the same name as on Cast and on the character — so <i>Generated voice</i>
+          stops being anonymous. And on a part with two actors, a sentence under the takes says
+          the other actor is there, and that listeners choose; nothing else in Audio edit changes,
+          because the other actor's takes are theirs and never appear here.<br><br>
+          <b>Not built yet.</b> Both screens are signed off, so the prototype changes once these
+          words are agreed, and both go back to WIP with it.
         </div>
       </div>
     </div>

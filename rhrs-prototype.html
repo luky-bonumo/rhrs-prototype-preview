@@ -1813,6 +1813,16 @@
     font-size: 14px; color: var(--text-muted);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  /* What plays on this line for you — the take of the actor you hear, or the
+     part's voice standing in for it. A fact about the line, under its text,
+     not a thing to do to it; wine because a take is somebody else's as often
+     as yours, and the name above already says whose line it is. */
+  .sheet-context .ctx-source {
+    display: flex; align-items: flex-start; gap: 6px; margin-top: 9px;
+    font-size: 12.5px; font-weight: 600; line-height: 1.35; color: var(--wine);
+  }
+  .sheet-context .ctx-source i { flex: 0 0 auto; margin-top: 1px; }
+  .sheet-context .ctx-source:empty { display: none; }
 
   .sheet-items { padding: 8px 0; overflow-y: auto; }
   .sheet-item {
@@ -3206,6 +3216,9 @@
     <div class="sheet-context" id="sheetContext">
       <div class="ctx-name" id="ctxName">My character</div>
       <div class="ctx-line" id="ctxLine">Aliquam at sollicitudin sem…</div>
+      <!-- What you will hear on this line, and why. Empty on the sheets that
+           are not about a line, and then it takes no room. -->
+      <div class="ctx-source" id="ctxSource"></div>
     </div>
     <div class="sheet-items" id="sheetItems"></div>
   </div>
@@ -3786,6 +3799,30 @@
     const has = OTHERS_REC[id];
     return has === 'all' ? lines.length : Math.min(lines.length, has || 0);
   }
+  /* Whether one actor has recorded one line. Yours is on the line's takes; the
+     others' come from OTHERS_REC, counted from the top of the part. */
+  function recordedBy(id, line) {
+    if (id === ME) return !!takesFor(line).length;
+    const has = OTHERS_REC[id];
+    if (has === 'all') return true;
+    return WHOLE_SCRIPT.filter(it => it.who === line.who)
+                       .findIndex(it => it.key === line.key) < (has || 0);
+  }
+  /* What plays on this line for you, said in a sentence: the take of the actor
+     you hear, or the part's voice and whose take it is standing in for. It sits
+     in the line's menu — under the three dots, where a question about this one
+     line is asked — rather than on every card or in the transport. */
+  function sourceLine(line) {
+    const m = hearIn(line.who);
+    if (m && recordedBy(m.id, line)) {
+      return m.you ? 'You hear your take \u00b7 ' + takeInUse(line).when
+                   : 'You hear ' + m.name + '\u2019s take';
+    }
+    const v = 'the voice ' + voiceOf(line.who).name;
+    if (!m) return 'You hear ' + v + ' \u2014 nobody is cast in this part';
+    return m.you ? 'You hear ' + v + ' until you record this line'
+                 : 'You hear ' + v + ' \u2014 ' + m.name + ' hasn\u2019t recorded this line yet';
+  }
   /* The sentence under the row that leads to Who you hear, so the row says
      whether there is anything to choose before it is opened. */
   function hearMeta() {
@@ -3809,6 +3846,11 @@
     rehearse: '<i class="ph ph-microphone ic-22"></i>',
     edit:     '<i class="ph ph-pencil-simple ic-22"></i>',
     note:     '<i class="ph ph-note ic-22"></i>',
+    /* Which of two actors you hear in a part — the same glyph as the corner of
+       a member's Script detail. */
+    hear:     '<i class="ph ph-users-three ic-22"></i>',
+    /* What plays on a line, in the line's menu. */
+    source:   '<i class="ph ph-speaker-high ic-14"></i>',
     record:   '<i class="ph ph-microphone ic-22"></i>',
     trash:    '<i class="ph ph-trash ic-22"></i>',
     /* A line of the script, as opposed to a direction — the two things you can
@@ -4802,6 +4844,9 @@
     if (!noJumps) {
       html += item('listen', 'Listen from here', false, "Listen from this line");
       if (!uncastView) html += item('rehearse', 'Rehearse from here', false, "Rehearse from this line");
+      /* Where the part has two actors, the question the context line answers
+         can be changed right here. */
+      if (castOf(SCRIPT[sheetIdx].who).length > 1) html += item('hear', 'Who you hear', false, null, 'openWhoYouHear()');
       html += '<div class="sheet-sep"></div>';
     }
     html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
@@ -4823,6 +4868,7 @@
     document.getElementById('sheetContext').className = 'sheet-context ' + (line.mine ? 'mine' : 'others');
     document.getElementById('ctxName').textContent = line.who;
     document.getElementById('ctxLine').textContent = shorten(line.text);
+    document.getElementById('ctxSource').innerHTML = ICON.source + sourceLine(line);
     document.getElementById('sheetItems').innerHTML =
       buildItems(line.mine, fromEval || activeScreen().id === 'wizardScreen');
     document.getElementById('scrim').classList.add('open');
@@ -4832,6 +4878,7 @@
     document.getElementById('sheetContext').className = 'sheet-context others';
     document.getElementById('ctxName').textContent = 'Directions';
     document.getElementById('ctxLine').textContent = shorten(SCRIPT[idx].stage);
+    document.getElementById('ctxSource').innerHTML = ICON.source + 'Read by the narrator \u00b7 ' + voiceOf(null).name;
     document.getElementById('sheetItems').innerHTML =
       item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`) +
       item('note', 'Add a private note', false, 'Private note') +
@@ -4845,6 +4892,9 @@
   function closeSheet() {
     document.getElementById('scrim').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
+    /* The other users of this sheet — casting, changing a character — set the
+       name and the line but know nothing of the source, so it is cleared here. */
+    document.getElementById('ctxSource').innerHTML = '';
     document.getElementById('inviteSheet').classList.remove('open');
     document.getElementById('voiceSheet').classList.remove('open');
     vpStop();
@@ -6438,7 +6488,7 @@
                                         ?? lineIdx()[0]); } },
 
     /* ---- sheets: they slide over whatever you are on ---- */
-    linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'prepared',
+    linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'wip',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen');
                               openSheet(lineIdx().find(i => SCRIPT[i].mine) ?? lineIdx()[0]); } },
     stagemenu:  { label:'Direction menu',    group:'sheets', ver:1, st:'prepared',
