@@ -679,7 +679,9 @@
   /* ============ PEOPLE AND CASTING ============ */
   /* A person's name at the top of their own screen, the way a scene names itself
      above a line. */
-  .pe-head { padding: 4px 2px 6px; }
+  /* The name and what follows it are two things, not one block: the label under
+     it was arriving 6px later and reading as part of the name. */
+  .pe-head { padding: 8px 2px 16px; }
   .pe-head .pe-name {
     font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--noir);
   }
@@ -1822,6 +1824,9 @@
      not, so a sheet built out of those has to set it once, here. Without it the
      invite ran edge to edge. */
   .invite-body { padding: 2px 22px 26px; }
+  /* The lede is a sentence about what follows, not a caption on it. */
+  .invite-body .ac-note { padding: 4px 2px 16px; }
+  .invite-body .gs-theme { margin-bottom: 6px; }
   .set-group-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
     text-transform: uppercase; color: var(--text-muted); padding: 8px 24px;
@@ -6025,7 +6030,7 @@
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
-    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', ver:1, st:'prepared',
+    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0);
                               openDirEdit(SCRIPT.findIndex(it => it.stage)); } },
     addline:    { label:'Add line',         group:'editing', ver:1, st:'prepared',
