@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rhrs — wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  /* ---- wireframes ----
+     The one design page with no palette in it, on purpose. A wireframe that
+     wears the app's colours reads as a decision that has been made, and none of
+     these have been. Everything here is grey; the copy, though, is real — the
+     words are the part worth arguing about at this stage.
+
+     Because there is no palette, tools/build-preview.py leaves this page out of
+     its colour check — it only checks pages that carry the palette tokens, and
+     naming one of them even in a comment is enough to be counted in. Nothing
+     here to keep in step with the prototype. */
+  :root {
+    --wf-page:#EFEFEF;  --wf-ground:#F7F7F7; --wf-card:#FFFFFF;
+    --wf-line:#C9C9C9;  --wf-fill:#E4E4E4;
+    --wf-ink:#2B2B2B;   --wf-dim:#6E6E6E;    --wf-band:#3A3A3A;
+
+    --font-display:'Platypi', Georgia, serif;
+    --font-body:'DM Sans', system-ui, sans-serif;
+    --shell:1120px;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --wf-page:#141414;  --wf-ground:#191919; --wf-card:#1E1E1E;
+    --wf-line:#3E3E3E;  --wf-fill:#2C2C2C;
+    --wf-ink:#E8E8E8;   --wf-dim:#9A9A9A;    --wf-band:#262626;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body); background: var(--wf-page); color: var(--wf-ink);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--wf-ink); }
+  :focus-visible { outline: 2.5px solid var(--wf-ink); outline-offset: 3px; border-radius: 4px; }
+
+  /* Same switch as the other pages, drawn in this page's greys. */
+  .theme-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    display: flex; gap: 3px; padding: 3px;
+    background: var(--wf-card); border: 1px solid var(--wf-line);
+    border-radius: 999px; box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .theme-switch button {
+    border: none; background: none; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wf-ink); opacity: 0.5;
+  }
+  .theme-switch button.on { background: var(--wf-ink); color: var(--wf-card); opacity: 1; }
+
+  :root { --cap-shift: 0.092em; }
+  .cap-trim { text-box: trim-both cap alphabetic; }
+  @supports not (text-box: trim-both cap alphabetic) {
+    .cap-trim { display: inline-block; transform: translateY(calc(var(--cap-shift) * -1)); }
+  }
+
+  .top { background: var(--wf-band); color: #F2F2F2; padding-block: 26px 34px; }
+  .shell { max-width: var(--shell); margin: 0 auto; padding-inline: 28px; }
+  .top .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(242,242,242,0.72); text-decoration: none;
+    font-size: 14px; font-weight: 600; margin-bottom: 22px;
+  }
+  .top .back:hover { color: #F2F2F2; }
+  .top h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(30px, 5vw, 42px); line-height: 1.12;
+    text-wrap: balance; max-width: 22ch;
+  }
+  .top h1 em { font-style: normal; font-weight: 700; }
+  .top .lede { margin-top: 14px; max-width: 64ch; color: rgba(242,242,242,0.75); font-size: 16px; }
+
+  main { padding-block: 40px 76px; }
+  section + section { margin-top: 54px; }
+  .sec-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--wf-dim); margin-bottom: 12px;
+  }
+  h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 25px;
+    color: var(--wf-ink); margin-bottom: 6px; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--font-display); font-weight: 600; font-size: 18px;
+    color: var(--wf-ink); margin: 26px 0 10px;
+  }
+  .note-line { color: var(--wf-dim); font-size: 15px; max-width: 70ch; margin-bottom: 20px; }
+  footer {
+    border-top: 1px solid var(--wf-line); padding-block: 30px 64px;
+    color: var(--wf-dim); font-size: 14px;
+  }
+  footer a { font-weight: 600; }
+
+  /* ---- the canvas the wireframes stand on ---- */
+  .canvas {
+    background: var(--wf-ground); border: 1px solid var(--wf-line);
+    border-radius: 20px; padding: 22px; overflow-x: auto;
+  }
+  .flow { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  .flow + .flow { margin-top: 20px; }
+
+  /* A screen. Dashed means it slides up over whatever you are on. */
+  .wf {
+    width: 268px; flex: 0 0 auto;
+    background: var(--wf-card); border: 1.5px solid var(--wf-line); border-radius: 14px;
+  }
+  .wf.sheet { border-style: dashed; }
+  .wf.wide { width: 380px; }
+  .wf-kind {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid var(--wf-line);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    color: var(--wf-dim);
+  }
+  .wf-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; }
+  .wf-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+  .wf-sub { font-size: 12.5px; color: var(--wf-dim); }
+  .wf-text { font-size: 13px; line-height: 1.45; }
+  .wf-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    color: var(--wf-dim); margin-top: 4px;
+  }
+  .wf-row {
+    display: flex; align-items: center; gap: 9px;
+    border: 1px solid var(--wf-line); border-radius: 9px; padding: 9px 10px;
+    font-size: 13px;
+  }
+  .wf-row .grow { flex: 1 1 auto; min-width: 0; }
+  .wf-row .r-sub { display: block; font-size: 11.5px; color: var(--wf-dim); }
+  .wf-row.on { border-color: var(--wf-ink); }
+  .wf-row.flat { border: none; padding: 0; }
+  .wf-btn {
+    border: 1.5px solid var(--wf-ink); border-radius: 999px; padding: 9px;
+    text-align: center; font-size: 12.5px; font-weight: 700;
+  }
+  .wf-btn.fill { background: var(--wf-ink); color: var(--wf-card); }
+  .wf-btn.ghost { border-color: var(--wf-line); color: var(--wf-dim); }
+  .wf-btn.big { padding: 22px 9px; border-style: dashed; }
+  .wf-field {
+    border: 1px solid var(--wf-line); border-radius: 9px; padding: 10px;
+    font-size: 13px; color: var(--wf-dim); min-height: 58px;
+  }
+  .wf-bar { height: 7px; border-radius: 4px; background: var(--wf-fill); }
+  .wf-bar.short { width: 62%; }
+  .wf-bar.mid { width: 82%; }
+  .wf-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--wf-line); border-radius: 999px;
+    padding: 1px 8px; font-size: 11px; color: var(--wf-dim);
+  }
+  .wf-chip.solid { background: var(--wf-fill); border-color: var(--wf-fill); color: var(--wf-ink); }
+  .wf-toggle {
+    flex: 0 0 auto; width: 34px; height: 20px; border-radius: 999px;
+    border: 1.5px solid var(--wf-line); position: relative;
+  }
+  .wf-toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 13px; height: 13px; border-radius: 50%; background: var(--wf-line);
+  }
+  .wf-toggle.on { border-color: var(--wf-ink); }
+  .wf-toggle.on::after { left: auto; right: 2px; background: var(--wf-ink); }
+  .wf-tabbar {
+    display: flex; justify-content: space-around; gap: 6px;
+    border-top: 1px solid var(--wf-line); padding: 9px 10px;
+    font-size: 11.5px; font-weight: 600; color: var(--wf-dim);
+  }
+  .wf-tabbar span.on { color: var(--wf-ink); }
+  .wf-tabbar span.gone { text-decoration: line-through; opacity: 0.45; }
+
+  /* Between two screens: what takes you there. */
+  .arrow {
+    flex: 0 0 auto; align-self: center; display: flex; flex-direction: column;
+    align-items: center; gap: 2px; color: var(--wf-dim);
+    font-size: 11px; width: 78px; text-align: center;
+  }
+  .arrow i { font-size: 20px; }
+
+  /* A note is a decision, or a thing that has to be true elsewhere. */
+  .note {
+    flex: 0 0 auto; width: 240px;
+    border-left: 2px solid var(--wf-line); padding: 2px 0 2px 12px;
+    font-size: 12.5px; color: var(--wf-dim); line-height: 1.5;
+  }
+  .note b { color: var(--wf-ink); font-weight: 700; }
+
+  /* The legend, and the permission table — both are content, not decoration. */
+  .legend { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 18px; font-size: 13px; color: var(--wf-dim); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .legend i.box { width: 22px; height: 15px; border: 1.5px solid var(--wf-line); border-radius: 4px; display: inline-block; }
+  .legend i.box.dash { border-style: dashed; }
+  .legend i.box.fill { background: var(--wf-fill); border-color: var(--wf-fill); }
+
+  table.perm {
+    width: 100%; border-collapse: collapse; font-size: 13.5px;
+    background: var(--wf-card); border: 1px solid var(--wf-line); border-radius: 12px;
+  }
+  table.perm th, table.perm td { padding: 9px 12px; border-bottom: 1px solid var(--wf-line); text-align: left; }
+  table.perm thead th { font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--wf-dim); }
+  table.perm td.y, table.perm td.n { text-align: center; width: 116px; }
+  table.perm td.n { color: var(--wf-dim); }
+  table.perm tr:last-child th, table.perm tr:last-child td { border-bottom: none; }
+  table.perm td.own { text-align: center; font-size: 12px; color: var(--wf-dim); }
+
+  @media (max-width: 720px) {
+    .arrow { width: 100%; flex-direction: row; }
+    .arrow i { transform: rotate(90deg); }
+    .note { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="theme-switch" role="group" aria-label="Theme">
+  <button id="themeLight" onclick="setTheme('light')" aria-label="Light mode"><i class="ph ph-sun"></i></button>
+  <button id="themeDark"  onclick="setTheme('dark')"  aria-label="Dark mode"><i class="ph ph-moon"></i></button>
+</div>
+
+<header class="top">
+  <div class="shell">
+    <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
+    <h1>Three things the app <em>cannot do yet</em>.</h1>
+    <p class="lede">
+      Who is on a script and what they may touch, who plays which part and in what voice,
+      and how a script gets in at all. Grey on purpose: these are the shapes and the words,
+      not the design. The copy is real — at this stage the words are the part worth arguing
+      about. From the meeting of 21 September 2026.
+    </p>
+  </div>
+</header>
+
+<main class="shell">
+
+  <section>
+    <div class="legend">
+      <span><i class="box"></i>a screen</span>
+      <span><i class="box dash"></i>a sheet, over whatever you are on</span>
+      <span><i class="box fill"></i>text that is not the point here</span>
+      <span><i class="ph ph-arrow-right"></i>what takes you on</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1 -->
+  <section>
+    <div class="sec-label">One</div>
+    <h2>Members and roles</h2>
+    <p class="note-line">
+      Membership belongs to a script, not to a company: a role is held on one script and an
+      invitation is an invitation into one script. Four roles, and the difference between them
+      is not how much they can see — everyone reads and listens to everything — but what they
+      may change.
+    </p>
+
+    <table class="perm">
+      <thead>
+        <tr><th>Can</th><th>Reader</th><th>Assigned member</th><th>Editor</th><th>Admin</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>Read and Listen</th><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Rehearse</th><td class="n">no</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Change their own name</th><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Write private notes</th><td class="own">their own</td><td class="own">their own</td><td class="own">their own</td><td class="own">their own</td></tr>
+        <tr><th>Edit the text of a line</th><td class="n">no</td><td class="own">their part only</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Record and manage audio</th><td class="n">no</td><td class="own">their part only</td><td class="own">their part only</td><td class="own">their part only</td></tr>
+        <tr><th>Direction written on a line</th><td class="n">no</td><td class="own">their part only</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Standalone direction</th><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Add or delete a line</th><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Rename or add a character</th><td class="n">no</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><th>Cast a part</th><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td></tr>
+        <tr><th>Choose the voices</th><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td></tr>
+        <tr><th>Invite and remove people</th><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td></tr>
+        <tr><th>Delete the script</th><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The screens</h3>
+    <div class="canvas">
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>exists</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Script detail</div>
+            <div class="wf-bar mid"></div>
+            <div class="wf-bar short"></div>
+            <div class="wf-row"><span class="grow">People<span class="r-sub">4 on this script</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Cast<span class="r-sub">3 parts · 1 not cast</span></span><i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>People</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">People</div>
+            <div class="wf-row"><span class="grow">Luky Kuky<span class="r-sub">Admin · Nina</span></span><span class="wf-chip">you</span></div>
+            <div class="wf-row"><span class="grow">Luděk Sobota<span class="r-sub">Assigned member · Michael</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Jana Kratochvílová<span class="r-sub">Reader · no part</span></span><span class="wf-chip">invited</span></div>
+            <div class="wf-btn fill">Invite someone</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>a person</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Luděk Sobota</div>
+            <div class="wf-sub">Joined 12 September</div>
+            <div class="wf-label">Role</div>
+            <div class="wf-row"><span class="grow">Reader<span class="r-sub">Reads and listens. No rehearsing.</span></span></div>
+            <div class="wf-row on"><span class="grow">Assigned member<span class="r-sub">Their own lines: text, audio, notes.</span></span><i class="ph ph-check"></i></div>
+            <div class="wf-row"><span class="grow">Editor<span class="r-sub">The whole script, except casting.</span></span></div>
+            <div class="wf-row"><span class="grow">Admin<span class="r-sub">Everything, including people.</span></span></div>
+            <div class="wf-label">Parts</div>
+            <div class="wf-row"><span class="grow">Michael</span><i class="ph ph-x"></i></div>
+            <div class="wf-btn">Cast in a part</div>
+            <div class="wf-btn ghost">Remove from the script</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Everyone sees this list.</b> A reader opens People and sees the same rows —
+          without Invite, without the chevrons, and Role is a word rather than a choice.
+          One screen, not two.<br><br>
+          <b>Removing asks first</b>, through the alert sheet that already exists: it says what
+          goes with the person (their takes stay, their part comes free).
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf sheet">
+          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Invite someone</div>
+            <div class="wf-text">Anyone with this link can join the script as the role you pick.</div>
+            <div class="wf-row"><span class="grow">rhrs.app/j/8Q2F-K7</span><i class="ph ph-copy"></i></div>
+            <div class="wf-label">They join as</div>
+            <div class="wf-row"><span class="grow">Reader</span><i class="ph ph-caret-down"></i></div>
+            <div class="wf-label">Part, if you know it</div>
+            <div class="wf-row"><span class="grow">Anna</span><i class="ph ph-caret-down"></i></div>
+            <div class="wf-btn fill">Copy the link</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>they open it</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Join this script</div>
+            <div class="wf-text">Luky Kuky invited you to <b>I love you, you're fine, but change quickly</b>.</div>
+            <div class="wf-row"><span class="grow">Your role<span class="r-sub">Assigned member</span></span></div>
+            <div class="wf-row"><span class="grow">Your part<span class="r-sub">Anna — 8 lines</span></span></div>
+            <div class="wf-btn fill">Join</div>
+            <div class="wf-btn ghost">Not now</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>How do I become Nina?</b> Somebody casts you. Only an admin may cast, so an
+          uncast member sees <i>You have not been cast yet</i> and the part comes from the
+          director, not from a queue. If that is wrong, this is the decision to overturn —
+          the alternative is a part anybody can claim while it is free.<br><br>
+          The invitation carries the role, and the part when the admin already knows it.
+          Email invitations come later; a link is enough to test with.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><span>Existing screen</span><span>changes</span></div>
+          <div class="wf-body">
+            <div class="wf-title">A reader's scene</div>
+            <div class="wf-bar"></div>
+            <div class="wf-bar mid"></div>
+            <div class="wf-bar short"></div>
+          </div>
+          <div class="wf-tabbar"><span class="on">Read</span><span>Listen</span><span class="gone">Rehearse</span></div>
+        </div>
+
+        <div class="note">
+          <b>A reader has no Rehearse.</b> The mode bar carries two, not three — and with it
+          go the Recording wizard, the microphone on a line, and the notification about lines
+          without audio. There is nothing for them to record.<br><br>
+          <b>An assigned member</b> keeps all three modes, but Scene edit loses its + between
+          the rows and its <i>Add line</i> / <i>Add direction</i>: they may rewrite their own
+          lines, not the script.<br><br>
+          <b>In the prototype, "who am I" is a switch in the panel</b>, next to light and dark.
+          It is a tool for looking at the app, never a control inside it.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2 -->
+  <section>
+    <div class="sec-label">Two</div>
+    <h2>Cast, alternations and voices</h2>
+    <p class="note-line">
+      One actor can hold several parts and one part can be held by several actors — the
+      alternation a theatre runs on. Everything else follows from that: whose take plays when
+      two people have recorded the same line, and what a part sounds like before anybody has.
+      The voice is the script's, assigned by the admin; which alternate you hear is yours.
+    </p>
+
+    <div class="canvas">
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Cast</div>
+            <div class="wf-label">Read aloud by</div>
+            <div class="wf-row"><span class="grow">Narrator — directions<span class="r-sub">Voice: Ivy</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-label">Parts</div>
+            <div class="wf-row"><span class="grow">Nina<span class="r-sub">12 lines · you</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">9 lines · Luděk Sobota, Petr Novák</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Anna<span class="r-sub">8 lines · not cast · voice: Ivy</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-btn">Add a character</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>a part</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>exists, rebuilt</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Michael</div>
+            <div class="wf-label">Name</div>
+            <div class="wf-row"><span class="grow">Michael</span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-label">Cast</div>
+            <div class="wf-row"><span class="grow">Luděk Sobota<span class="r-sub">9 of 9 lines recorded</span></span><i class="ph ph-x"></i></div>
+            <div class="wf-row"><span class="grow">Petr Novák<span class="r-sub">2 of 9 lines recorded</span></span><i class="ph ph-x"></i></div>
+            <div class="wf-btn">Cast someone else</div>
+            <div class="wf-label">You hear</div>
+            <div class="wf-row"><span class="grow">Luděk Sobota<span class="r-sub">Only you — everyone chooses their own</span></span><i class="ph ph-caret-down"></i></div>
+            <div class="wf-label">Voice, until it is recorded</div>
+            <div class="wf-row"><span class="grow">Rufus<span class="r-sub">Set by the admin, heard by everyone</span></span><i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>voice</div>
+
+        <div class="wf sheet">
+          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Voice for Michael</div>
+            <div class="wf-text">Heard until somebody records the line, and behind every direction if this is the narrator.</div>
+            <div class="wf-row on"><i class="ph ph-play"></i><span class="grow">Rufus<span class="r-sub">Low, unhurried</span></span><i class="ph ph-check"></i></div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Ivy<span class="r-sub">Warm, mid</span></span></div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Arto<span class="r-sub">Bright, quick</span></span></div>
+            <div class="wf-row"><i class="ph ph-play"></i><span class="grow">Mara<span class="r-sub">Dry, level</span></span></div>
+            <div class="wf-sub">Play one to hear it read this character's first line.</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Preview reads a real line</b> — this character's first — rather than a stock
+          sentence, because the question is never how the voice sounds but how it sounds
+          saying this.<br><br>
+          <b>Recommendations come later</b>, picked from the part itself. The sheet is built
+          so a <i>Suggested</i> group can sit at the top of the same list.<br><br>
+          <b>Only an admin opens this.</b> For everyone else the voice row is a line of text.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="note" style="width:100%;max-width:70ch">
+          <b>What plays, in order.</b> The alternate you chose to hear, if they have recorded
+          the line → otherwise the generated voice of the character. Nothing else changes:
+          a take still belongs to the person who recorded it, Audio edit still shows you your
+          own takes and nobody else's, and the Recording wizard still counts only the lines
+          <i>you</i> owe. Two alternates each see their own count.<br><br>
+          <b>The one thing to decide:</b> where "You hear" lives. Here it is on the part, next
+          to the people who hold it. It could also be a row in Listen's settings — but a
+          setting that only exists for parts with two actors is a setting nobody finds.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3 -->
+  <section>
+    <div class="sec-label">Three</div>
+    <h2>Upload wizard</h2>
+    <p class="note-line">
+      A script gets in by being read by the machine and checked by a person, in that order and
+      in three passes: the characters it found, the scenes it split, and finally the lines. Each
+      pass confirms or complains, and complaining is the same small loop every time. Drawn for
+      a phone — the drop target of the desktop version is the same step, worded differently.
+    </p>
+
+    <div class="canvas">
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>1</span></div>
+          <div class="wf-body">
+            <div class="wf-title">New script</div>
+            <div class="wf-row"><i class="ph ph-file-arrow-up"></i><span class="grow">Upload a file<span class="r-sub">A script you already have</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><i class="ph ph-clipboard-text"></i><span class="grow">Paste the text<span class="r-sub">Straight from a message or a mail</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><i class="ph ph-plus"></i><span class="grow">Start from nothing<span class="r-sub">Write it here</span></span><i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>2</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Choose a file</div>
+            <div class="wf-btn big">Choose a file</div>
+            <div class="wf-sub">PDF, DOCX, Markdown, TXT, RTF, EPUB and the other e-book formats.</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>3</span></div>
+          <div class="wf-body">
+            <div class="wf-title">What kind of script is it?</div>
+            <div class="wf-row on"><span class="grow">Theatre<span class="r-sub">A stage play</span></span><i class="ph ph-check"></i></div>
+            <div class="wf-row"><span class="grow">Screen<span class="r-sub">Film, television, a series</span></span></div>
+            <div class="wf-label">Bring in as well</div>
+            <div class="wf-row"><span class="grow">Staging directions</span><span class="wf-toggle on"></span></div>
+            <div class="wf-btn fill">Upload</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Screen changes the two toggles</b> to <i>Acting directions</i> and
+          <i>Filming directions</i>, separately, because one is for the actor and the other
+          never is. Musicals and opera are not handled and the screen does not pretend
+          otherwise.<br><br>
+          <b>What is switched off here is not imported at all</b> — it is not hidden. Saying so
+          matters: this is the one step that throws part of the file away.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>4</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Reading your script</div>
+            <div class="wf-bar mid"></div>
+            <div class="wf-sub">Finding the characters…</div>
+            <div class="wf-row flat"><span class="grow">Read the file</span><i class="ph ph-check"></i></div>
+            <div class="wf-row flat"><span class="grow">Find the characters</span><i class="ph ph-circle-dashed"></i></div>
+            <div class="wf-row flat"><span class="grow">Split the scenes</span></div>
+            <div class="wf-row flat"><span class="grow">Sort out the directions</span></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>it can fail</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>State</span><span>4b</span></div>
+          <div class="wf-body">
+            <div class="wf-title">We could not read this file</div>
+            <div class="wf-text">There is no text in it — it looks like a scan or a photograph of the pages.</div>
+            <div class="wf-btn fill">Choose another file</div>
+            <div class="wf-btn">Paste the text instead</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Two failures, two messages:</b> a file with no text in it, and a file with text but
+          no characters in it (prose, a synopsis, the wrong document). Each says what it saw and
+          offers the way out that would work.<br><br>
+          <b>Leaving in the middle</b> — decide: keep the half-read import as a draft, or throw
+          it away. Keeping it means it has to appear somewhere, which means a state on
+          All scripts.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>5</span></div>
+          <div class="wf-body">
+            <div class="wf-title">The characters we found</div>
+            <div class="wf-sub">Rename anyone the file got wrong.</div>
+            <div class="wf-row"><span class="grow">NINA<span class="r-sub">112 lines</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">MICHAEL<span class="r-sub">98 lines</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">ANNA<span class="r-sub">64 lines</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">ACT ONE<span class="r-sub">1 line</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-btn ghost">Something else is wrong</div>
+            <div class="wf-btn fill">These are right</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>6</span></div>
+          <div class="wf-body">
+            <div class="wf-title">The scenes we found</div>
+            <div class="wf-sub">Rename them if the file did not.</div>
+            <div class="wf-row"><span class="grow">Scene 1<span class="r-sub">42 lines · opens in a kitchen</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">Scene 2<span class="r-sub">31 lines</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">Scene 3<span class="r-sub">57 lines</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-btn ghost">Something else is wrong</div>
+            <div class="wf-btn fill">These are right</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>7</span></div>
+          <div class="wf-body">
+            <div class="wf-title">The script</div>
+            <div class="wf-sub">Look through it scene by scene.</div>
+            <div class="wf-row"><span class="grow">Opening — the kitchen<span class="r-sub">42 lines · 6 directions</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Late night phone call<span class="r-sub">31 lines · 2 directions</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-btn fill">Finish</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>into a scene</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>7b</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Opening — the kitchen</div>
+            <div class="wf-row"><span class="grow">Direction<span class="r-sub">A kitchen, ten past two in the…</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">Nina<span class="r-sub">You're eating.</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">I'm eating.</span></span><i class="ph ph-pencil-simple"></i></div>
+            <div class="wf-btn ghost">Something is wrong here</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>A row opens Line edit</b>, the screen that already exists, with everything on it
+          except audio — there is nothing recorded yet and the part is not cast.
+          A direction opens Direction edit the same way.<br><br>
+          <b>Confirming is not saving.</b> Nothing is written twice: the script exists from the
+          moment it is read, and these three passes are a read-through. Finish only ends the
+          wizard.
+        </div>
+      </div>
+
+      <h3>Something is wrong — the same loop three times</h3>
+      <div class="flow">
+        <div class="wf sheet">
+          <div class="wf-kind"><span>Sheet</span><span>new</span></div>
+          <div class="wf-body">
+            <div class="wf-title">What is wrong?</div>
+            <div class="wf-field">Every second line is glued to the one above it…</div>
+            <div class="wf-label">Where can we find it in the file?</div>
+            <div class="wf-field">Page 4, the argument in the kitchen.</div>
+            <div class="wf-row"><span class="grow">Apply to the whole script<span class="r-sub">Not just this scene</span></span><span class="wf-toggle on"></span></div>
+            <div class="wf-btn fill">Send</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>State</span><span>working</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Looking at it</div>
+            <div class="wf-bar short"></div>
+            <div class="wf-sub">This takes about a minute on a long script.</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>two ends</div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>State</span><span>done</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Fixed</div>
+            <div class="wf-text">We split the glued lines. Have a look — the list below has changed.</div>
+            <div class="wf-btn fill">Back to the list</div>
+            <div class="wf-btn ghost">Something else is wrong</div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i></div>
+
+        <div class="wf">
+          <div class="wf-kind"><span>State</span><span>not done</span></div>
+          <div class="wf-body">
+            <div class="wf-title">We could not fix this one</div>
+            <div class="wf-text">You will have to correct it by hand, here or on the web. Everything else we did is kept.</div>
+            <div class="wf-btn fill">Carry on</div>
+            <div class="wf-btn ghost">Send another request</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Two fields, not one.</b> What is wrong, and where to look for it — a request without
+          the second is a request nobody can act on.<br><br>
+          <b>Apply to the whole script</b> appears only in the lines pass. In the characters and
+          scenes passes there is nothing narrower to apply it to.<br><br>
+          <b>Failure keeps what worked.</b> Saying so out loud is the point: the alternative
+          reading is that the whole import has been thrown away.
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="wf">
+          <div class="wf-kind"><span>Screen</span><span>8</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Your script is in</div>
+            <div class="wf-sub">3 characters · 5 scenes · 130 lines</div>
+            <div class="wf-row"><span class="grow">Cast the parts<span class="r-sub">Nobody is cast yet</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Invite the others<span class="r-sub">They join with a link</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-btn fill">Open the script</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>The end of one job is the start of the next.</b> An imported script with nobody in
+          it can do nothing, so the last screen points at casting and inviting rather than
+          congratulating itself.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Still open</div>
+    <h2>What these wireframes do not answer</h2>
+    <p class="note-line">
+      Five decisions are deliberately left standing. They are in <a href="todo.html">todo</a>
+      and none of them block drawing: a reader losing the missing-audio notification along with
+      Rehearse; whether an assigned member may write a private note on somebody else's line;
+      where "You hear" lives; what happens to an import left half-finished; and whether a
+      standalone direction gets a reference of its own, the way a line has <b>#001-0002</b>.
+    </p>
+  </section>
+
+</main>
+
+<footer class="shell">
+  <a href="index.html">rhrs design</a> · <a href="rhrs-prototype.html">Prototype</a> ·
+  <a href="sitemap.html">Screen map</a> · <a href="style-kit.html">Style kit</a>
+</footer>
+
+<script>
+  function setTheme(mode) {
+    document.documentElement.dataset.theme = mode;
+    document.getElementById('themeLight').classList.toggle('on', mode === 'light');
+    document.getElementById('themeDark').classList.toggle('on', mode === 'dark');
+  }
+  setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+</script>
+</body>
+</html>
