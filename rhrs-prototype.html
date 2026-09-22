@@ -673,6 +673,56 @@
     font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--wine);
   }
 
+  /* ============ PEOPLE AND CASTING ============ */
+  /* A person's name at the top of their own screen, the way a scene names itself
+     above a line. */
+  .pe-head { padding: 4px 2px 6px; }
+  .pe-head .pe-name {
+    font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--noir);
+  }
+  .pe-head .pe-when { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+  /* Taking a part off someone is a small, quiet control — it undoes a decision
+     rather than making one. */
+  .pe-x {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+    background: none; color: var(--text-muted);
+  }
+  .pe-x:active { transform: scale(0.9); }
+  /* The role they hold now. Wine, not coral: coral in this app means you, and a
+     role is a fact about somebody else as often as about yourself. */
+  .le-row.chosen::before { --glass-rim: 2.5px; background: var(--wine); }
+  .le-row.chosen .le-chev { color: var(--wine); }
+  /* Who is invited but has not arrived. Not an error and not a warning — a state
+     that ends by itself. */
+  .badge.quiet { color: var(--wine); border-color: var(--wine-border); }
+
+  /* The cast, on Script detail: the parts and who holds them, under the wizard's
+     card. It is the question everybody has about a script they have just opened,
+     and an alternated part shows both names rather than the newest one. */
+  .cast-card { border-radius: var(--radius-card); padding: 6px 4px; }
+  .cast-card .cc-row {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 10px 16px; border-bottom: 1px solid var(--divider);
+  }
+  .cast-card .cc-row:last-of-type { border-bottom: none; }
+  .cast-card .cc-part {
+    flex: 0 0 auto; font-family: var(--font-display); font-weight: 600; font-size: 16px;
+    color: var(--wine);
+  }
+  .cast-card .cc-row.mine .cc-part { color: var(--coral); }
+  .cast-card .cc-who {
+    flex: 1 1 auto; min-width: 0; text-align: right;
+    font-size: 13.5px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cast-card .cc-go {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    background: none; border: none; cursor: pointer; padding: 12px 16px 10px;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--wine);
+  }
+  .cast-card .cc-go .le-chev { margin-left: auto; display: flex; }
+
   /* ============ LINE EDIT ============ */
   /* Which scene this line is in. You can arrive here from a lot of places and
      one line out of context is hard to place. */
@@ -2783,10 +2833,21 @@
       <span class="spacer"></span>
     </div>
     <div class="list">
-      <div class="list-sublabel">Characters</div>
-      <div class="edit-card" id="charactersList"></div>
-      <button class="se-add" style="margin-top:10px;" onclick="openCharacter(null)">
-        <i class="ph ph-plus ic-18"></i>Add character
+      <!-- People and Cast, before the text: a script is the people on it before
+           it is a list of scenes, and this is the only place they are managed. -->
+      <button class="le-row" onclick="openPeople()">
+        <span class="le-main">
+          <span class="le-top">People</span>
+          <span class="le-sub" id="peopleMeta">4 on this script</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <button class="le-row" style="margin-top:10px;" onclick="openCast()">
+        <span class="le-main">
+          <span class="le-top">Cast</span>
+          <span class="le-sub" id="castMeta">3 parts</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>
       <div class="list-sublabel">Scenes</div>
       <!-- The scenes themselves, not three buttons that talk about them: each one
@@ -2796,6 +2857,54 @@
         <i class="ph ph-trash ic-20"></i>Delete script
       </button>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: PEOPLE ============
+       Who is on this script. It hangs off Edit script, because managing people
+       belongs with the script's own settings and not on the way into a scene. -->
+  <div class="screen" id="peopleScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">People</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="peopleList"></div>
+  </div>
+
+  <!-- ============ SCREEN: PERSON ============
+       One person, and the two questions there are about them: what they hold,
+       and what they may do. In that order — the part is what you came for. -->
+  <div class="screen" id="personScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Person</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="personBody"></div>
+  </div>
+
+  <!-- ============ SCREEN: CAST ============
+       The parts, and who holds them. It took over the character list that used
+       to sit on Edit script — one list, in one place, with the casting on it. -->
+  <div class="screen" id="castScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Cast</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="castList"></div>
+  </div>
+
+  <!-- ============ SCREEN: JOIN ============
+       What somebody sees coming in from an invitation link. The app never leads
+       here; the link does. -->
+  <div class="screen" id="joinScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Join</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="list fades" id="joinBody"></div>
   </div>
 
   <!-- ============ SCREEN: EDIT CHARACTER ============ -->
@@ -3253,6 +3362,18 @@
     </div>
   </div>
 
+  <!-- ============ SHEET: INVITE ============
+       A link, what it makes them, and — when it is already known — the part it
+       casts them in. One sheet, because inviting is one decision made three
+       times over. -->
+  <div class="settings-sheet" id="inviteSheet">
+    <div class="sheet-grabber"></div>
+    <div class="settings-title">
+      <span class="h-title cap-trim">Invite someone</span>
+    </div>
+    <div class="set-scroll" id="inviteBody"></div>
+  </div>
+
   <!-- playback speed, opened from the figure under the scrubber -->
   <div class="settings-sheet" id="speedSheet">
     <div class="sheet-grabber"></div>
@@ -3478,14 +3599,48 @@
   }
   const shorten = t => t.length > 44 ? t.slice(0, 43).trimEnd() + '…' : t;
 
-  /* Who is playing each part. `mine` is the one that is yours; `actor` is the
-     person on it when that person is not you. Neither means nobody has it yet. */
-  const CAST = { Michael: 'Luděk Sobota', Anna: null };
+  /* ---- the people on this script, and who holds which part ----
+     Two independent things, not one list of four roles. A role says what someone
+     may do to the script — read it, edit it, run it. Casting says whether they
+     hold a part. They cross: an admin can act, an actor can be nothing more than
+     a reader who holds a part, and a director who never goes on stage is an
+     editor with no part at all.
+
+     What an actor may do comes from the part and not from the role — rehearsing,
+     recording, rewriting the lines they say — which is why Rehearse asks whether
+     you are cast and never which role you hold. */
+  const ROLES = {
+    reader: { label: 'Reader', line: 'Reads and listens. Changes nothing.' },
+    editor: { label: 'Editor', line: 'The whole script, except casting.' },
+    admin:  { label: 'Admin',  line: 'Everything, including people.' }
+  };
+  const ME = 'me';
+  const MEMBERS = [
+    { id: ME,   name: 'Luky Kuky',          role: 'admin',  when: 'Joined 3 September', you: true },
+    { id: 'ls', name: 'Luděk Sobota',       role: 'reader', when: 'Joined 12 September' },
+    { id: 'pn', name: 'Petr Novák',         role: 'reader', when: 'Joined 14 September' },
+    { id: 'jk', name: 'Jana Kratochvílová', role: 'editor', when: 'Invited 20 September', invited: true }
+  ];
+  const member = id => MEMBERS.find(m => m.id === id);
+  /* A part can be held by more than one person — the alternation a theatre runs
+     on — and a person can hold more than one part. Both directions are read from
+     this one table rather than kept twice. */
+  const CAST = { Nina: [ME], Michael: ['ls', 'pn'], Anna: [] };
+  const castOf  = name => (CAST[name] || []).map(member).filter(Boolean);
+  const partsOf = id => Object.keys(CAST).filter(n => (CAST[n] || []).includes(id));
+  /* Who holds a part, said in a line: you first, because that is the thing you
+     are looking for, and "Not cast" rather than an empty space. */
+  const castLine = name => {
+    const who = castOf(name);
+    return who.length ? who.map(m => m.you ? 'you' : m.name).join(' · ') : 'Not cast';
+  };
   const CHARACTERS = ['Nina', 'Michael', 'Anna'].map(name => ({
     name,
     lines: WHOLE_SCRIPT.filter(it => it.who === name).length,
-    mine: WHOLE_SCRIPT.some(it => it.who === name && it.mine),
-    actor: CAST[name] || null
+    /* Read from the cast rather than stored beside it: two answers to one
+       question drift apart the moment anybody is cast. */
+    get mine() { return (CAST[this.name] || []).includes(ME); },
+    get actors() { return castOf(this.name); }
   }));
 
   /* Icons — swap any ph-* name from https://phosphoricons.com */
@@ -3640,8 +3795,14 @@
     wizardScreen:         'wizardScenesScreen',
 
     editScriptScreen:     'detailScreen',
+    peopleScreen:         'editScriptScreen',
+    castScreen:           'editScriptScreen',
+    personScreen:         'origin',
+    /* The app never leads here — a link does — so in the prototype it lets go
+       to the dashboard, the way the login does. */
+    joinScreen:           'dashboardScreen',
     sceneEditScreen:      'editScriptScreen',
-    characterScreen:      'editScriptScreen',
+    characterScreen:      'castScreen',
 
     /* The detours. */
     lineScreen:           'origin',
@@ -3664,7 +3825,8 @@
     dirScreen:        'sceneEditScreen',
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
-    accountScreen:    'globalSettingsScreen'
+    accountScreen:    'globalSettingsScreen',
+    personScreen:     'peopleScreen'
   };
   /* Landing on a screen again is not the same as never having left it: counts
      move, takes are added, a name is changed. Each place says how to redraw. */
@@ -3672,7 +3834,11 @@
     dashboardScreen:    () => { renderContinue(); renderRecent(); paintBellDot(); },
     scriptsScreen:      () => renderScripts(),
     detailScreen:       () => renderScenes(),
-    editScriptScreen:   () => { renderCharacters(); renderEditScenes(); },
+    editScriptScreen:   () => { renderEditMeta(); renderEditScenes(); },
+    peopleScreen:       () => renderPeople(),
+    personScreen:       () => renderPerson(),
+    castScreen:         () => renderCast(),
+    joinScreen:         () => renderJoin(),
     sceneEditScreen:    () => renderSceneEdit(),
     characterScreen:    () => { editRender = renderCharacter; renderCharacter(); },
     wizardScenesScreen: () => renderWizardScenes(),
@@ -4482,9 +4648,12 @@
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
+  /* Every sheet there is. A new one that is not on this list cannot be closed by
+     the scrim, which is the one way out every sheet has. */
   function closeSheet() {
     document.getElementById('scrim').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
+    document.getElementById('inviteSheet').classList.remove('open');
     document.getElementById('settingsSheet').classList.remove('open');
     document.getElementById('speedSheet').classList.remove('open');
     document.getElementById('wizardSettingsSheet').classList.remove('open');
@@ -4616,6 +4785,17 @@
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
+      <div class="list-sublabel">Cast</div>
+      <div class="cast-card">
+        ${CHARACTERS.map(c => `
+        <div class="cc-row ${c.mine ? 'mine' : ''}">
+          <span class="cc-part cap-trim">${c.name}</span>
+          <span class="cc-who">${castLine(c.name)}</span>
+        </div>`).join('')}
+        <button class="cc-go" onclick="openCast()">
+          Cast the parts<span class="le-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+      </div>
       <div class="list-sublabel">Scenes</div>`;
     html += scenes.map(sc => `
       <div class="card" onclick="openScene('${sc.title}')">
@@ -4686,23 +4866,21 @@
     document.getElementById('charBody').innerHTML =
       editSection('charname', 'Name', '', charEditing, 'Name this character') + `
 
-      <div class="le-label">Part</div>
-      ${!c ? '' : c.actor
-        /* Taken by someone else: there is nothing to switch here, only something
-           to know. A toggle would be offering to take a part off a person. */
-        ? `<div class="le-row">
-             <span class="le-main">
-               <span class="le-top">Assigned to ${c.actor}</span>
-               <span class="le-sub">Their lines play in your scenes</span>
-             </span>
-           </div>`
-        : `<div class="le-row">
-             <span class="le-main">
-               <span class="le-top">Assign to me</span>
-               <span class="le-sub">${c.mine ? 'This is your part' : 'Rehearse as this character'}</span>
-             </span>
-             <button class="toggle ${c.mine ? 'on' : ''}" onclick="toggleMine()"></button>
-           </div>`}
+      <div class="le-label">Cast</div>
+      ${!c ? '' : castOf(c.name).map(m => `
+        <div class="le-row ${m.you ? 'mine' : ''}">
+          <span class="le-main">
+            <span class="le-top">${m.you ? 'You' : m.name}</span>
+            <span class="le-sub">${m.you ? 'You rehearse and record this part' : 'Their takes play in your scenes'}</span>
+          </span>
+          <button class="pe-x" onclick="uncast('${c.name}', '${m.id}')" aria-label="Take the part away">
+            <i class="ph ph-x ic-18"></i>
+          </button>
+        </div>`).join('')}
+      ${!c ? '' : (castOf(c.name).length ? '' : '<div class="ae-empty">Not cast</div>') + `
+      <button class="se-add" onclick="openCastPick('${c.name}')">
+        <i class="ph ph-plus ic-18"></i>Cast someone in this part
+      </button>`}
 
       ${c ? `<div class="le-label">Lines</div>
       <div class="le-row"><span class="le-main"><span class="le-top">${c.lines} lines</span>
@@ -4715,32 +4893,305 @@
   }
   /* One part is yours at a time, so taking one releases the other. It applies on
      the tap — there is nothing here to confirm, which is why there is no Save. */
+  /* Casting yourself is casting, so it moves the same table the admin moves —
+     and it no longer takes every other part off you: one person can hold more
+     than one. */
   function toggleMine() {
     const c = CHARACTERS.find(x => x.name === charEditing);
     const becoming = !c.mine;
-    if (becoming) CHARACTERS.forEach(x => { x.mine = false; });
-    c.mine = becoming;
+    CAST[c.name] = becoming
+      ? [...(CAST[c.name] || []), ME]
+      : (CAST[c.name] || []).filter(id => id !== ME);
     renderCharacter();
-    renderCharacters();
+    renderCast();
+    renderScenes();
     toast(becoming ? 'This is your part now' : 'Part released');
   }
 
   function openEditScript() {
-    renderCharacters();
+    renderEditMeta();
     renderEditScenes();
     showScreen('editScriptScreen');
   }
-  function renderCharacters() {
-    document.getElementById('charactersList').innerHTML = CHARACTERS.map(c => `
-      <div class="char-row">
-        <div class="cr-main">
-          <div class="cr-name">${c.name}${c.mine ? '<span class="mine-tag">Me</span>' : ''}</div>
-          <div class="cr-lines">${c.lines} lines · ${c.mine ? 'Me' : (c.actor || 'Unassigned')}</div>
-        </div>
-        <button class="cr-edit" onclick="openCharacter('${c.name}')" aria-label="Edit character">
-          <i class="ph ph-pencil-simple ic-18"></i>
+  /* The two rows above the scenes count what is behind them, so the screen says
+     how big the job is before you open it. */
+  function renderEditMeta() {
+    const left = MEMBERS.filter(m => m.invited).length;
+    document.getElementById('peopleMeta').textContent =
+      MEMBERS.length + ' on this script' + (left ? ' · ' + left + ' invited' : '');
+    const uncast = CHARACTERS.filter(c => !castOf(c.name).length).length;
+    document.getElementById('castMeta').textContent =
+      CHARACTERS.length + ' part' + (CHARACTERS.length === 1 ? '' : 's') +
+      (uncast ? ' · ' + uncast + ' not cast' : '');
+  }
+
+  /* ============================================================
+     PEOPLE, ROLES AND CASTING
+     ============================================================ */
+  function openPeople() {
+    renderPeople();
+    showScreen('peopleScreen');
+  }
+  function renderPeople() {
+    document.getElementById('peopleList').innerHTML = MEMBERS.map(m => {
+      const parts = partsOf(m.id);
+      return `
+      <button class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openPerson('${m.id}')">
+        <span class="le-main">
+          <span class="le-top">${m.name}</span>
+          <span class="le-sub">${ROLES[m.role].label} · ${parts.length ? 'cast as ' + parts.join(', ') : 'not cast'}</span>
+        </span>
+        ${m.you ? '<span class="badge">you</span>' : m.invited ? '<span class="badge quiet">invited</span>' : ''}
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>`;
+    }).join('') + `
+      <button class="se-add" style="margin-top:6px;" onclick="openInvite()">
+        <i class="ph ph-plus ic-18"></i>Invite someone
+      </button>`;
+  }
+
+  /* One person: what they hold first, what they may do second. A part is the
+     thing you opened this screen for; the role is the paperwork. */
+  let personId = ME;
+  function openPerson(id) {
+    personId = id;
+    renderPerson();
+    showScreen('personScreen');
+  }
+  function renderPerson() {
+    const m = member(personId);
+    if (!m) return;
+    const parts = partsOf(m.id);
+    document.getElementById('personBody').innerHTML = `
+      <div class="pe-head">
+        <div class="pe-name cap-trim">${m.name}</div>
+        <div class="pe-when">${m.when}${m.you ? ' · this is you' : ''}</div>
+      </div>
+
+      <div class="le-label">Cast in</div>
+      ${parts.length ? parts.map(p => `
+        <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;">
+          <span class="le-main">
+            <span class="le-top cap-trim">${p}</span>
+            <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines || 0} lines · rehearses and records them</span>
+          </span>
+          <button class="pe-x" onclick="uncast('${p}', '${m.id}')" aria-label="Take the part away">
+            <i class="ph ph-x ic-18"></i>
+          </button>
+        </div>`).join('')
+      : '<div class="ae-empty">Not cast in anything yet</div>'}
+      <button class="se-add" onclick="openPartPick()">
+        <i class="ph ph-plus ic-18"></i>Cast in a part
+      </button>
+
+      <div class="le-label">Role</div>
+      ${Object.entries(ROLES).map(([key, r]) => `
+        <button class="le-row ${m.role === key ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="setRole('${key}')">
+          <span class="le-main">
+            <span class="le-top">${r.label}</span>
+            <span class="le-sub">${r.line}</span>
+          </span>
+          ${m.role === key ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>' : ''}
+        </button>`).join('')}
+      <div class="ac-note">A part is not a role. Whoever holds one rehearses it,
+        records it and may rewrite the lines they say — reader, editor and admin alike.</div>
+
+      <button class="le-danger" onclick="openAlert('removeMember')">
+        <i class="ph ph-sign-out ic-20"></i>Remove from the script
+      </button>`;
+  }
+  function setRole(key) {
+    const m = member(personId);
+    if (!m || m.role === key) return;
+    m.role = key;
+    renderPerson();
+    renderPeople();
+    renderEditMeta();
+    toast(m.name + ' is now ' + (key === 'admin' ? 'an ' : 'a ') + ROLES[key].label.toLowerCase());
+  }
+  /* Casting and uncasting both move the one table, so both are one line each. */
+  function cast(name, id) {
+    if (!CAST[name]) CAST[name] = [];
+    if (!CAST[name].includes(id)) CAST[name].push(id);
+    afterCast(member(id).name + ' is cast as ' + name);
+  }
+  function uncast(name, id) {
+    CAST[name] = (CAST[name] || []).filter(x => x !== id);
+    afterCast('Part released');
+  }
+  function afterCast(msg) {
+    renderPerson(); renderPeople(); renderCast(); renderScenes(); renderCharacter();
+    /* Edit script counts what is behind its two rows, and it is one screen back
+       from all of this — it has to be told. */
+    renderEditMeta();
+    toast(msg);
+  }
+  function removeMember() {
+    closeSheet();
+    const m = member(personId);
+    Object.keys(CAST).forEach(n => { CAST[n] = CAST[n].filter(x => x !== personId); });
+    MEMBERS.splice(MEMBERS.indexOf(m), 1);
+    renderPeople(); renderCast(); renderScenes(); renderEditMeta();
+    goBack();
+    toast(m.name + ' removed');
+  }
+
+  /* Which part to cast this person in — a sheet, because it is one choice out of
+     a short list, the same as changing a line's character. */
+  function openPartPick() {
+    const m = member(personId);
+    const free = CHARACTERS.filter(c => !(CAST[c.name] || []).includes(m.id));
+    document.getElementById('sheetContext').className = 'sheet-context others';
+    document.getElementById('ctxName').textContent = 'Cast ' + (m.you ? 'yourself' : m.name);
+    document.getElementById('ctxLine').textContent = free.length
+      ? 'A part can be held by more than one person'
+      : 'They already hold every part';
+    document.getElementById('sheetItems').innerHTML = free.map(c =>
+      `<button class="sheet-item" onclick="closeSheet(); cast('${c.name}', '${m.id}')">
+        <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${c.name} · ${c.lines} lines
+      </button>`).join('<div class="sheet-rule"></div>')
+      || '<div class="ae-empty">Nothing left to cast them in</div>';
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+  /* The same sheet from the other side: this part, and who could hold it. */
+  function openCastPick(name) {
+    const free = MEMBERS.filter(m => !(CAST[name] || []).includes(m.id));
+    document.getElementById('sheetContext').className = 'sheet-context others';
+    document.getElementById('ctxName').textContent = 'Cast as ' + name;
+    document.getElementById('ctxLine').textContent = 'More than one person can hold a part';
+    document.getElementById('sheetItems').innerHTML = free.map(m =>
+      `<button class="sheet-item ${m.you ? 'accent' : ''}" onclick="closeSheet(); cast('${name}', '${m.id}')">
+        <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${m.name}${m.you ? ' · you' : ''}
+      </button>`).join('<div class="sheet-rule"></div>')
+      || '<div class="ae-empty">Everybody on this script already holds it</div>';
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+
+  /* ---- the cast: the parts, and who holds them ---- */
+  function openCast() {
+    renderCast();
+    showScreen('castScreen');
+  }
+  function renderCast() {
+    const el = document.getElementById('castList');
+    if (!el) return;
+    el.innerHTML = CHARACTERS.map(c => `
+      <button class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;" onclick="openCharacter('${c.name}')">
+        <span class="le-main">
+          <span class="le-top cap-trim">${c.name}</span>
+          <span class="le-sub">${c.lines} lines · ${castLine(c.name)}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>`).join('') + `
+      <button class="se-add" style="margin-top:6px;" onclick="openCharacter(null)">
+        <i class="ph ph-plus ic-18"></i>Add a character
+      </button>`;
+  }
+
+  /* ---- inviting ---- */
+  const INVITE = { role: 'reader', part: null, link: 'rhrs.app/j/8Q2F-K7' };
+  function openInvite() {
+    renderInvite();
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('inviteSheet').classList.add('open');
+  }
+  function renderInvite() {
+    document.getElementById('inviteBody').innerHTML = `
+      <div class="set-group">
+        <div class="ac-note" style="padding-top:0;">Anyone with this link joins the script as
+          the role you pick. It stops working once they have.</div>
+        <button class="le-row" onclick="copyInvite()">
+          <span class="le-main">
+            <span class="le-top" style="font-variant-numeric:tabular-nums;">${INVITE.link}</span>
+            <span class="le-sub">Tap to copy</span>
+          </span>
+          <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
         </button>
-      </div>`).join('');
+
+        <div class="le-label">They join as</div>
+        <div class="gs-theme">
+          ${Object.entries(ROLES).map(([key, r]) =>
+            `<button class="${INVITE.role === key ? 'on' : ''}" onclick="inviteRole('${key}')">${r.label}</button>`).join('')}
+        </div>
+
+        <div class="le-label">Part, if you know it</div>
+        <button class="le-row" onclick="openInvitePart()">
+          <span class="le-main">
+            <span class="le-top">${INVITE.part || 'Not yet'}</span>
+            <span class="le-sub">${INVITE.part ? 'Cast the moment they join' : 'You can cast them later'}</span>
+          </span>
+          <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+        </button>
+
+        <button class="alert-btn fill" style="margin-top:18px;" onclick="copyInvite()">Copy the link</button>
+      </div>`;
+  }
+  function inviteRole(key) { INVITE.role = key; renderInvite(); }
+  function copyInvite() {
+    navigator.clipboard?.writeText('https://' + INVITE.link);
+    sheetAction('Invitation link copied');
+  }
+  /* Swapped, not stacked: the part is a detail of this sheet, not something on
+     top of it — the same move the speed sheet makes out of settings. */
+  function openInvitePart() {
+    document.getElementById('inviteSheet').classList.remove('open');
+    setTimeout(() => {
+      document.getElementById('sheetContext').className = 'sheet-context others';
+      document.getElementById('ctxName').textContent = 'Cast them as';
+      document.getElementById('ctxLine').textContent = 'They hold it the moment they join';
+      document.getElementById('sheetItems').innerHTML =
+        `<button class="sheet-item" onclick="setInvitePart(null)">
+          <span class="item-ic"><i class="ph ph-minus ic-22"></i></span>Not yet
+        </button><div class="sheet-rule"></div>` +
+        CHARACTERS.map(c =>
+          `<button class="sheet-item" onclick="setInvitePart('${c.name}')">
+            <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${c.name} · ${castLine(c.name)}
+          </button>`).join('<div class="sheet-rule"></div>');
+      document.getElementById('sheet').classList.add('open');
+    }, 180);
+  }
+  function setInvitePart(name) {
+    INVITE.part = name;
+    document.getElementById('sheet').classList.remove('open');
+    setTimeout(openInvite, 180);
+  }
+
+  /* ---- arriving from a link ---- */
+  function openJoin() {
+    renderJoin();
+    showScreen('joinScreen');
+  }
+  function renderJoin() {
+    const from = MEMBERS.find(m => m.role === 'admin') || MEMBERS[0];
+    document.getElementById('joinBody').innerHTML = `
+      <div class="pe-head">
+        <div class="pe-name cap-trim">Join this script</div>
+        <div class="pe-when">${from.name} invited you</div>
+      </div>
+      <div class="le-text" style="cursor:default;">${SCRIPTS[0].title}</div>
+
+      <div class="le-label">Your role</div>
+      <div class="le-row">
+        <span class="le-main">
+          <span class="le-top">${ROLES[INVITE.role].label}</span>
+          <span class="le-sub">${ROLES[INVITE.role].line}</span>
+        </span>
+      </div>
+
+      <div class="le-label">Your part</div>
+      <div class="le-row ${INVITE.part ? 'mine' : ''}">
+        <span class="le-main">
+          <span class="le-top cap-trim">${INVITE.part || 'Not cast yet'}</span>
+          <span class="le-sub">${INVITE.part
+            ? 'You rehearse and record it'
+            : 'The director casts the parts — ask them for one'}</span>
+        </span>
+      </div>
+
+      <button class="alert-btn fill" style="margin-top:22px;" onclick="toast('Joined')">Join</button>
+      <button class="alert-btn ghost" onclick="goBack()">Not now</button>`;
   }
 
   /* ============================================================
@@ -4834,6 +5285,16 @@
       text: 'The line, its note and all of its takes go with it. This cannot be undone.',
       primary: 'Delete line', act: "closeSheet(); toast('Line deleted')",
       ghost: 'Keep it'
+    },
+    /* Taking somebody off a script. Not destructive in the way the others are —
+       what they recorded stays and their part comes free — so it says that
+       rather than warning about something that does not happen. */
+    removeMember: {
+      icon: 'ph ph-sign-out',
+      title: 'Remove them from this script?',
+      text: 'They lose the script and any part they held comes free. What they recorded stays — the takes belong to the script, not to the person.',
+      primary: 'Remove', act: 'removeMember()',
+      ghost: 'Keep them'
     },
     deleteDirection: {
       icon: 'ph-fill ph-warning',
@@ -5434,7 +5895,6 @@
   renderNotifications();
   renderRecent();
   renderScripts();
-  renderCharacters();
   renderRead();
 
   /* One table for every screen: the hash routes read it, and so does the panel.
@@ -5492,6 +5952,19 @@
                   go: () => showScreen('scriptsScreen') },
     detail:     { label:'Script detail',    group:'library', screen:'detailScreen', ver:1, st:'prepared',
                   go: () => openScript('s1') },
+
+    /* ---- who is on the script ---- */
+    people:     { label:'People',           group:'people', screen:'peopleScreen', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openPeople(); } },
+    person:     { label:'Person',           group:'people', screen:'personScreen', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openPeople(); openPerson('ls'); } },
+    invite:     { label:'Invite',           group:'people', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openPeople(); openInvite(); } },
+    cast:       { label:'Cast',             group:'people', screen:'castScreen', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openCast(); } },
+    join:       { label:'Join',             group:'people', screen:'joinScreen', st:'wip',
+                  /* Reached from a link, never from inside the app. */
+                  go: () => openJoin() },
 
     /* ---- one scene, three modes ---- */
     read:       { label:'Read',             group:'scene', screen:'readScreen', ver:1, st:'prepared',
@@ -5875,8 +6348,19 @@
     charname: v => {
       if (!v) return toast('Give the character a name');
       const ch = CHARACTERS.find(x => x.name === charEditing);
-      if (ch) { ch.name = v; charEditing = v; } else { CHARACTERS.push({ name: v, lines: 0 }); charEditing = v; }
-      renderCharacters();
+      if (ch) {
+        /* The cast is keyed by the name, so renaming has to carry it across or
+           whoever was cast quietly stops being. */
+        CAST[v] = CAST[charEditing] || [];
+        delete CAST[charEditing];
+        ch.name = v; charEditing = v;
+      } else {
+        CAST[v] = [];
+        CHARACTERS.push({ name: v, lines: 0, get mine() { return (CAST[this.name] || []).includes(ME); },
+                          get actors() { return castOf(this.name); } });
+        charEditing = v;
+      }
+      renderCast();
     }
   };
   function editSection(key, label, icon, value, addLabel) {
@@ -6366,6 +6850,7 @@
     ['Getting in',          'entry'],
     ['Home',                'home'],
     ['Scripts',             'library'],
+    ['People',              'people'],
     ['One scene, three modes', 'scene'],
     ['Recording',           'recording'],
     ['Writing and editing', 'editing'],
