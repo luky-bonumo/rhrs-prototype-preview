@@ -572,10 +572,12 @@
      scroller with its alpha wrong and every half-faded card came out darker than
      the ground — every variant of the mask did, on the scroller or on the screen.
      So the fade is two sticky bands painted in the ground's own colour, one at
-     each end of the scrollport: the same look, no mask. Each band pulls itself
-     into the region's padding with margins, so nothing under it moves and what
-     fades at the very end is the padding, not the last row. --pad-t / --pad-b
-     are the region's own padding, --fade-color its ground.
+     each end of the scrollport: the same look, no mask. A sticky box can never
+     enter its container's padding, so the region's vertical padding is the
+     bands' to carry: padding-top and -bottom are 0 and each band brings the
+     padding back as its margin. Nothing under them moves, and what fades at the
+     very end is that padding, not the last row. --pad-t / --pad-b are the
+     region's own padding, --fade-color its ground.
 
      Fade only where something is actually fixed over the content — a sheet ends
      at its own rim, not in a fade. */
@@ -593,20 +595,22 @@
     --fade-color: var(--screen-bg);
     margin-top: calc(var(--fade-lift) * -1);
   }
+  /* Two classes, so this outranks each region's own padding shorthand. */
+  .list.fades, .scroll.fades, .dash-scroll.fades, .gs-list.fades, .settings-scroll.fades {
+    padding-top: 0; padding-bottom: 0;
+  }
   .fades::before, .fades::after {
     content: ''; display: block; position: sticky; z-index: 3;
     flex: 0 0 auto; pointer-events: none;
   }
   .fades::before {
     top: 0; height: var(--fade-t);
-    margin-top: calc(var(--pad-t) * -1);
     margin-bottom: calc(var(--pad-t) - var(--fade-t));
     background: linear-gradient(to bottom, var(--fade-color), transparent);
   }
   .fades::after {
     bottom: 0; height: var(--fade-b);
     margin-top: calc(var(--pad-b) - var(--fade-b));
-    margin-bottom: calc(var(--pad-b) * -1);
     background: linear-gradient(to top, var(--fade-color), transparent);
   }
   /* Each region's own padding and ground; .list's are the defaults above. */
@@ -1466,7 +1470,7 @@
     --fade-over: 72px;
     --fade-b: 96px;
     margin-bottom: calc(var(--fade-over) * -1);
-    padding-bottom: calc(20px + var(--fade-over));
+    /* The overhang is the bottom band's margin now, not padding. */
     --pad-b: calc(20px + var(--fade-over));
   }
   /* 72px is the reach of the open player. Collapsed there is only the mini bar to
