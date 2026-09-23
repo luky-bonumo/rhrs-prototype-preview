@@ -214,6 +214,8 @@
     font-size: 12.5px; color: var(--wf-dim); line-height: 1.5;
   }
   .note b { color: var(--wf-ink); font-weight: 700; }
+  .note ul { margin: 6px 0 10px; padding-left: 16px; }
+  .note li { margin: 4px 0; }
 
   /* The legend, and the permission table — both are content, not decoration. */
   .legend { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 18px; font-size: 13px; color: var(--wf-dim); }
@@ -253,12 +255,13 @@
 <header class="top">
   <div class="shell">
     <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
-    <h1>Three things the app <em>cannot do yet</em>.</h1>
+    <h1>Four things the app <em>cannot do yet</em>.</h1>
     <p class="lede">
       Who is on a script and what they may touch, who plays which part and in what voice,
-      and how a script gets in at all. Grey on purpose: these are the shapes and the words,
-      not the design. The copy is real — at this stage the words are the part worth arguing
-      about. From the meeting of 21 September 2026.
+      how a script gets in at all, and what Global settings holds. Grey on purpose: these are
+      the shapes and the words, not the design. The copy is real — at this stage the words are
+      the part worth arguing about. From the meeting of 21 September 2026; Global settings
+      from 23 September.
     </p>
   </div>
 </header>
@@ -1009,6 +1012,82 @@
           with a role, the cast, the voices — is the script's own, so the new script starts
           with one admin and nobody cast.
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 4 -->
+  <section>
+    <div class="sec-label">Four</div>
+    <h2>Global settings</h2>
+    <p class="note-line">
+      What is yours rather than a scene's: your account, how the app looks, what it may tell you,
+      what it records, the way to talk to us, and the small print. Proposed 23 September. Of this,
+      the prototype has Account, Appearance, Feedback and the two documents under About.
+    </p>
+
+    <div class="canvas">
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Global settings</button><span>exists, filled in</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Settings</div>
+            <div class="wf-label">Account</div>
+            <div class="wf-row"><i class="ph ph-user"></i><span class="grow">Luky Kuky<span class="r-sub">lukykuky@example.com</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-label">Appearance</div>
+            <div class="wf-row flat"><span class="wf-chip solid">System</span><span class="wf-chip">Light</span><span class="wf-chip">Dark</span></div>
+            <div class="wf-label">Notifications</div>
+            <div class="wf-row"><i class="ph ph-bell-slash"></i><span class="grow">Notifications are off<span class="r-sub">Only your phone’s settings can turn them back on</span></span><i class="ph ph-arrow-square-out"></i></div>
+            <div class="wf-row"><span class="grow">Lines you still need to record<span class="r-sub">When a scene of yours has lines without audio</span></span><span class="wf-toggle on"></span></div>
+            <div class="wf-label">Recording &amp; storage</div>
+            <div class="wf-row"><i class="ph ph-microphone-slash"></i><span class="grow">The microphone is off<span class="r-sub">Rehearse and the Recording wizard need it</span></span><i class="ph ph-arrow-square-out"></i></div>
+            <div class="wf-row"><span class="grow">Audio on this phone<span class="r-sub">124 MB · takes and voices kept for playing offline</span></span><span class="wf-chip">Clear</span></div>
+            <div class="wf-label">Feedback</div>
+            <div class="wf-row"><i class="ph ph-chat-circle-text"></i><span class="grow">Send feedback</span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><span class="grow">Shake to send feedback<span class="r-sub">Give your phone a shake wherever you are</span></span><span class="wf-toggle on"></span></div>
+            <div class="wf-label">About</div>
+            <div class="wf-row"><i class="ph ph-file-text"></i><span class="grow">Terms of Service</span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><i class="ph ph-shield-check"></i><span class="grow">Privacy Policy</span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><i class="ph ph-scroll"></i><span class="grow">Licenses<span class="r-sub">The fonts, the icons and the code rhrs is built on</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row flat"><span class="grow">Version<span class="r-sub">0.1 alpha · build 42 · tap to copy</span></span></div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Only what is yours rather than a scene's.</b> Text size, notes and directions,
+          playback speed, the narrator and who you hear are already in each mode's settings
+          &mdash; the gear on the scene &mdash; and they should hold everywhere, one value rather
+          than one per scene. So they are not repeated here: two doors to one value is two places
+          to look for it. <i>Playback &amp; voices</i>, <i>Rehearsal defaults</i> and
+          <i>Notes &amp; display</i> fold into those sheets.<br><br>
+          <b>The two slashed rows appear only while the phone has it off</b> &mdash; notifications,
+          the microphone &mdash; each with the one way back, the phone's settings, the same as
+          <i>Android playback</i>. The rest of the time the section is just its switches.<br><br>
+          <b>About holds the small print:</b> the two documents the login asks you to agree to,
+          the licences the fonts and the icons require (Flutter has a page of its own for them),
+          and the version to quote in a bug report. The stores want the privacy policy reachable
+          from inside the app, not only at the door.
+        </div>
+
+        <div class="note">
+          <b>Still to come here</b>
+          <ul>
+            <li><b>Subscription</b>, once there is a price: the plan, managing it, restoring a
+              purchase. The Terms and Privacy links have to sit in the purchase flow too.</li>
+            <li><b>Notifications</b>: the full list of kinds, each with its own switch and icon
+              &mdash; next versions.</li>
+            <li><b>Language</b>, when the copy is translated. It is written as keys already.</li>
+            <li><b>Change email</b>, in Account, being worked out with the developers.</li>
+            <li><b>A way to reach us</b> other than feedback: a support address, perhaps under About.</li>
+            <li><b>Your data</b>: a copy of everything we hold, which the law lets you ask for.
+              On request for now; a row here later.</li>
+          </ul>
+          <b>Still to decide:</b> is playback speed one value for Listen and Rehearse, or one each?
+          And does <i>Audio on this phone</i> exist at all &mdash; does the app keep audio for
+          playing offline?
+        </div>
+
       </div>
     </div>
   </section>
