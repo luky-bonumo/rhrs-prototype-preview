@@ -4530,6 +4530,13 @@
      them to say. Painted on every screen change, so casting changes reach it. */
   function paintViewer() {
     document.querySelector('.phone').classList.toggle('uncast', !can.act());
+    /* New script is for whoever runs a script somewhere. Set here, on every
+       screen change, rather than by the dashboard's own renderer, which does
+       not run on every visit — and by display, because the row is display:flex
+       and the hidden attribute loses to it. */
+    const runs = adminSomewhere();
+    document.getElementById('dashNew').style.display = runs ? '' : 'none';
+    document.getElementById('newScriptBtn').style.visibility = runs ? '' : 'hidden';
   }
 
   /* Switching mode replaces the current mode screen. Back from any of the three
@@ -5381,7 +5388,6 @@
      LIST RENDERERS
      ============================================================ */
   function renderScripts() {
-    document.getElementById('newScriptBtn').style.visibility = adminSomewhere() ? '' : 'hidden';
     /* Only the scripts you are on: membership belongs to a script. An import
        left half-way waits here as a draft and opens where it was left. */
     document.getElementById('scriptsList').innerHTML = myScripts().map(s => `
@@ -5443,7 +5449,6 @@
         <i class="ph ph-users-three ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Cast</span>
-          <span class="rw-sub">Who plays which part</span>
           <span class="rw-meta">${CHARACTERS.length} part${CHARACTERS.length === 1 ? '' : 's'} · ${
             CHARACTERS.filter(c => !castOf(c.name).length).length
               ? CHARACTERS.filter(c => !castOf(c.name).length).length + ' not cast'
@@ -5488,7 +5493,7 @@
   }
   function renderContinue() {
     const s = lastScript();
-    document.getElementById('dashContinue').hidden = !s;
+    document.getElementById('dashContinue').style.display = s ? '' : 'none';
     if (!s) return;
     document.getElementById('dashContinue').innerHTML = `
       <span class="dc-main">
@@ -5499,7 +5504,6 @@
       <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
   }
   function renderRecent() {
-    document.getElementById('dashNew').hidden = !adminSomewhere();
     const scenesByScript = LAST_SCENE;
     document.getElementById('recentList').innerHTML = myScripts().filter(s => !s.draft).slice(0, 3).map(s => `
       <button class="dash-recent" onclick="openScript('${s.id}')">
@@ -6424,17 +6428,19 @@
         <div class="il-title">Your script is in</div>
         <div class="il-sub">${CHARACTERS.length} character${CHARACTERS.length === 1 ? '' : 's'} · ${s.scenes.length} scene${s.scenes.length === 1 ? '' : 's'} · ${lines} line${lines === 1 ? '' : 's'}</div>
       </div>
-      <button class="le-row" style="margin-bottom:10px;" onclick="openCast()">
-        <span class="le-main">
-          <span class="le-top">Cast the parts</span>
-          <span class="le-sub">${uncast ? (uncast === CHARACTERS.length ? 'Nobody is cast yet' : uncast + ' not cast') : 'Everybody is cast'}</span>
-        </span>
-        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
-      </button>
-      <button class="le-row" onclick="openPeople()">
+      <button class="le-row" style="margin-bottom:10px;" onclick="openPeople()">
+        <span class="le-ic"><i class="ph ph-user-plus ic-22"></i></span>
         <span class="le-main">
           <span class="le-top">Invite the others</span>
           <span class="le-sub">They join with a link</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
+      </button>
+      <button class="le-row" onclick="openCast()">
+        <span class="le-ic"><i class="ph ph-users-three ic-22"></i></span>
+        <span class="le-main">
+          <span class="le-top">Cast the parts</span>
+          <span class="le-sub">${uncast ? (uncast === CHARACTERS.length ? 'Nobody is cast yet' : uncast + ' not cast') : 'Everybody is cast'}</span>
         </span>
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>
