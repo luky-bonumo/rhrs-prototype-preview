@@ -884,6 +884,19 @@
   /* A line of explanation under a field, where the field itself cannot carry it.
      Same size as a row's own sub-line, so the two read as one voice. */
   .ac-note { font-size: 13px; color: var(--text-muted); padding: 8px 2px 0; line-height: 1.45; }
+  /* Under Sign out and quieter than it: the way out for good is there to be found,
+     not to be the next thing the thumb meets. */
+  .ac-delete {
+    display: block; margin: 14px auto 0; padding: 10px 16px; border: none; background: none;
+    cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--coral);
+  }
+  /* A document, not a form: headings and paragraphs at reading size. */
+  .doc-updated { font-size: 13px; color: var(--text-muted); margin: 0 2px 4px; }
+  .doc h3 {
+    font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 1.3;
+    color: var(--noir); margin: 22px 2px 6px;
+  }
+  .doc p { font-size: 15px; line-height: var(--line-height); color: var(--noir); margin: 0 2px 8px; }
 
   #noteSheet textarea {
     width: 100%; border: none; background: none; outline: none; resize: none;
@@ -1183,6 +1196,14 @@
   .otp.err .otp-box::before { background: var(--coral); }
 
   .auth-err { font-size: 13px; color: var(--coral); font-weight: 500; margin: -4px 0 14px; }
+  /* The small print under the ways in. Muted, because it is not the action, but
+     never so small or so pale that nobody could be said to have seen it — and
+     the links are underlined as well as coloured. */
+  .auth-legal { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); text-align: center; margin: 16px 6px 0; }
+  .auth-legal button {
+    font: inherit; font-weight: 600; color: var(--wine); background: none; border: none; padding: 0;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+  }
 
   /* Not the app's button, and not glass. Both brands fix the background: Apple's
      must stay black or white, Google's must be one of three fills. White in both
@@ -2571,8 +2592,11 @@
     </div>
 
     <div class="dash-scroll fades">
+      <!-- A script you are on and have never opened, above everything: there is
+           nothing in it to continue yet, only something to start. -->
+      <button class="dash-continue" id="dashNewFor"></button>
       <button class="dash-continue" id="dashContinue" onclick="continueLastScene()"></button>
-      <div class="dash-recent-label">Last open scripts</div>
+      <div class="dash-recent-label" id="recentLabel">Last open scripts</div>
       <div class="dash-recent-list" id="recentList"></div>
       <button class="dash-alllink" onclick="showScreen('scriptsScreen')">
         All scripts
@@ -2812,7 +2836,7 @@
 <path d="M15.3816 13.7565V13.4328L16.5684 11.8684L16.2987 12.3898V8.30785C16.2987 7.70843 16.1788 7.27086 15.939 6.99514C15.6993 6.71941 15.3156 6.58154 14.7882 6.58154C14.4165 6.58154 14.0749 6.63549 13.7632 6.74338C13.4635 6.85128 13.1937 7.00712 12.954 7.21092V6.20391H13.1338C14.2007 5.02906 15.3756 4.44164 16.6583 4.44164C17.5455 4.44164 18.2468 4.72336 18.7623 5.28681C19.2778 5.83827 19.5355 6.59353 19.5355 7.55259V12.3898L19.2478 11.8863L20.5965 13.4328V13.7565H15.3816ZM8.92592 13.7565V13.4328L10.2746 11.8863L9.98688 12.3898V2.4456L10.7601 3.93814L8.74609 1.78025V1.34868L12.6303 0H13.2237V12.3898L12.954 11.8684L14.1408 13.4328V13.7565H8.92592Z" fill="currentColor"/>
 <path d="M0.179824 13.7563V13.4326L1.5285 11.8861L1.24078 12.3896V7.12078L2.01402 8.5234L0 6.23964V5.80806L3.83024 4.58526H4.42366L4.29778 6.3835H4.47761V12.3896L4.18989 11.8142L6.07803 13.4326V13.7563H0.179824ZM4.13594 7.6063L4.20787 6.3835H4.38769C4.72336 5.78409 5.15494 5.31055 5.68242 4.96289C6.20991 4.61524 6.75537 4.44141 7.31882 4.44141C7.83431 4.44141 8.29586 4.5493 8.70346 4.76509L7.31882 8.61331H6.79733L4.5855 6.3835L6.77935 6.77911C6.15596 6.77911 5.62248 6.85104 5.17892 6.9949C4.74734 7.12677 4.39968 7.33057 4.13594 7.6063Z" fill="currentColor"/></svg></span>
       <div class="auth-head">Always have someone<br>to <span class="accent">rehearse</span> with.</div>
-      <div class="auth-sub">Sign in to pick up where you left off.</div>
+      <div class="auth-sub">Sign in or create an account.</div>
       <!-- The marks themselves, not icon-font approximations: both brands require
            their own artwork and forbid a redrawn one. Faithful reproductions for
            the prototype — the Flutter build must use the files downloaded from
@@ -2851,6 +2875,13 @@
            the bottom it sat a screen away from what it acts on, greyed out and
            still the loudest thing there. -->
       <button class="auth-btn" id="emailBtn" onclick="authSubmitEmail()" disabled>Continue</button>
+      <!-- Under the last way in, so it is read before any of the three is used, and
+           naming all three, so it cannot be taken to belong to the email route
+           alone. The terms are agreed to; the privacy policy is only read — it
+           says what happens to your data, it is not something you consent to. -->
+      <div class="auth-legal">By continuing with Apple, Google or email, you agree to the
+        <button onclick="showScreen('termsScreen')">Terms of Service</button> and confirm that
+        you have read the <button onclick="showScreen('privacyScreen')">Privacy Policy</button>.</div>
       <div class="auth-spacer"></div>
     </div>
   </div>
@@ -2923,6 +2954,88 @@
       <span style="width:42px;flex:0 0 auto;"></span>
     </div>
     <div class="scroll fades" id="accountScroll"></div>
+  </div>
+
+  <!-- ============ SCREENS: TERMS OF SERVICE, PRIVACY POLICY ============
+       Reached from the login, where agreeing to them happens, and from About in
+       Global settings, where they can be read again. In the app both are web pages
+       in an in-app browser: the stores ask for their addresses anyway, and a
+       lawyer's change should not have to wait for a release. The text is a
+       placeholder; the headings are what the real documents have to cover. -->
+  <div class="screen" id="termsScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim">Terms of Service</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+    <div class="scroll fades">
+      <div class="doc">
+        <div class="gs-todo" style="margin-bottom:18px;">
+          <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>Placeholder</div>
+          <p>Not the real text. The headings are what it has to cover; the words come from a lawyer.</p>
+        </div>
+        <div class="doc-updated">Last updated [date]</div>
+        <h3>Who we are</h3>
+        <p>rhrs is made by [company], [address]. These terms are the agreement between you and us whenever you use it.</p>
+        <h3>Your account</h3>
+        <p>You need an account to use rhrs, and you must be at least [age] to have one. Keep the way you sign in to yourself: what is done from your account is yours.</p>
+        <h3>Scripts you bring in</h3>
+        <p>What you upload stays yours. Upload only what you have the right to use — a script is usually somebody’s copyrighted work. You let us store it, read it for you and show it to the people you share it with, and nothing more.</p>
+        <h3>If a script is not yours to share</h3>
+        <p>Tell us at [email] and we will look at it. We may take down a script that breaks somebody’s rights.</p>
+        <h3>Your voice</h3>
+        <p>The takes you record are heard by everyone on the script. We keep them to run rhrs, and we check them against the text so you can see how a line went.</p>
+        <h3>Generated voices and transcripts</h3>
+        <p>A line nobody has recorded is read by a generated voice, and a take is turned into text to check it. Both are done by services we work with; the Privacy Policy names them.</p>
+        <h3>Sharing a script</h3>
+        <p>Whoever runs a script decides who is on it and who plays what. Anyone with an invite link can join the script, with the role the link gives.</p>
+        <h3>What you may not do</h3>
+        <p>Use rhrs against the law or against other people, or try to take it apart, overload it or get into what is not yours.</p>
+        <h3>Leaving</h3>
+        <p>You can delete your account at any time, in Account. We may suspend an account that breaks these terms, and we will tell you why.</p>
+        <h3>rhrs as it is</h3>
+        <p>rhrs is in alpha. Things change and sometimes break, so keep your own copy of any script that matters. [Limits of liability.]</p>
+        <h3>Changes to these terms</h3>
+        <p>If we change them in a way that matters, we tell you in the app before it applies and ask you to agree again.</p>
+        <h3>The law, and how to reach us</h3>
+        <p>These terms are governed by [law]. Write to us at [email].</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="privacyScreen">
+    <div class="header">
+      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <div class="header-title cap-trim">Privacy Policy</div>
+      <span style="width:42px;flex:0 0 auto;"></span>
+    </div>
+    <div class="scroll fades">
+      <div class="doc">
+        <div class="gs-todo" style="margin-bottom:18px;">
+          <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>Placeholder</div>
+          <p>Not the real text. The headings are what it has to cover; the words come from a lawyer.</p>
+        </div>
+        <div class="doc-updated">Last updated [date]</div>
+        <h3>Who looks after your data</h3>
+        <p>[company], [address], is responsible for it. Write to [email] about anything on this page.</p>
+        <h3>What we keep</h3>
+        <p>Your name, your email and how you sign in. The scripts, notes and directions you add. The takes you record, and the text we make from them. What happened when the app broke, so we can fix it.</p>
+        <h3>Why</h3>
+        <p>To run rhrs for you, which is our agreement with you; to keep it safe and working, which is our legitimate interest; and to send the notifications you allow, which is your consent.</p>
+        <h3>Who sees it</h3>
+        <p>The people on a script see your name, the part you play and your takes on it. The services that run rhrs for us — hosting [provider], generated voices [provider], speech to text [provider], crash reports [provider] — handle it on our behalf. We do not sell it.</p>
+        <h3>Where it is kept</h3>
+        <p>[Region]. When it leaves the EU, it goes with the safeguards the law asks for.</p>
+        <h3>How long</h3>
+        <p>As long as you have an account. Each line keeps its last five takes. Delete your account and what is yours is deleted within [30] days.</p>
+        <h3>Your rights</h3>
+        <p>See what we hold about you, correct it, delete it, take it with you or object to how we use it — write to [email]. You can also complain to your data protection authority, [authority].</p>
+        <h3>Children</h3>
+        <p>rhrs is not for children under [age].</p>
+        <h3>Changes to this policy</h3>
+        <p>We tell you in the app before a change that matters applies.</p>
+      </div>
+    </div>
   </div>
 
   <!-- ============ SCREEN: AUDIO EDIT ============
@@ -3091,13 +3204,29 @@
         </button>
       </div>
 
+      <!-- The small print the login asked you to agree to, where it can be read
+           again later. The stores want the privacy policy reachable from inside the
+           app, not only at the door. -->
+      <div class="gs-label" style="margin-top:26px;">About</div>
+      <div class="gs-group">
+        <button class="edit-row" onclick="showScreen('termsScreen')">
+          <span class="er-ic"><i class="ph ph-file-text ic-20"></i></span>
+          <span class="er-label">Terms of Service</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+        <button class="edit-row" onclick="showScreen('privacyScreen')">
+          <span class="er-ic"><i class="ph ph-shield-check ic-20"></i></span>
+          <span class="er-label">Privacy Policy</span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+      </div>
+
       <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
       <div class="gs-todo">
         <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
-        <p>Playback &amp; voices, Rehearsal defaults, Notes &amp; display,
-           Notifications, Recording &amp; storage, Subscription, About. Not drawn yet —
-           the theme switch is here first so the prototype can be looked at on a
-           phone in either mode.</p>
+        <p>What else belongs here is proposed in the wireframes, under Global
+           settings. The theme switch came first so the prototype can be looked at
+           on a phone in either mode.</p>
       </div>
     </div>
   </div>
@@ -3979,7 +4108,7 @@
      What they may do is not theirs to carry — it is per script, on that
      script's own list. */
   const PEOPLE = [
-    { id: 'me', name: 'Luky Kuky',          email: 'nina@example.com' },
+    { id: 'me', name: 'Luky Kuky',          email: 'lukykuky@example.com' },
     { id: 'ls', name: 'Luděk Sobota' },
     { id: 'pn', name: 'Petr Novák' },
     { id: 'jk', name: 'Jana Kratochvílová' },
@@ -4095,7 +4224,12 @@
     voices: { Vladimir: 'arto', Estragon: 'rufus', Pozzo: 'mara', Lucky: 'ivy' }
   });
   /* The scripts the member looking is on: their library, and all they see. */
-  const myScripts = () => SCRIPTS.filter(s => s.people.some(m => m.id === ME));
+  /* Scripts the member looking is on and has never opened. The demo has opened
+     everything; the panel's Dashboard — one new script cuts the library down to
+     a single script, not opened yet, until the next jump from the panel. */
+  const UNOPENED = new Set();
+  let ONLY_SCRIPT = null;
+  const myScripts = () => SCRIPTS.filter(s => s.people.some(m => m.id === ME) && (!ONLY_SCRIPT || s.id === ONLY_SCRIPT));
 
   /* ---- what the member looking may do ----
      The permission table from the wireframes, as four questions. Everything
@@ -4118,7 +4252,7 @@
     line:  it => RANK[me().role] >= 1 || !!it.mine
   };
   /* Somebody who runs a script somewhere is who a new script is for. */
-  const adminSomewhere = () => SCRIPTS.some(s => s.people.some(m => m.id === ME && m.role === 'admin'));
+  const adminSomewhere = () => myScripts().some(s => s.people.some(m => m.id === ME && m.role === 'admin'));
   /* Who holds a part, said in a line: you first, because that is the thing you
      are looking for, and "Not cast" rather than an empty space. */
   const castLine = name => {
@@ -4393,6 +4527,8 @@
     audioScreen:          'origin',
     evaluationScreen:     'origin',
     accountScreen:        'origin',
+    termsScreen:          'origin',
+    privacyScreen:        'origin',
     /* Opened from Listen settings, from a part and from the corner of Script
        detail — three doors, so it goes back to whichever one it came in by. */
     whoYouHearScreen:     'origin',
@@ -4412,6 +4548,8 @@
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen',
+    termsScreen:      'globalSettingsScreen',
+    privacyScreen:    'globalSettingsScreen',
     personScreen:     'peopleScreen',
     castScreen:       'editScriptScreen',
     whoYouHearScreen: 'detailScreen',
@@ -4424,7 +4562,7 @@
   /* Landing on a screen again is not the same as never having left it: counts
      move, takes are added, a name is changed. Each place says how to redraw. */
   const REDRAW = {
-    dashboardScreen:    () => { renderContinue(); renderRecent(); paintBellDot(); },
+    dashboardScreen:    () => { renderNewFor(); renderContinue(); renderRecent(); paintBellDot(); },
     scriptsScreen:      () => renderScripts(),
     detailScreen:       () => renderScenes(),
     editScriptScreen:   () => { renderEditMeta(); renderEditScenes(); },
@@ -4482,6 +4620,7 @@
     REDRAW[to]?.();
   }
   function openScript(id) {
+    UNOPENED.delete(id);
     const s = SCRIPTS.find(x => x.id === id);
     currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
@@ -5481,7 +5620,7 @@
      actually came from. The three boxes under it do the opposite on purpose: they
      open Script detail, where Where you left off is waiting. */
   /* Where you left off is in the scripts you are on — the first of them. */
-  const lastScript = () => myScripts().find(s => !s.draft);
+  const lastScript = () => myScripts().find(s => !s.draft && !UNOPENED.has(s.id));
   const lastSceneOf = s => LAST_SCENE[s.id] || (s.scenes[0] && s.scenes[0].title);
   function continueLastScene() {
     const s = lastScript();
@@ -5503,9 +5642,33 @@
       </span>
       <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
   }
+  /* Who brought you in and what you play: the two things a first look at a
+     script is for. */
+  function renderNewFor() {
+    const s = myScripts().find(x => !x.draft && UNOPENED.has(x.id));
+    const b = document.getElementById('dashNewFor');
+    b.style.display = s ? '' : 'none';
+    if (!s) return;
+    const admin = s.people.find(m => m.role === 'admin' && m.id !== ME);
+    const parts = Object.keys(s.cast).filter(n => s.cast[n].includes(ME));
+    b.style.marginBottom = lastScript() ? '12px' : '';
+    b.onclick = () => openScript(s.id);
+    b.innerHTML = `
+      <span class="dc-main">
+        <span class="dc-over">New for you</span>
+        <span class="dc-title">${s.title}</span>
+        <span class="dc-sub">${admin ? admin.name + ' invited you' : 'Your script'} · ${parts.length ? 'cast as ' + parts.join(', ') : 'not cast yet'}</span>
+      </span>
+      <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
+  }
   function renderRecent() {
     const scenesByScript = LAST_SCENE;
-    document.getElementById('recentList').innerHTML = myScripts().filter(s => !s.draft).slice(0, 3).map(s => `
+    const recent = myScripts().filter(s => !s.draft && !UNOPENED.has(s.id)).slice(0, 3);
+    /* A member whose one script is still unopened has nothing to list and
+       nothing to count. */
+    document.getElementById('recentLabel').style.display = recent.length ? '' : 'none';
+    document.querySelector('.dash-stats').style.display = ONLY_SCRIPT ? 'none' : '';
+    document.getElementById('recentList').innerHTML = recent.map(s => `
       <button class="dash-recent" onclick="openScript('${s.id}')">
         <span class="r-main">
           <span class="r-title">${s.title}</span>
@@ -6607,6 +6770,16 @@
       primary: 'Sign out', act: 'signOutNow()',
       ghost: 'Stay signed in'
     },
+    /* Leaving for good. The takes go too — a voice is the person's, whatever the
+       script does with it — so the alert says what the others will hear instead,
+       and what happens to a script nobody else runs. */
+    deleteAccount: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete your account?',
+      text: 'Your name, your email and every take you recorded go for good — the others will hear the generated voice on your lines. Scripts you run alone are deleted for everyone in them. This cannot be undone.',
+      primary: 'Delete account', act: 'deleteAccountNow()',
+      ghost: 'Keep it'
+    },
     /* Widening the wizard from what is missing to everything of yours. Less a
        filter than a plan for the next twenty minutes, and it has a consequence
        worth saying out loud before it starts: what you already recorded stops
@@ -6679,7 +6852,7 @@
        any other    it works
        and the email says whether the account is new: this one is not, so it
        goes straight in, while any other email gets the name screen. */
-  const KNOWN_EMAIL = 'nina@example.com';
+  const KNOWN_EMAIL = 'lukykuky@example.com';
   const RESEND_SECONDS = 30;
   const auth = { email: '', resendLeft: 0 };
   let resendTimer;
@@ -7211,7 +7384,7 @@
      Anything without `st` counts as wip. */
   const SCREENS = {
     /* ---- getting in ---- */
-    login:      { label:'Login',            group:'entry', screen:'loginScreen', ver:1, st:'prepared',
+    login:      { label:'Login',            group:'entry', screen:'loginScreen', ver:1, st:'wip',
                   go: () => openLogin() },
     code:       { label:'Verification code', group:'entry', screen:'codeScreen', ver:1, st:'prepared',
                   go: () => { openLogin();
@@ -7228,12 +7401,26 @@
     /* ---- home ---- */
     dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'prepared',
                   go: () => showScreen('dashboardScreen') },
+    /* A library of one, never opened: Godot where it can be, a script somebody
+       else runs, which is how most people meet their first. */
+    dashnew:    { label:'Dashboard — one new script', group:'home', st:'wip',
+                  go: () => {
+                    const s = myScripts().find(x => x.id === 's3') || myScripts()[0];
+                    ONLY_SCRIPT = s.id;
+                    UNOPENED.add(s.id);
+                    showScreen('dashboardScreen');
+                    REDRAW.dashboardScreen();
+                  } },
     notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
     settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', st:'wip',
                   go: () => showScreen('globalSettingsScreen') },
     account:    { label:'Account',          group:'home', screen:'accountScreen', st:'wip',
                   go: () => openAccount() },
+    terms:      { label:'Terms of Service', group:'home', screen:'termsScreen', st:'wip',
+                  go: () => showScreen('termsScreen') },
+    privacy:    { label:'Privacy Policy',   group:'home', screen:'privacyScreen', st:'wip',
+                  go: () => showScreen('privacyScreen') },
 
     /* ---- the scripts ---- */
     scripts:    { label:'All scripts',      group:'library', screen:'scriptsScreen', ver:1, st:'prepared',
@@ -7393,6 +7580,8 @@
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openAlert('wizardAll'); } },
     alertsignout:{ label:'Sign out',        group:'alerts', st:'wip',
                   go: () => { openAccount(); openAlert('signOut'); } },
+    alertdelacct:{ label:'Delete account',  group:'alerts', st:'wip',
+                  go: () => { openAccount(); openAlert('deleteAccount'); } },
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
 
@@ -8284,7 +8473,8 @@
 
       <button class="le-danger" onclick="openAlert('signOut')">
         <i class="ph ph-sign-out ic-20"></i>Sign out
-      </button>`;
+      </button>
+      <button class="ac-delete" onclick="openAlert('deleteAccount')">Delete account</button>`;
     growTextarea(document.getElementById('leInput'));
   }
   function copyEmail() {
@@ -8296,6 +8486,13 @@
   function signOutNow() {
     closeSheet();
     openLogin();
+  }
+  /* Signing out for good: the same way back to the login, and a word that it
+     happened, because nothing on the login would say so. */
+  function deleteAccountNow() {
+    closeSheet();
+    openLogin();
+    toast('Your account is deleted');
   }
 
   /* ============================================================
@@ -8354,6 +8551,7 @@
   function becomeMember(id) {
     if (!person(id) || id === ME) return;
     ME = id;
+    leaveOneNewScript();
     closeSheet();
     editingKey = null;
     const here = activeScreen()?.id;
@@ -8457,12 +8655,19 @@
     panelGoing = true;
     /* A sheet left open by the last stop would sit over the next one. */
     closeSheet();
+    leaveOneNewScript();
     SCREENS[key].go();
     panelGoing = false;
     panelHere = key;
     panelAt = activeScreen()?.id;
     renderPanel();
     closePanel();          // no-op where the panel is always there
+  }
+  function leaveOneNewScript() {
+    if (!ONLY_SCRIPT && !UNOPENED.size) return;
+    ONLY_SCRIPT = null;
+    UNOPENED.clear();
+    REDRAW.dashboardScreen();
   }
   function openPanel()  { renderPanel(); document.getElementById('panel').classList.add('open'); }
   function closePanel() { document.getElementById('panel').classList.remove('open'); }
@@ -8471,6 +8676,7 @@
     const entry = SCREENS[location.hash.replace('#', '')];
     if (!entry) return;
     closeSheet();
+    leaveOneNewScript();
     entry.go();
   }
   window.addEventListener('hashchange', openFromHash);
