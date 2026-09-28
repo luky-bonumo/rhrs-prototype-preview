@@ -4171,6 +4171,9 @@
      a single script, not opened yet, until the next jump from the panel. */
   const UNOPENED = new Set();
   let ONLY_SCRIPT = null;
+  /* Opened, but no scene of it read yet: Script detail offers a place to start
+     rather than a place you left. */
+  const NOT_YET_IN = new Set();
   const myScripts = () => SCRIPTS.filter(s => s.people.some(m => m.id === ME) && (!ONLY_SCRIPT || s.id === ONLY_SCRIPT));
 
   /* ---- what the member looking may do ----
@@ -4559,7 +4562,7 @@
     REDRAW[to]?.();
   }
   function openScript(id) {
-    UNOPENED.delete(id);
+    if (UNOPENED.delete(id)) NOT_YET_IN.add(id);
     const s = SCRIPTS.find(x => x.id === id);
     currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
@@ -4574,6 +4577,10 @@
     const b = document.getElementById('detailAction');
     b.innerHTML = edits ? '<i class="ph ph-pencil-simple ic-21"></i>' : '<i class="ph ph-users-three ic-22"></i>';
     b.setAttribute('aria-label', edits ? 'Edit script' : 'Who you hear');
+    /* Who you hear is a choice between two actors in one part. Where no part has
+       two there is nothing behind the glyph, so it is not shown; the space stays,
+       so the title does not move. */
+    b.style.visibility = edits || alternated().length ? '' : 'hidden';
   }
   function detailAction() {
     if (can.edit()) openEditScript(); else openWhoYouHear();
@@ -4588,6 +4595,9 @@
        open on it. */
     SCRIPT = sc ? (sc.items || SCENE_1) : (wholeOf(currentScript).length ? wholeOf(currentScript) : wholeOf(SCRIPTS[0]));
     wholeOpen = !sc;
+    /* Where you left off is wherever you last were — a scene, not Whole script. */
+    NOT_YET_IN.delete(currentScript.id);
+    if (sc) LAST_SCENE[currentScript.id] = name;
     currentScene = name;
     document.querySelectorAll('.js-scene-title').forEach(el => el.textContent = name);
     currentMode = 'read';
@@ -5486,19 +5496,36 @@
        in, no longer the one you are pointed at. Both name the script you opened,
        not the one that happens to be written. */
     const scenes = sceneList();
-    const last = scenes.find(sc => sc.title === LAST_SCENE[currentScript.id]) || scenes[0];
-    /* Lines are only known where there is text. Rather than a made-up number, the
-       scripts without it simply do not claim one. */
+    /* A script with no scene read yet — just imported, started from nothing, or
+       opened for the first time from New for you — has no place to come back to.
+       It offers a place to start: your first scene if you are in one, the first
+       scene if not. */
+    const fresh = NOT_YET_IN.has(currentScript.id) || !LAST_SCENE[currentScript.id];
+    const last = fresh
+      ? scenes.find(sc => sc.assigned) || scenes[0]
+      : scenes.find(sc => sc.title === LAST_SCENE[currentScript.id]) || scenes[0];
+    /* The written script counts its own lines; the two without text state theirs
+       in the data, the one invented figure in the prototype. Nothing at all is
+       said rather than 0. */
     const lineCount = it => it && it.lines ? `<span class="meta-lines">${it.lines} lines</span>` : '';
-    const wholeLines = `<span class="meta-lines">${scenes.reduce((n, sc) => n + (sc.lines || 0), 0)} lines · all scenes</span>`;
+    const total = scenes.reduce((n, sc) => n + (sc.lines || 0), 0);
+    const wholeLines = total ? `<span class="meta-lines">${total} lines · all scenes</span>` : '';
+    /* The card stays once everything is recorded: recording again is always
+       possible, and this is the way into it. It goes only where nothing of yours
+       has been written yet. */
+    const ownLines = wholeOf(currentScript).some(it => it.who && it.mine);
+    const missing = scriptMissing();
+    const uncast = CHARACTERS.filter(c => !castOf(c.name).length).length;
+    const castMeta = !CHARACTERS.length ? 'No parts yet'
+      : CHARACTERS.length + ' part' + (CHARACTERS.length === 1 ? '' : 's') + ' · ' + (uncast ? uncast + ' not cast' : 'all cast');
     let html = `
       <div class="card featured mine" onclick="openScene('${last.title}')">
         <div class="card-main">
-          <div class="card-over">Where you left off</div>
+          <div class="card-over">${fresh ? 'Start here' : 'Where you left off'}</div>
           <div class="card-title">${last.title}</div>
           <div class="card-meta">
             ${lineCount(last)}
-            ${currentScript.assigned ? '<span class="badge">Assigned</span>' : ''}
+            ${last.assigned ? '<span class="badge">Assigned</span>' : ''}
           </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
@@ -5513,13 +5540,15 @@
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
-      ${can.act() && scriptMissing() ? `
+      ${can.act() && ownLines ? `
       <button class="rec-wizard" onclick="openWizardScenes()">
         <i class="ph-fill ph-microphone ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Recording wizard</span>
           <span class="rw-sub">Record your lines for others</span>
-          <span class="rw-meta">${scriptMissing()} lines without audio</span>
+          <span class="rw-meta">${missing
+            ? missing + (missing === 1 ? ' line' : ' lines') + ' without audio'
+            : '<i class="ph-bold ph-check ic-14"></i> All your lines have audio'}</span>
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>` : ''}
@@ -5527,10 +5556,7 @@
         <i class="ph ph-users-three ic-22"></i>
         <span class="rw-main">
           <span class="rw-title">Cast</span>
-          <span class="rw-meta">${CHARACTERS.length} part${CHARACTERS.length === 1 ? '' : 's'} · ${
-            CHARACTERS.filter(c => !castOf(c.name).length).length
-              ? CHARACTERS.filter(c => !castOf(c.name).length).length + ' not cast'
-              : 'all cast'}</span>
+          <span class="rw-meta">${castMeta}</span>
         </span>
         <span class="chevron">${ICON.chevron}</span>
       </button>
@@ -8793,6 +8819,7 @@
     if (!ONLY_SCRIPT && !UNOPENED.size) return;
     ONLY_SCRIPT = null;
     UNOPENED.clear();
+    NOT_YET_IN.clear();
     REDRAW.dashboardScreen();
   }
   function openPanel()  { renderPanel(); document.getElementById('panel').classList.add('open'); }
