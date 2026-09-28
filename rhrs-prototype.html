@@ -1063,6 +1063,7 @@
   /* The way out carries the same colour, so it is plainly the other half of the
      same question — only without the weight that says press me. */
   .alert-btn.ghost { background: none; color: var(--coral); border: 1.5px solid var(--coral); }
+  .alert-btn:disabled { opacity: 0.4; box-shadow: none; cursor: default; transform: none; }
 
   /* ============ NOTIFICATIONS ============
      A sheet, not a screen: nothing here is a place you stay. */
@@ -2893,7 +2894,8 @@
       <div class="auth-spacer"></div>
       <button class="auth-btn" id="codeBtn" onclick="authSubmitCode()" disabled>Continue</button>
       <button class="auth-link" id="resendBtn" onclick="authResend()">Resend code</button>
-      <button class="auth-link" onclick="authBackToEmail()">Wrong email?</button>
+      <button class="auth-link" id="codeWrongEmail" onclick="authBackToEmail()">Wrong email?</button>
+      <button class="auth-link" id="codeBackJoin" onclick="showScreen('joinScreen')" style="display:none;">Back to the invitation</button>
     </div>
   </div>
 
@@ -3747,9 +3749,11 @@
   </div>
 
   <!-- ============ SHEET: INVITE ============
-       A link, what it makes them, and — when it is already known — the part it
-       casts them in. One sheet, because inviting is one decision made three
-       times over. -->
+       Who it is for, what it makes them, and — when it is already known — the
+       part it casts them in. The invitation goes to an email address and works
+       only for it, so the link inside can be passed on anywhere: whoever opens it
+       still has to be that address. One sheet, because inviting is one decision
+       made three times over. -->
   <div class="settings-sheet" id="inviteSheet">
     <div class="sheet-grabber"></div>
     <div class="settings-title">
@@ -4042,6 +4046,18 @@
     { id: 'td', name: 'Tomas Dvorak' }
   ];
   const person = id => PEOPLE.find(p => p.id === id);
+  /* The demo gives an address only where it matters; everybody else's is made
+     from their name. */
+  const emailOf = id => {
+    const p = person(id);
+    return p.email || p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@example.com';
+  };
+  /* An invitation opened by somebody else must not hand them the address it was
+     for: a first letter, a last one, and the domain. */
+  const maskEmail = e => {
+    const [u, d] = e.split('@');
+    return u[0] + '•••' + (u.length > 1 ? u[u.length - 1] : '') + '@' + d;
+  };
   /* One person on one script, with a role there. The name and "you" read
      through to the person, so a rename reaches every script at once. */
   function membership(id, role, when, extra = {}) {
@@ -5723,7 +5739,7 @@
       const body = `
         <span class="le-main">
           <span class="le-top">${m.name}</span>
-          <span class="le-sub">${ROLES[m.role].label} · ${parts.length ? 'cast as ' + parts.join(', ') : 'not cast'}</span>
+          <span class="le-sub">${ROLES[m.role].label} · ${m.invited && m.part ? m.part + ' when they join' : parts.length ? 'cast as ' + parts.join(', ') : 'not cast'}</span>
         </span>
         ${m.you ? '<span class="badge">you</span>' : m.invited ? '<span class="badge quiet">invited</span>' : ''}`;
       return admin ? `
@@ -5756,8 +5772,24 @@
     document.getElementById('personBody').innerHTML = `
       <div class="pe-head">
         <div class="pe-name cap-trim">${m.name}</div>
-        <div class="pe-when">${m.when}${m.you ? ' · this is you' : ''}</div>
+        <div class="pe-when">${m.when}${m.you ? ' · this is you' : ''}${m.invited && !person(m.id).unnamed ? ' · ' + emailOf(m.id) : ''}</div>
       </div>
+      ${m.invited && admin ? `
+      <div class="le-label">Invitation</div>
+      <button class="le-row" style="margin-bottom:10px;" onclick="copyInviteLink('${m.id}')">
+        <span class="le-main">
+          <span class="le-top">Copy the link</span>
+          <span class="le-sub">It works only for ${emailOf(m.id)}, so pass it on anywhere</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
+      </button>
+      <button class="le-row" style="margin-bottom:10px;" onclick="toast('Invitation sent again')">
+        <span class="le-main">
+          <span class="le-top">Send it again</span>
+          <span class="le-sub">To ${emailOf(m.id)}</span>
+        </span>
+        <span class="le-chev"><i class="ph ph-paper-plane-tilt ic-20"></i></span>
+      </button>` : ''}
 
       <div class="le-label">Cast in</div>
       ${parts.length ? parts.map(p => `
@@ -5770,6 +5802,13 @@
             <i class="ph ph-x ic-18"></i>
           </button>` : ''}
         </div>`).join('')
+      : m.invited && m.part ? `
+        <div class="le-row" style="margin-bottom:10px;cursor:default;">
+          <span class="le-main">
+            <span class="le-top cap-trim">${m.part}</span>
+            <span class="le-sub">Theirs the moment they join</span>
+          </span>
+        </div>`
       : '<div class="ae-empty">Not cast in anything yet</div>'}
       ${admin ? `
       <button class="se-add" onclick="openPartPick()">
@@ -5794,10 +5833,13 @@
       <div class="ac-note">A part is not a role. Whoever holds one rehearses it,
         records it and may rewrite the lines they say — reader, editor and admin alike.${admin ? '' : ' The admin sets both.'}</div>
 
-      ${admin ? `
+      ${admin ? (m.invited ? `
+      <button class="le-danger" onclick="cancelInvite()">
+        <i class="ph ph-x ic-20"></i>Cancel the invitation
+      </button>` : `
       <button class="le-danger" onclick="openAlert('removeMember')">
         <i class="ph ph-sign-out ic-20"></i>Remove from the script
-      </button>` : ''}`;
+      </button>`) : ''}`;
   }
   function setRole(key) {
     const m = member(personId);
@@ -6056,7 +6098,8 @@
   }
 
   /* ---- inviting ---- */
-  const INVITE = { role: 'reader', part: null, link: 'rhrs.app/j/8Q2F-K7' };
+  const INVITE = { role: 'reader', part: null, email: '', link: 'rhrs.app/j/8Q2F-K7' };
+  let inviteSeq = 0;
   function openInvite() {
     renderInvite();
     document.getElementById('scrim').classList.add('open');
@@ -6065,15 +6108,14 @@
   function renderInvite() {
     document.getElementById('inviteBody').innerHTML = `
       <div class="invite-body">
-        <div class="ac-note" style="padding-top:0;">Anyone with this link joins the script as
-          the role you pick. It stops working once they have.</div>
-        <button class="le-row" onclick="copyInvite()">
-          <span class="le-main">
-            <span class="le-top" style="font-variant-numeric:tabular-nums;">${INVITE.link}</span>
-            <span class="le-sub">Tap to copy</span>
-          </span>
-          <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
-        </button>
+        <div class="ac-note" style="padding-top:0;">We email them an invitation. It works only for
+          that address, so the link in it is safe to pass on — in a group chat too.</div>
+        <div class="le-label">Their email</div>
+        <div class="auth-field" id="inviteField">
+          <input id="inviteEmail" type="email" inputmode="email" autocomplete="off"
+                 placeholder="name@example.com" value="${INVITE.email}" oninput="inviteEmailTyped()">
+        </div>
+        <div class="auth-err" id="inviteErr" hidden></div>
 
         <div class="le-label">They join as</div>
         <div class="gs-theme">
@@ -6090,13 +6132,53 @@
           <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
         </button>
 
-        <button class="alert-btn fill" style="margin-top:18px;" onclick="copyInvite()">Copy the link</button>
+        <button class="alert-btn fill" id="inviteSend" style="margin-top:18px;" onclick="sendInvite()"
+                ${INVITE.email.trim() ? '' : 'disabled'}>Send the invite</button>
       </div>`;
   }
   function inviteRole(key) { INVITE.role = key; renderInvite(); }
-  function copyInvite() {
+  /* The same field as the login's, and the same manners: the button wakes up
+     with the first letter, and the error waits for the tap. */
+  function inviteEmailTyped() {
+    INVITE.email = document.getElementById('inviteEmail').value;
+    document.getElementById('inviteSend').disabled = !INVITE.email.trim();
+    document.getElementById('inviteErr').hidden = true;
+    document.getElementById('inviteField').classList.remove('err');
+  }
+  function inviteError(msg) {
+    const e = document.getElementById('inviteErr');
+    e.textContent = msg; e.hidden = false;
+    document.getElementById('inviteField').classList.add('err');
+  }
+  /* Somebody new is known by their address until they arrive with a name, and
+     waits on People as invited. A part chosen here is theirs when they join. */
+  function sendInvite() {
+    const v = INVITE.email.trim();
+    if (!looksLikeEmail(v)) return inviteError('That does not look like an email.');
+    if (MEMBERS.some(m => emailOf(m.id).toLowerCase() === v.toLowerCase()))
+      return inviteError('They are on this script already.');
+    const id = 'inv' + (++inviteSeq);
+    PEOPLE.push({ id, name: v, email: v, unnamed: true });
+    MEMBERS.push(membership(id, INVITE.role, 'Invited just now', { invited: true, part: INVITE.part }));
+    INVITE.email = ''; INVITE.part = null;
+    closeSheet();
+    renderPeople();
+    toast('Invitation sent to ' + v);
+  }
+  /* For passing on in a message. It is the same link the email carries, and it
+     still only lets that address in. */
+  function copyInviteLink(id) {
     navigator.clipboard?.writeText('https://' + INVITE.link);
-    sheetAction('Invitation link copied');
+    toast('Link copied — it works only for ' + emailOf(id));
+  }
+  /* Taking an invitation back is not destructive: nobody has arrived, nothing
+     of theirs is on the script, and they can be invited again. */
+  function cancelInvite() {
+    const m = member(personId);
+    MEMBERS.splice(MEMBERS.indexOf(m), 1);
+    goBack();
+    renderPeople();
+    toast('Invitation cancelled');
   }
   /* Swapped, not stacked: the part is a detail of this sheet, not something on
      top of it — the same move the speed sheet makes out of settings. */
@@ -6123,8 +6205,15 @@
     setTimeout(openInvite, 180);
   }
 
-  /* ---- arriving from a link ---- */
-  function openJoin() {
+  /* ---- arriving from a link ----
+     Signed in with the address the invitation went to, joining is one tap.
+     Signed in with another one — Apple's Hide My Email, a work address — a code
+     goes to the invited address first, the same code as at the login, so a
+     stranger who got the link from a group chat cannot get in. */
+  let joinOther = false;
+  const JOIN_OTHER = { invited: 'lukykuky@example.com', signedIn: 'x7k2q9@privaterelay.appleid.com' };
+  function openJoin(other = false) {
+    joinOther = other;
     renderJoin();
     showScreen('joinScreen');
   }
@@ -6136,6 +6225,10 @@
         <div class="pe-when">${from.name} invited you</div>
       </div>
       <div class="le-text" style="cursor:default;">${currentScript.title}</div>
+      ${joinOther ? `
+      <div class="ac-note" style="padding-top:14px;">This invitation is for
+        <b>${maskEmail(JOIN_OTHER.invited)}</b>, and you are signed in as ${JOIN_OTHER.signedIn}.
+        We send a code to the invited address to make sure it is you.</div>` : ''}
 
       <div class="le-label">Your role</div>
       <div class="le-row">
@@ -6155,8 +6248,27 @@
         </span>
       </div>
 
-      <button class="alert-btn fill" style="margin-top:22px;" onclick="toast('Joined')">Join</button>
+      ${joinOther
+        ? `<button class="alert-btn fill" style="margin-top:22px;" onclick="joinSendCode()">Send the code</button>`
+        : `<button class="alert-btn fill" style="margin-top:22px;" onclick="joined()">Join</button>`}
       <button class="alert-btn ghost" onclick="goBack()">Not now</button>`;
+  }
+  /* The login's code screen, pointed at the invitation: the address is fixed,
+     so Wrong email? gives way to the way back. */
+  function joinSendCode() {
+    auth.mode = 'invite';
+    document.getElementById('codeEmail').textContent = maskEmail(JOIN_OTHER.invited);
+    document.getElementById('codeWrongEmail').style.display = 'none';
+    document.getElementById('codeBackJoin').style.display = '';
+    renderOtp();
+    startResend();
+    showScreen('codeScreen');
+    setTimeout(() => document.querySelector('#otp input')?.focus(), 250);
+  }
+  function joined() {
+    auth.mode = 'login';
+    toast('Joined');
+    openScript(currentScript.id);
   }
 
   /* ============================================================
@@ -6518,7 +6630,7 @@
         <span class="le-ic"><i class="ph ph-user-plus ic-22"></i></span>
         <span class="le-main">
           <span class="le-top">Invite the others</span>
-          <span class="le-sub">They join with a link</span>
+          <span class="le-sub">By email, one address each</span>
         </span>
         <span class="le-chev"><i class="ph ph-caret-right ic-20"></i></span>
       </button>
@@ -6789,6 +6901,9 @@
   let resendTimer;
 
   function openLogin() {
+    auth.mode = 'login';
+    document.getElementById('codeWrongEmail').style.display = '';
+    document.getElementById('codeBackJoin').style.display = 'none';
     auth.email = '';
     document.getElementById('emailInput').value = '';
     document.getElementById('emailErr').hidden = true;
@@ -6895,6 +7010,7 @@
     if (code === '000000') return authCodeError('That code is not right.');
     if (code === '111111') return authCodeError('That code has expired. Send a new one.');
     clearInterval(resendTimer);
+    if (auth.mode === 'invite') return joined();
     if (auth.email.toLowerCase() === KNOWN_EMAIL) return authFinish();
     document.getElementById('nameInput').value = '';
     document.getElementById('nameBtn').disabled = true;
@@ -7412,6 +7528,10 @@
     join:       { label:'Join',             group:'people', screen:'joinScreen', st:'wip',
                   /* Reached from a link, never from inside the app. */
                   go: () => openJoin() },
+    joinother:  { label:'Join — another address', group:'people', st:'wip',
+                  go: () => { openScript('s1'); openJoin(true); } },
+    personinv:  { label:'Person — invited', group:'people', st:'wip',
+                  go: () => { openScript('s1'); openEditScript(); openPeople(); openPerson('jk'); } },
 
     /* ---- one scene, three modes ---- */
     read:       { label:'Read',             group:'scene', screen:'readScreen', ver:1, st:'prepared',
@@ -8380,10 +8500,7 @@
   const ACCOUNT = {
     get name() { return person(ME).name; },
     set name(v) { person(ME).name = v; },
-    get email() {
-      const p = person(ME);
-      return p.email || p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '.') + '@example.com';
-    }
+    get email() { return emailOf(ME); }
   };
 
   function openAccount() {
