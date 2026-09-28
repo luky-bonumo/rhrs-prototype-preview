@@ -445,16 +445,33 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Invite</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Invite</button><span>by email, 28 September</span></div>
           <div class="wf-body">
             <div class="wf-title">Invite someone</div>
-            <div class="wf-text">Anyone with this link can join the script as the role you pick.</div>
-            <div class="wf-row"><span class="grow">rhrs.app/j/8Q2F-K7</span><i class="ph ph-copy"></i></div>
+            <div class="wf-text">We email them an invitation. It works only for that address, so the link in it is safe to pass on — in a group chat too.</div>
+            <div class="wf-label">Their email</div>
+            <div class="wf-field">anna@example.com</div>
             <div class="wf-label">They join as</div>
             <div class="wf-row"><span class="grow">Reader</span><i class="ph ph-caret-down"></i></div>
             <div class="wf-label">Part, if you know it</div>
             <div class="wf-row"><span class="grow">Anna</span><i class="ph ph-caret-down"></i></div>
-            <div class="wf-btn fill">Copy the link</div>
+            <div class="wf-btn fill">Send the invite</div>
+          </div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Person — invited</button><span>new, 28 September</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Jana Kratochvílová</div>
+            <div class="wf-sub">Invited 20 September · jana.kratochvilova@example.com</div>
+            <div class="wf-label">Invitation</div>
+            <div class="wf-row"><span class="grow">Copy the link<span class="r-sub">It works only for that address, so pass it on anywhere</span></span><i class="ph ph-copy"></i></div>
+            <div class="wf-row"><span class="grow">Send it again<span class="r-sub">To jana.kratochvilova@example.com</span></span><i class="ph ph-paper-plane-tilt"></i></div>
+            <div class="wf-label">Cast in</div>
+            <div class="wf-sub">Not cast in anything yet</div>
+            <div class="wf-label">Role</div>
+            <div class="wf-row on"><span class="grow">Editor<span class="r-sub">The whole script, except casting.</span></span><i class="ph ph-check"></i></div>
+            <div class="wf-btn ghost">Cancel the invitation</div>
           </div>
         </div>
 
@@ -472,12 +489,33 @@
           </div>
         </div>
 
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Join — another address</button><span>new, 28 September</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Join this script</div>
+            <div class="wf-text">Luky Kuky invited you to <b>I love you, you're fine, but change quickly</b>.</div>
+            <div class="wf-text">This invitation is for <b>l•••y@example.com</b>, and you are signed in as x7k2q9@privaterelay.appleid.com. We send a code to the invited address to make sure it is you.</div>
+            <div class="wf-row"><span class="grow">Your role<span class="r-sub">Reader</span></span></div>
+            <div class="wf-row"><span class="grow">Your part<span class="r-sub">Anna — 8 lines</span></span></div>
+            <div class="wf-btn fill">Send the code</div>
+            <div class="wf-btn ghost">Not now</div>
+          </div>
+        </div>
+
         <div class="note">
           <b>How do I become Nina?</b> Somebody casts you. Only an admin may cast — confirmed
           22 September — so an uncast member sees <i>You have not been cast yet</i> and the part
           comes from the director. Nobody claims a part because it happens to be free.<br><br>
-          The invitation carries the role, and the part when the admin already knows it.
-          Email invitations come later; a link is enough to test with.
+          The invitation carries the role, and the part when the admin already knows it.<br><br>
+          <b>An invitation goes to an email address and works only for it</b> — decided
+          28 September. A link on its own let in whoever tapped it first, which in a group chat
+          could be anybody, and with the admin role that is the whole script. The link still
+          exists and can be passed on in a message, but only the owner of the address gets in:
+          signed in with it, straight through; signed in with another one (Apple's Hide My Email,
+          a work address), with a code sent to the invited address, the same code as at the
+          login. The address is masked on the way, so a stranger holding the link does not learn
+          it. Until they arrive they wait on People as <i>invited</i>, and the admin can pass the
+          link on, send it again or cancel it.
         </div>
       </div>
 
@@ -996,7 +1034,7 @@
           <div class="wf-body">
             <div class="wf-title">Your script is in</div>
             <div class="wf-sub">3 characters · 5 scenes · 130 lines</div>
-            <div class="wf-row"><i class="ph ph-user-plus"></i><span class="grow">Invite the others<span class="r-sub">They join with a link</span></span><i class="ph ph-caret-right"></i></div>
+            <div class="wf-row"><i class="ph ph-user-plus"></i><span class="grow">Invite the others<span class="r-sub">By email, one address each</span></span><i class="ph ph-caret-right"></i></div>
             <div class="wf-row"><i class="ph ph-users-three"></i><span class="grow">Cast the parts<span class="r-sub">Nobody is cast yet</span></span><i class="ph ph-caret-right"></i></div>
             <div class="wf-btn fill">Open the script</div>
           </div>
