@@ -1856,13 +1856,22 @@
     background: var(--sheet-bg);
     border-radius: 26px 26px 0 0; z-index: 21;
     transform: translateY(110%);
-    transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1);
+    /* Put away, a sheet is hidden as well as moved: 110% is only a tenth of its
+       own height below the edge, and its shadow reaches 48px up, so every short
+       sheet waiting down there laid a dark band across the foot of each screen —
+       the band once blamed on the scroll mask. Hidden only after it has slid
+       out, so the shadow still goes down with it. */
+    visibility: hidden;
+    transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear .28s;
     box-shadow: 0 -8px 40px rgba(var(--shadow-rgb),0.2);
     display: flex; flex-direction: column;
   }
   .sheet { padding-bottom: calc(16px + env(safe-area-inset-bottom)); max-height: 82%; }
   .settings-sheet { padding-bottom: calc(20px + env(safe-area-inset-bottom)); max-height: 86%; }
-  .sheet.open, .settings-sheet.open { transform: translateY(0); }
+  .sheet.open, .settings-sheet.open {
+    transform: translateY(0); visibility: visible;
+    transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
+  }
 
   /* One clearance under the grabber, whatever a sheet opens with — a title, a
      context line, an alert's icon. It had been set three different ways in three
@@ -5510,6 +5519,8 @@
     const lineCount = it => it && it.lines ? `<span class="meta-lines">${it.lines} lines</span>` : '';
     const total = scenes.reduce((n, sc) => n + (sc.lines || 0), 0);
     const wholeLines = total ? `<span class="meta-lines">${total} lines · all scenes</span>` : '';
+    /* One scene is the whole script already; the second card would be the first
+       one again, so Whole script waits until there are two. */
     /* The card stays once everything is recorded: recording again is always
        possible, and this is the way into it. It goes only where nothing of yours
        has been written yet. */
@@ -5530,6 +5541,7 @@
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
+      ${scenes.length > 1 ? `
       <div class="card featured" onclick="openScene('Whole script')">
         <div class="card-main">
           <div class="card-title">Whole script</div>
@@ -5539,7 +5551,7 @@
           </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
-      </div>
+      </div>` : ''}
       ${can.act() && ownLines ? `
       <button class="rec-wizard" onclick="openWizardScenes()">
         <i class="ph-fill ph-microphone ic-22"></i>
