@@ -890,13 +890,6 @@
     display: block; margin: 14px auto 0; padding: 10px 16px; border: none; background: none;
     cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--coral);
   }
-  /* A document, not a form: headings and paragraphs at reading size. */
-  .doc-updated { font-size: 13px; color: var(--text-muted); margin: 0 2px 4px; }
-  .doc h3 {
-    font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 1.3;
-    color: var(--noir); margin: 22px 2px 6px;
-  }
-  .doc p { font-size: 15px; line-height: var(--line-height); color: var(--noir); margin: 0 2px 8px; }
 
   #noteSheet textarea {
     width: 100%; border: none; background: none; outline: none; resize: none;
@@ -2878,10 +2871,11 @@
       <!-- Under the last way in, so it is read before any of the three is used, and
            naming all three, so it cannot be taken to belong to the email route
            alone. The terms are agreed to; the privacy policy is only read — it
-           says what happens to your data, it is not something you consent to. -->
+           says what happens to your data, it is not something you consent to.
+           Both are pages on rhrs.app, opened the way openWeb says. -->
       <div class="auth-legal">By continuing with Apple, Google or email, you agree to the
-        <button onclick="showScreen('termsScreen')">Terms of Service</button> and confirm that
-        you have read the <button onclick="showScreen('privacyScreen')">Privacy Policy</button>.</div>
+        <button onclick="openWeb('https://rhrs.app/terms')">Terms of Service</button> and confirm that
+        you have read the <button onclick="openWeb('https://rhrs.app/privacy')">Privacy Policy</button>.</div>
       <div class="auth-spacer"></div>
     </div>
   </div>
@@ -2956,86 +2950,16 @@
     <div class="scroll fades" id="accountScroll"></div>
   </div>
 
-  <!-- ============ SCREENS: TERMS OF SERVICE, PRIVACY POLICY ============
-       Reached from the login, where agreeing to them happens, and from About in
-       Global settings, where they can be read again. In the app both are web pages
-       in an in-app browser: the stores ask for their addresses anyway, and a
-       lawyer's change should not have to wait for a release. The text is a
-       placeholder; the headings are what the real documents have to cover. -->
-  <div class="screen" id="termsScreen">
+  <!-- ============ SCREEN: HAND OVER YOUR SCRIPTS ============
+       Between Delete account and its alert, for whoever runs a script nobody
+       else runs: each can be handed to somebody on it first. -->
+  <div class="screen" id="handoverScreen">
     <div class="header">
       <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title cap-trim">Terms of Service</div>
+      <div class="header-title cap-trim">Hand over your scripts</div>
       <span style="width:42px;flex:0 0 auto;"></span>
     </div>
-    <div class="scroll fades">
-      <div class="doc">
-        <div class="gs-todo" style="margin-bottom:18px;">
-          <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>Placeholder</div>
-          <p>Not the real text. The headings are what it has to cover; the words come from a lawyer.</p>
-        </div>
-        <div class="doc-updated">Last updated [date]</div>
-        <h3>Who we are</h3>
-        <p>rhrs is made by [company], [address]. These terms are the agreement between you and us whenever you use it.</p>
-        <h3>Your account</h3>
-        <p>You need an account to use rhrs, and you must be at least [age] to have one. Keep the way you sign in to yourself: what is done from your account is yours.</p>
-        <h3>Scripts you bring in</h3>
-        <p>What you upload stays yours. Upload only what you have the right to use — a script is usually somebody’s copyrighted work. You let us store it, read it for you and show it to the people you share it with, and nothing more.</p>
-        <h3>If a script is not yours to share</h3>
-        <p>Tell us at [email] and we will look at it. We may take down a script that breaks somebody’s rights.</p>
-        <h3>Your voice</h3>
-        <p>The takes you record are heard by everyone on the script. We keep them to run rhrs, and we check them against the text so you can see how a line went.</p>
-        <h3>Generated voices and transcripts</h3>
-        <p>A line nobody has recorded is read by a generated voice, and a take is turned into text to check it. Both are done by services we work with; the Privacy Policy names them.</p>
-        <h3>Sharing a script</h3>
-        <p>Whoever runs a script decides who is on it and who plays what. Anyone with an invite link can join the script, with the role the link gives.</p>
-        <h3>What you may not do</h3>
-        <p>Use rhrs against the law or against other people, or try to take it apart, overload it or get into what is not yours.</p>
-        <h3>Leaving</h3>
-        <p>You can delete your account at any time, in Account. We may suspend an account that breaks these terms, and we will tell you why.</p>
-        <h3>rhrs as it is</h3>
-        <p>rhrs is in alpha. Things change and sometimes break, so keep your own copy of any script that matters. [Limits of liability.]</p>
-        <h3>Changes to these terms</h3>
-        <p>If we change them in a way that matters, we tell you in the app before it applies and ask you to agree again.</p>
-        <h3>The law, and how to reach us</h3>
-        <p>These terms are governed by [law]. Write to us at [email].</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="screen" id="privacyScreen">
-    <div class="header">
-      <button class="icon-btn" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <div class="header-title cap-trim">Privacy Policy</div>
-      <span style="width:42px;flex:0 0 auto;"></span>
-    </div>
-    <div class="scroll fades">
-      <div class="doc">
-        <div class="gs-todo" style="margin-bottom:18px;">
-          <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>Placeholder</div>
-          <p>Not the real text. The headings are what it has to cover; the words come from a lawyer.</p>
-        </div>
-        <div class="doc-updated">Last updated [date]</div>
-        <h3>Who looks after your data</h3>
-        <p>[company], [address], is responsible for it. Write to [email] about anything on this page.</p>
-        <h3>What we keep</h3>
-        <p>Your name, your email and how you sign in. The scripts, notes and directions you add. The takes you record, and the text we make from them. What happened when the app broke, so we can fix it.</p>
-        <h3>Why</h3>
-        <p>To run rhrs for you, which is our agreement with you; to keep it safe and working, which is our legitimate interest; and to send the notifications you allow, which is your consent.</p>
-        <h3>Who sees it</h3>
-        <p>The people on a script see your name, the part you play and your takes on it. The services that run rhrs for us — hosting [provider], generated voices [provider], speech to text [provider], crash reports [provider] — handle it on our behalf. We do not sell it.</p>
-        <h3>Where it is kept</h3>
-        <p>[Region]. When it leaves the EU, it goes with the safeguards the law asks for.</p>
-        <h3>How long</h3>
-        <p>As long as you have an account. Each line keeps its last five takes. Delete your account and what is yours is deleted within [30] days.</p>
-        <h3>Your rights</h3>
-        <p>See what we hold about you, correct it, delete it, take it with you or object to how we use it — write to [email]. You can also complain to your data protection authority, [authority].</p>
-        <h3>Children</h3>
-        <p>rhrs is not for children under [age].</p>
-        <h3>Changes to this policy</h3>
-        <p>We tell you in the app before a change that matters applies.</p>
-      </div>
-    </div>
+    <div class="scroll fades" id="handoverScroll"></div>
   </div>
 
   <!-- ============ SCREEN: AUDIO EDIT ============
@@ -3209,15 +3133,17 @@
            app, not only at the door. -->
       <div class="gs-label" style="margin-top:26px;">About</div>
       <div class="gs-group">
-        <button class="edit-row" onclick="showScreen('termsScreen')">
+        <!-- Out to the website, so the row ends in the glyph that says so rather
+             than in a chevron that promises another screen of the app. -->
+        <button class="edit-row" onclick="openWeb('https://rhrs.app/terms')">
           <span class="er-ic"><i class="ph ph-file-text ic-20"></i></span>
           <span class="er-label">Terms of Service</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+          <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
         </button>
-        <button class="edit-row" onclick="showScreen('privacyScreen')">
+        <button class="edit-row" onclick="openWeb('https://rhrs.app/privacy')">
           <span class="er-ic"><i class="ph ph-shield-check ic-20"></i></span>
           <span class="er-label">Privacy Policy</span>
-          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+          <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
         </button>
       </div>
 
@@ -4527,8 +4453,7 @@
     audioScreen:          'origin',
     evaluationScreen:     'origin',
     accountScreen:        'origin',
-    termsScreen:          'origin',
-    privacyScreen:        'origin',
+    handoverScreen:       'accountScreen',
     /* Opened from Listen settings, from a part and from the corner of Script
        detail — three doors, so it goes back to whichever one it came in by. */
     whoYouHearScreen:     'origin',
@@ -4548,8 +4473,6 @@
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen',
-    termsScreen:      'globalSettingsScreen',
-    privacyScreen:    'globalSettingsScreen',
     personScreen:     'peopleScreen',
     castScreen:       'editScriptScreen',
     whoYouHearScreen: 'detailScreen',
@@ -6771,12 +6694,20 @@
       ghost: 'Stay signed in'
     },
     /* Leaving for good. The takes go too — a voice is the person's, whatever the
-       script does with it — so the alert says what the others will hear instead,
-       and what happens to a script nobody else runs. */
+       script does with it — so the alert says what the others will hear instead.
+       A script nobody else runs was offered for handing over on the way here;
+       the second version says what is left of those. */
     deleteAccount: {
       icon: 'ph-fill ph-warning',
       title: 'Delete your account?',
-      text: 'Your name, your email and every take you recorded go for good — the others will hear the generated voice on your lines. Scripts you run alone are deleted for everyone in them. This cannot be undone.',
+      text: 'Your name, your email and every take you recorded go for good — the others will hear the generated voice on your lines. This cannot be undone.',
+      primary: 'Delete account', act: 'deleteAccountNow()',
+      ghost: 'Keep it'
+    },
+    deleteAccountScripts: {
+      icon: 'ph-fill ph-warning',
+      title: 'Delete your account?',
+      text: 'Your name, your email and every take you recorded go for good, and so do the scripts you did not hand over — for everyone on them. This cannot be undone.',
       primary: 'Delete account', act: 'deleteAccountNow()',
       ghost: 'Keep it'
     },
@@ -7352,6 +7283,7 @@
      used to be four numbers typed by hand next to a script that disagreed with
      them. */
   SCENES.forEach(sc => { sc.lines = sc.items.filter(it => it.who).length; });
+  renderNewFor();
   renderContinue();
   renderNotifications();
   renderRecent();
@@ -7417,10 +7349,8 @@
                   go: () => showScreen('globalSettingsScreen') },
     account:    { label:'Account',          group:'home', screen:'accountScreen', st:'wip',
                   go: () => openAccount() },
-    terms:      { label:'Terms of Service', group:'home', screen:'termsScreen', st:'wip',
-                  go: () => showScreen('termsScreen') },
-    privacy:    { label:'Privacy Policy',   group:'home', screen:'privacyScreen', st:'wip',
-                  go: () => showScreen('privacyScreen') },
+    handover:   { label:'Hand over your scripts', group:'home', screen:'handoverScreen', st:'wip',
+                  go: () => { openAccount(); openHandover(); } },
 
     /* ---- the scripts ---- */
     scripts:    { label:'All scripts',      group:'library', screen:'scriptsScreen', ver:1, st:'prepared',
@@ -7564,6 +7494,12 @@
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
     wizardset:  { label:'Wizard settings',  group:'sheets', st:'wip',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardSettings(); } },
+    handpick:   { label:'Hand over a script', group:'sheets', st:'wip',
+                  go: () => {
+                    openAccount(); openHandover();
+                    const s = soleAdminScripts()[0];
+                    if (s) openHandoverPick(s.id);
+                  } },
 
     /* ---- alerts: one sheet, one table of words ---- */
     alertrec:   { label:'Delete recording', group:'alerts', ver:1, st:'prepared',
@@ -7582,6 +7518,8 @@
                   go: () => { openAccount(); openAlert('signOut'); } },
     alertdelacct:{ label:'Delete account',  group:'alerts', st:'wip',
                   go: () => { openAccount(); openAlert('deleteAccount'); } },
+    alertdelacct2:{ label:'Delete account — with scripts', group:'alerts', st:'wip',
+                  go: () => { openAccount(); openHandover(); openAlert('deleteAccountScripts'); } },
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
 
@@ -7929,7 +7867,7 @@
       if (!v) return toast('A script needs a name');
       currentScript.title = v;
       document.getElementById('detailTitle').textContent = v;
-      renderScripts(); renderRecent(); renderContinue();
+      renderScripts(); renderRecent(); renderNewFor(); renderContinue();
     },
     scenename: v => {
       if (!v) return toast('A scene needs a name');
@@ -8429,7 +8367,7 @@
     SCRIPTS.splice(SCRIPTS.indexOf(gone), 1);
     currentScript = myScripts()[0] || SCRIPTS[0];
     showScreen('scriptsScreen');
-    renderScripts(); renderRecent(); renderContinue(); paintBellDot();
+    renderScripts(); renderRecent(); renderNewFor(); renderContinue(); paintBellDot();
     toast('Script deleted');
   }
 
@@ -8474,7 +8412,7 @@
       <button class="le-danger" onclick="openAlert('signOut')">
         <i class="ph ph-sign-out ic-20"></i>Sign out
       </button>
-      <button class="ac-delete" onclick="openAlert('deleteAccount')">Delete account</button>`;
+      <button class="ac-delete" onclick="startDeleteAccount()">Delete account</button>`;
     growTextarea(document.getElementById('leInput'));
   }
   function copyEmail() {
@@ -8493,6 +8431,77 @@
     closeSheet();
     openLogin();
     toast('Your account is deleted');
+  }
+  /* A page on the website. The app opens it in an in-app browser — Safari's on
+     iOS, a Custom Tab on Android — so closing it leaves you where you were; the
+     prototype can only offer a new tab. */
+  function openWeb(url) { window.open(url, '_blank', 'noopener'); }
+
+  /* ---- deleting an account that runs a script nobody else runs ----
+     Such a script would go with the account, for everyone on it. So before the
+     alert comes a screen that offers each one to somebody already on it, and
+     says plainly what happens to the ones kept. Only whoever runs a script alone
+     sees it; everybody else goes straight to the alert. Handed over is kept for
+     the visit and does not touch the demo's people. */
+  const HANDED = {};
+  const soleAdminScripts = () => myScripts().filter(s =>
+    s.people.some(m => m.id === ME && m.role === 'admin') &&
+    !s.people.some(m => m.id !== ME && m.role === 'admin' && !m.invited));
+  function startDeleteAccount() {
+    if (soleAdminScripts().length) openHandover();
+    else openAlert('deleteAccount');
+  }
+  function openHandover() {
+    renderHandover();
+    showScreen('handoverScreen');
+  }
+  function renderHandover() {
+    const alone = soleAdminScripts();
+    const rows = alone.map(s => {
+      const to = HANDED[s.id] && person(HANDED[s.id]);
+      const n = s.people.filter(m => m.id !== ME && !m.invited).length;
+      return `
+      <div class="le-row" style="margin-top:10px;cursor:default;">
+        <span class="le-main">
+          <span class="le-top">${s.title}</span>
+          <span class="le-sub">${to ? to.name + ' is its admin now' : n + (n === 1 ? ' other person' : ' others') + ' on it · deleted with your account'}</span>
+        </span>
+        ${to ? '<span class="le-chev"><i class="ph-bold ph-check ic-20"></i></span>'
+             : `<button class="ae-use off" onclick="openHandoverPick('${s.id}')">Hand over</button>`}
+      </div>`;
+    }).join('');
+    document.getElementById('handoverScroll').innerHTML = (alone.length ? `
+      <div class="ac-note" style="padding-top:0;">Nobody else is an admin on these. Hand one to somebody already on it and it stays; the ones you keep are deleted with your account, for everyone on them.</div>
+      ${rows}` : `
+      <div class="ac-note" style="padding-top:0;">Every script you run has another admin, so nothing goes with your account but what is your own.</div>`) + `
+      <div class="ac-note" style="padding-top:18px;">Whatever you do here, your name, your email and every take you recorded go — the others will hear the generated voice on your lines.</div>
+      <button class="le-danger" onclick="confirmDeleteAccount()">
+        <i class="ph ph-trash ic-20"></i>Delete account
+      </button>`;
+  }
+  /* The people already on the script, as the cast picker lists them. Somebody
+     only invited is not on it yet, so is not offered. */
+  function openHandoverPick(sid) {
+    const s = SCRIPTS.find(x => x.id === sid);
+    const others = s.people.filter(m => m.id !== ME && !m.invited);
+    document.getElementById('sheetContext').className = 'sheet-context others';
+    document.getElementById('ctxName').textContent = 'Who runs it after you?';
+    document.getElementById('ctxLine').textContent = s.title;
+    document.getElementById('sheetItems').innerHTML = others.map(m =>
+      `<button class="sheet-item" onclick="closeSheet(); handOver('${sid}', '${m.id}')">
+        <span class="item-ic"><i class="ph ph-user ic-22"></i></span>${m.name} · ${ROLES[m.role].label}
+      </button>`).join('<div class="sheet-rule"></div>')
+      || '<div class="ae-empty">Nobody else is on this script yet</div>';
+    document.getElementById('scrim').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+  function handOver(sid, id) {
+    HANDED[sid] = id;
+    renderHandover();
+    toast(person(id).name + ' is its admin now');
+  }
+  function confirmDeleteAccount() {
+    openAlert(soleAdminScripts().some(s => !HANDED[s.id]) ? 'deleteAccountScripts' : 'deleteAccount');
   }
 
   /* ============================================================
