@@ -144,6 +144,16 @@
   }
   .wf-id:hover { background: var(--wf-line); }
   .wf-id.copied { background: var(--wf-ink); color: var(--wf-card); }
+  /* Whether the prototype has it: on every box, on a line of its own under the
+     name, because it is the first thing looked for. Ink rather than the dim of
+     the tag beside the name, so it reads before the tag does. */
+  .wf-built {
+    flex-basis: 100%;
+    display: flex; align-items: center; gap: 5px;
+    color: var(--wf-ink);
+  }
+  .wf-built i { font-size: 13px; }
+  .wf-built.no { color: var(--wf-dim); }
   .wf-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; }
   .wf-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
   .wf-sub { font-size: 12.5px; color: var(--wf-dim); }
@@ -275,12 +285,20 @@
       <span><i class="box fill"></i>text that is not the point here</span>
       <span><i class="ph ph-arrow-right"></i>what takes you on</span>
       <span><i class="ph ph-hand-tap"></i>tap a name to copy it</span>
+      <span><i class="ph ph-check-circle"></i>in the prototype</span>
+      <span><i class="ph ph-circle-dashed"></i>not in the prototype yet</span>
     </div>
     <p class="note-line">
       <b>Every box is named</b>, and the name in its header is the one to use everywhere —
       here, in conversation, and in the prototype's own list of screens. Where the screen is
       already built, the name is the one the prototype's panel gives it, letter for letter, so
       there is never a second word for the same thing. Tap a name to copy it.
+    </p>
+    <p class="note-line">
+      <b>Every box says whether the prototype has it</b>, on its own line under the name.
+      The boxes were the proposal; the work goes on in the prototype, and it has moved on
+      here and there — where the words in a box and in the prototype differ, the prototype
+      is the one that counts.
     </p>
     <p class="note-line">
       <b>The prototype is drawn for whoever is looking.</b> Its panel has a <i>You are</i>
@@ -357,7 +375,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Script detail</button><span>exists, one block added</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Script detail</button><span>exists, one block added</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Script detail</div>
             <div class="wf-row flat"><span class="grow">I love you, you're fine, but change quickly</span><i class="ph ph-pencil-simple"></i></div>
@@ -376,7 +394,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>the pencil</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Edit script</button><span>exists, two rows added</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Edit script</button><span>exists, two rows added</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Edit script</div>
             <div class="wf-row"><span class="grow">People<span class="r-sub">4 on this script · 1 invited</span></span><i class="ph ph-caret-right"></i></div>
@@ -405,7 +423,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>from Edit script</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">People</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">People</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">People</div>
             <div class="wf-row"><span class="grow">Luky Kuky<span class="r-sub">Admin · cast as Nina</span></span><span class="wf-chip">you</span></div>
@@ -418,7 +436,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>a person</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Person</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Person</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Luděk Sobota</div>
             <div class="wf-sub">Joined 12 September</div>
@@ -445,7 +463,7 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Invite</button><span>by email, 28 September</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Invite</button><span>by email, 28 September</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Invite someone</div>
             <div class="wf-text">We email them an invitation. It works only for that address, so the link in it is safe to pass on — in a group chat too.</div>
@@ -460,7 +478,7 @@
         </div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Person — invited</button><span>new, 28 September</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Person — invited</button><span>new, 28 September</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Jana Kratochvílová</div>
             <div class="wf-sub">Invited 20 September · jana.kratochvilova@example.com</div>
@@ -478,7 +496,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>they open it</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Join</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Join</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Join this script</div>
             <div class="wf-text">Luky Kuky invited you to <b>I love you, you're fine, but change quickly</b>.</div>
@@ -490,7 +508,7 @@
         </div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Join — another address</button><span>new, 28 September</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Join — another address</button><span>new, 28 September</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Join this script</div>
             <div class="wf-text">Luky Kuky invited you to <b>I love you, you're fine, but change quickly</b>.</div>
@@ -521,7 +539,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Scene — not cast</button><span>as a member sees it</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Scene — not cast</button><span>as a member sees it</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype, via You are</span></div>
           <div class="wf-body">
             <div class="wf-title">A scene, not cast</div>
             <div class="wf-bar"></div>
@@ -562,7 +580,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Cast</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Cast</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Cast</div>
             <div class="wf-label">Read aloud by</div>
@@ -578,7 +596,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>a part</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Edit character</button><span>exists, rebuilt</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Edit character</button><span>exists, rebuilt</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Michael</div>
             <div class="wf-label">Name</div>
@@ -597,7 +615,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>voice</div>
 
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Voice picker</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Voice picker</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Voice for Michael</div>
             <div class="wf-text">Heard until somebody records the line, and behind every direction if this is the narrator.</div>
@@ -621,7 +639,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Cast — not an admin</button><span>as a member sees it</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Cast — not an admin</button><span>as a member sees it</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype, via You are</span></div>
           <div class="wf-body">
             <div class="wf-title">Cast</div>
             <div class="wf-label">Read aloud by</div>
@@ -656,7 +674,7 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Mode settings</button><span>exists, one row added</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Mode settings</button><span>exists, one row added</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Listen / Rehearse settings</div>
             <div class="wf-bar mid"></div>
@@ -669,7 +687,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Who you hear</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Who you hear</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Who you hear</div>
             <div class="wf-text">Some parts are played by more than one actor. Pick the one you want to hear — it changes nothing for anybody else.</div>
@@ -681,7 +699,7 @@
         <div class="arrow"><i class="ph ph-arrow-left"></i>also from</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Script detail — not an admin</button><span>as a member sees it</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Script detail — not an admin</button><span>as a member sees it</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype, via You are</span></div>
           <div class="wf-body">
             <div class="wf-title">Script detail — not an admin</div>
             <div class="wf-row flat"><span class="grow">Top right, where an admin has the pencil</span><i class="ph ph-users-three"></i></div>
@@ -718,7 +736,7 @@
 
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line menu</button><span>exists, one line added</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line menu</button><span>exists, one line added</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Michael</div>
             <div class="wf-sub">I'm eating.</div>
@@ -746,7 +764,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Audio edit</button><span>exists, one line changed</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Audio edit</button><span>exists, one line changed</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Nina</div>
             <div class="wf-sub">You're eating.</div>
@@ -764,7 +782,7 @@
         <div class="arrow"><i class="ph ph-arrow-left"></i>the takes button</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line edit</button><span>exists, one line changed</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Line edit</button><span>exists, one line changed</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Line</div>
             <div class="wf-row"><span class="grow">Nina<span class="r-sub">Your part</span></span><i class="ph ph-caret-right"></i></div>
@@ -802,7 +820,7 @@
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">New script</button><span>1</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">New script</button><span>1</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">New script</div>
             <div class="wf-row"><i class="ph ph-file-arrow-up"></i><span class="grow">Upload a file<span class="r-sub">A script you already have</span></span><i class="ph ph-caret-right"></i></div>
@@ -814,7 +832,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Choose a file</button><span>2</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Choose a file</button><span>2</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Choose a file</div>
             <div class="wf-btn big">Choose a file</div>
@@ -823,7 +841,7 @@
         </div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Paste the text</button><span>2, the other way</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Paste the text</button><span>2, the other way</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Paste the text</div>
             <div class="wf-label">The script</div>
@@ -836,7 +854,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Kind of script</button><span>3</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Kind of script</button><span>3</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">What kind of script is it?</div>
             <div class="wf-row on"><span class="grow">Theatre<span class="r-sub">A stage play</span></span><i class="ph ph-check"></i></div>
@@ -863,7 +881,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Reading the script</button><span>4</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Reading the script</button><span>4</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Reading your script</div>
             <div class="wf-bar mid"></div>
@@ -878,7 +896,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>it can fail</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Could not read it</button><span>4b</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Could not read it</button><span>4b</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">We could not read this file</div>
             <div class="wf-text">There is no text in it — it looks like a scan or a photograph of the pages.</div>
@@ -900,7 +918,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported characters</button><span>5</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported characters</button><span>5</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">The characters we found</div>
             <div class="wf-sub">Rename anyone the file got wrong.</div>
@@ -916,7 +934,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported scenes</button><span>6</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported scenes</button><span>6</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">The scenes we found</div>
             <div class="wf-sub">Rename them if the file did not.</div>
@@ -931,7 +949,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported script</button><span>7</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported script</button><span>7</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">The script</div>
             <div class="wf-sub">Look through it scene by scene.</div>
@@ -944,7 +962,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>into a scene</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported scene</button><span>7b</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Imported scene</button><span>7b</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Opening — the kitchen</div>
             <div class="wf-row"><span class="grow">Direction<span class="r-sub">A kitchen, ten past two in the…</span></span><i class="ph ph-pencil-simple"></i></div>
@@ -969,7 +987,7 @@
       <h3>Something is wrong — the same loop three times</h3>
       <div class="flow">
         <div class="wf sheet">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request edit</button><span>new</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request edit</button><span>new</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">What is wrong?</div>
             <div class="wf-field">Every second line is glued to the one above it…</div>
@@ -983,7 +1001,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request working</button><span>working</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request working</button><span>working</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Looking at it</div>
             <div class="wf-bar short"></div>
@@ -994,7 +1012,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i>two ends</div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request fixed</button><span>done</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request fixed</button><span>done</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Fixed</div>
             <div class="wf-text">We split the glued lines. Have a look — the list below has changed.</div>
@@ -1006,7 +1024,7 @@
         <div class="arrow"><i class="ph ph-arrow-right"></i></div>
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request failed</button><span>not done</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Request failed</button><span>not done</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">We could not fix this one</div>
             <div class="wf-text">You will have to correct it by hand, here or on the web. Everything else we did is kept.</div>
@@ -1030,7 +1048,7 @@
 
       <div class="flow">
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Import finished</button><span>8</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Import finished</button><span>8</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Your script is in</div>
             <div class="wf-sub">3 characters · 5 scenes · 130 lines</div>
@@ -1060,15 +1078,15 @@
     <h2>Global settings</h2>
     <p class="note-line">
       What is yours rather than a scene's: your account, how the app looks, what it may tell you,
-      what it records, the way to talk to us, and the small print. Proposed 23 September. Of this,
-      the prototype has Account, Appearance, Feedback and the two documents under About.
+      what it records, the way to talk to us, and the small print. Proposed 23 September, and in
+      the prototype since 29 September — with an alert on Clear that the box does not draw.
     </p>
 
     <div class="canvas">
       <div class="flow">
 
         <div class="wf">
-          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Global settings</button><span>exists, filled in</span></div>
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Global settings</button><span>exists, filled in</span><span class="wf-built"><i class="ph ph-check-circle"></i>In the prototype</span></div>
           <div class="wf-body">
             <div class="wf-title">Settings</div>
             <div class="wf-label">Account</div>

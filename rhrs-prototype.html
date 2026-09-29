@@ -2172,6 +2172,13 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .dash-continue .dc-chev { color: var(--on-mark); flex: 0 0 auto; display: flex; }
+  /* The read-out the scene's card carries on Script detail, the same here: how
+     long the scene is, and whether you are in it. */
+  .dash-continue .dc-meta {
+    display: flex; align-items: center; gap: 10px; margin-top: 8px;
+    font-size: 13px; font-weight: 500; color: var(--on-mark-soft);
+  }
+  .dash-continue .badge { color: var(--on-mark-tint); border-color: var(--on-mark-line); }
 
   .dash-recent-list { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
   /* One script, one box. The same object as a scene card or a line card, on a
@@ -2267,9 +2274,9 @@
   .stat .stat-lbl { font-size: 12px; color: var(--on-wine-soft); margin-top: 6px; }
 
   /* ============ GLOBAL SETTINGS ============
-     One real setting so far. The rest of the screen says so rather than
-     pretending: a stub that lists sections it does not have would read as broken,
-     a note that says what is coming reads as unfinished, which is the truth. */
+     What is yours rather than a scene's. A row that goes somewhere carries a
+     glyph; a row that holds a control — a switch, Clear — carries none, and its
+     words start where the glyphs do, so a group reads down one edge. */
   .gs-list { flex: 1 1 auto; overflow-y: auto; padding: 16px 22px 30px; }
   .gs-list::-webkit-scrollbar { width: 0; }
   .gs-group {
@@ -2278,7 +2285,11 @@
     padding: 6px 0; margin-bottom: 18px;
     box-shadow: var(--glass-shadow);
   }
+  .gs-group .set-row { padding: 14px 18px; }
   .gs-group .set-row + .set-row { border-top: 1px solid var(--divider); }
+  /* A drill-in row says under its name what it holds — whose account, which
+     document — with the sub-line the sheets' rows use. */
+  .edit-row .er-label .set-sub { display: block; }
   .gs-label {
     font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
     text-transform: uppercase; color: var(--text-muted);
@@ -2301,16 +2312,6 @@
     box-shadow: 0 4px 12px var(--lift-wine);
   }
   .gs-theme button:active { transform: scale(0.97); }
-  .gs-todo {
-    border: 1.5px dashed var(--wine-border); border-radius: var(--radius-note);
-    padding: 14px 16px; color: var(--wine);
-  }
-  .gs-todo .gs-todo-head {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
-    text-transform: uppercase; margin-bottom: 7px;
-  }
-  .gs-todo p { font-size: 14px; line-height: 1.5; font-style: italic; }
 
   /* ============ EDIT PLAY ============ */
   .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.04); }
@@ -2337,6 +2338,7 @@
     display: flex; align-items: center; gap: 14px;
     width: 100%; background: none; border: none; cursor: pointer;
     padding: 16px 18px; border-bottom: 1px solid var(--divider); text-align: left;
+    font-family: var(--font-body);
   }
   .edit-row:last-child { border-bottom: none; }
   .edit-row:active { background: var(--mist); }
@@ -2585,7 +2587,7 @@
           <i class="ph ph-bell ic-20"></i>
           <span class="dot" id="bellDot" hidden></span>
         </button>
-        <button class="dash-btn" onclick="showScreen('globalSettingsScreen')" aria-label="Settings">
+        <button class="dash-btn" onclick="openGlobalSettings()" aria-label="Settings">
           <i class="ph ph-gear-six ic-20"></i>
         </button>
         <button class="dash-btn" onclick="openAccount()" aria-label="Account">
@@ -2642,7 +2644,7 @@
         <i class="ph ph-chat-circle-text ic-22"></i>
         <span class="df-main">
           <span class="df-title">Send feedback</span>
-          <span class="df-sub">Or give your phone a shake</span>
+          <span class="df-sub" id="dashShake">Or give your phone a shake</span>
         </span>
         <i class="ph ph-caret-right ic-18"></i>
       </button>
@@ -3116,9 +3118,11 @@
     <div class="gs-list fades">
       <div class="gs-label">Account</div>
       <div class="gs-group">
+        <!-- Who you are, said rather than described — the name and the address
+             of whoever is looking, painted by renderGlobalSettings. -->
         <button class="edit-row" onclick="openAccount()">
           <span class="er-ic"><i class="ph ph-user ic-20"></i></span>
-          <span class="er-label">Your name, email and sign out</span>
+          <span class="er-label"><span id="gsName"></span><span class="set-sub" id="gsEmail"></span></span>
           <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
         </button>
       </div>
@@ -3130,6 +3134,20 @@
         <button id="gsDark"   onclick="setTheme('dark')"><i class="ph-bold ph-moon ic-20"></i>Dark</button>
       </div>
 
+      <!-- What the app may tell you. Playback speed, the narrator, notes and who
+           you hear are not repeated here: they are in each mode's settings and
+           hold everywhere, and two doors to one value are two places to look
+           for it. The rows come from renderGlobalSettings — the switch only for
+           somebody cast somewhere, the slashed row only while the phone says no,
+           and with neither the section goes. -->
+      <div id="gsNotifsWrap">
+        <div class="gs-label" style="margin-top:26px;">Notifications</div>
+        <div class="gs-group" id="gsNotifs"></div>
+      </div>
+
+      <div class="gs-label" style="margin-top:26px;">Recording &amp; storage</div>
+      <div class="gs-group" id="gsStorage"></div>
+
       <div class="gs-label" style="margin-top:26px;">Feedback</div>
       <div class="gs-group">
         <button class="edit-row" onclick="sendFeedback()">
@@ -3137,6 +3155,13 @@
           <span class="er-label">Send feedback</span>
           <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
         </button>
+        <div class="set-row">
+          <div>
+            <div class="set-label">Shake to send feedback</div>
+            <div class="set-sub">Give your phone a shake wherever you are</div>
+          </div>
+          <button class="toggle on" onclick="gsToggle('shake', this)" aria-label="Shake to send feedback"></button>
+        </div>
       </div>
 
       <!-- The small print the login asked you to agree to, where it can be read
@@ -3156,14 +3181,18 @@
           <span class="er-label">Privacy Policy</span>
           <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
         </button>
-      </div>
-
-      <div class="gs-label" style="margin-top:26px;">The rest of this screen</div>
-      <div class="gs-todo">
-        <div class="gs-todo-head"><i class="ph-bold ph-wrench ic-16"></i>To be done</div>
-        <p>What else belongs here is proposed in the wireframes, under Global
-           settings. The theme switch came first so the prototype can be looked at
-           on a phone in either mode.</p>
+        <!-- Flutter's own page, showLicensePage: it gathers the licence of every
+             package in the build by itself, so nobody keeps this list by hand.
+             The prototype has no such page, so it says where it would go. -->
+        <button class="edit-row" onclick="toast('Licenses')">
+          <span class="er-ic"><i class="ph ph-scroll ic-20"></i></span>
+          <span class="er-label">Licenses<span class="set-sub">The fonts, the icons and the code rhrs is built on</span></span>
+          <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+        </button>
+        <!-- The one thing to quote in a bug report, so a tap copies it. -->
+        <button class="edit-row" onclick="copyVersion()">
+          <span class="er-label">Version<span class="set-sub" id="gsVersion"></span></span>
+        </button>
       </div>
     </div>
   </div>
@@ -4207,6 +4236,9 @@
   };
   /* Somebody who runs a script somewhere is who a new script is for. */
   const adminSomewhere = () => myScripts().some(s => s.people.some(m => m.id === ME && m.role === 'admin'));
+  /* Somebody who holds a part somewhere is somebody who records — so the
+     missing-audio notification and the microphone are theirs to think about. */
+  const castSomewhere = () => myScripts().some(s => s.assigned);
   /* Who holds a part, said in a line: you first, because that is the thing you
      are looking for, and "Not cast" rather than an empty space. */
   const castLine = name => {
@@ -4514,6 +4546,7 @@
      move, takes are added, a name is changed. Each place says how to redraw. */
   const REDRAW = {
     dashboardScreen:    () => { renderNewFor(); renderContinue(); renderRecent(); paintBellDot(); },
+    globalSettingsScreen: () => renderGlobalSettings(),
     scriptsScreen:      () => renderScripts(),
     detailScreen:       () => renderScenes(),
     editScriptScreen:   () => { renderEditMeta(); renderEditScenes(); },
@@ -5611,11 +5644,17 @@
     const s = lastScript();
     document.getElementById('dashContinue').style.display = s ? '' : 'none';
     if (!s) return;
+    /* The scene's own read-out, as its card on Script detail has it: how long
+       it is, and whether you are in it. */
+    const sc = (s.scenes || []).find(x => x.title === lastSceneOf(s));
+    const meta = (sc && sc.lines ? `<span>${sc.lines} lines</span>` : '') +
+                 (sc && sc.assigned ? '<span class="badge">Assigned</span>' : '');
     document.getElementById('dashContinue').innerHTML = `
       <span class="dc-main">
         <span class="dc-over">Where you left off</span>
         <span class="dc-title">${lastSceneOf(s)}</span>
         <span class="dc-sub">${s.title}</span>
+        ${meta ? `<span class="dc-meta">${meta}</span>` : ''}
       </span>
       <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
   }
@@ -6146,8 +6185,8 @@
   function renderInvite() {
     document.getElementById('inviteBody').innerHTML = `
       <div class="invite-body">
-        <div class="ac-note" style="padding-top:0;">We email them an invitation. It works only for
-          that address, so the link in it is safe to pass on — in a group chat too.</div>
+        <div class="ac-note" style="padding-top:0;">We email them an invitation and notify you when
+          they accept.</div>
         <div class="le-label">Their email</div>
         <div class="auth-field" id="inviteField">
           <input id="inviteEmail" type="email" inputmode="email" autocomplete="off"
@@ -6835,11 +6874,12 @@
       ghost: 'Keep it'
     },
     /* Leaving. Not a warning — nothing is lost — so it says where the work
-       actually lives and what getting back in costs. */
+       actually lives. How you get back in is the login's to say: an email code,
+       Apple or Google, and a sentence about one of them would hide the others. */
     signOut: {
       icon: 'ph ph-sign-out',
       title: 'Sign out?',
-      text: 'Your scripts, notes and recordings stay on your account. Getting back in means another code in your email.',
+      text: 'Your scripts, notes and recordings stay on your account.',
       primary: 'Sign out', act: 'signOutNow()',
       ghost: 'Stay signed in'
     },
@@ -6890,6 +6930,17 @@
       text: 'Notifications are off, so rhrs has no player in the shade or on the lock screen. Playback, headphone buttons and car controls work either way — only Settings can switch the player back on.',
       primary: 'Open settings', act: "sheetAction('Opening system settings')",
       ghost: 'Not now'
+    },
+    /* Clearing the audio this phone keeps. Nothing is lost — the takes and the
+       voices live with the scripts — so no warning triangle; what it costs is
+       playing without a connection, and that is what it says first. The glyph
+       is that cost. */
+    clearAudio: {
+      icon: 'ph ph-wifi-slash',
+      title: 'Clear the audio on this phone?',
+      text: 'Until it downloads again, you can only play with an internet connection. The takes and voices stay with your scripts — only the copy on this phone goes.',
+      primary: 'Clear audio', act: 'clearAudio()',
+      ghost: 'Keep it'
     }
   };
   function openAlert(key) {
@@ -7470,7 +7521,7 @@
      Anything without `st` counts as wip. */
   const SCREENS = {
     /* ---- getting in ---- */
-    login:      { label:'Login',            group:'entry', screen:'loginScreen', ver:1, st:'wip',
+    login:      { label:'Login',            group:'entry', screen:'loginScreen', ver:1, st:'prepared',
                   go: () => openLogin() },
     code:       { label:'Verification code', group:'entry', screen:'codeScreen', ver:1, st:'prepared',
                   go: () => { openLogin();
@@ -7485,11 +7536,11 @@
                               otpSync(); authSubmitCode(); } },
 
     /* ---- home ---- */
-    dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'prepared',
+    dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'wip',
                   go: () => showScreen('dashboardScreen') },
     /* A library of one, never opened: Godot where it can be, a script somebody
        else runs, which is how most people meet their first. */
-    dashnew:    { label:'Dashboard — one new script', group:'home', st:'wip',
+    dashnew:    { label:'Dashboard — one new script', group:'home', ver:1, st:'prepared',
                   go: () => {
                     const s = myScripts().find(x => x.id === 's3') || myScripts()[0];
                     ONLY_SCRIPT = s.id;
@@ -7500,10 +7551,14 @@
     notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
     settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', st:'wip',
-                  go: () => showScreen('globalSettingsScreen') },
-    account:    { label:'Account',          group:'home', screen:'accountScreen', st:'wip',
+                  go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); } },
+    /* The same screen while the phone refuses both: the two slashed rows, each
+       with its way back. A state, so no `screen` of its own. */
+    settingsoff: { label:'Global settings — permissions off', group:'home', st:'wip',
+                  go: () => { PHONE.notifications = PHONE.microphone = false; openGlobalSettings(); } },
+    account:    { label:'Account',          group:'home', screen:'accountScreen', ver:1, st:'prepared',
                   go: () => openAccount() },
-    handover:   { label:'Hand over your scripts', group:'home', screen:'handoverScreen', st:'wip',
+    handover:   { label:'Hand over your scripts', group:'home', screen:'handoverScreen', ver:1, st:'prepared',
                   go: () => { openAccount(); openHandover(); } },
 
     /* ---- the scripts ---- */
@@ -7571,13 +7626,16 @@
     personinv:  { label:'Person — invited', group:'people', st:'wip',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); openPerson('jk'); } },
 
-    /* ---- one scene, three modes ---- */
+    /* ---- one scene, three modes ----
+       The written scene is the first script's, so every entry that lands in it,
+       here and further down, opens that script first: after Start from nothing
+       the open script is an empty one, and the scene was looked for there. */
     read:       { label:'Read',             group:'scene', screen:'readScreen', ver:1, st:'prepared',
-                  go: () => openScene(DEMO_SCENE) },
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); } },
     listen:     { label:'Listen',           group:'scene', screen:'listenScreen', ver:1, st:'prepared',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); } },
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); } },
     rehearse:   { label:'Rehearse',         group:'scene', screen:'rehearseScreen', ver:1, st:'prepared',
-                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); } },
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); } },
 
     /* ---- recording ---- */
     wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
@@ -7588,6 +7646,7 @@
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
     evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', ver:1, st:'prepared',
                   go: () => {
+                    openScript('s1');
                     openScene(DEMO_SCENE);
                     switchMode('rehearse');
                     stepLine('rehearse', 1);          // cue line → your line
@@ -7598,6 +7657,7 @@
        highlight. */
     evalpoor:   { label:'Evaluation — poor audio', group:'recording', ver:1, st:'prepared',
                   go: () => {
+                    openScript('s1');
                     openScene(DEMO_SCENE);
                     switchMode('rehearse');
                     stepLine('rehearse', 1);
@@ -7632,27 +7692,27 @@
                                         ?? lineIdx()[0]); } },
 
     /* ---- sheets: they slide over whatever you are on ---- */
-    linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'wip',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen');
+    linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'prepared',
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen');
                               openSheet(lineIdx().find(i => SCRIPT[i].mine) ?? lineIdx()[0]); } },
     stagemenu:  { label:'Direction menu',    group:'sheets', ver:1, st:'prepared',
-                  go: () => { openScene(DEMO_SCENE);
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE);
                               openStageSheet(SCRIPT.findIndex(it => it.stage)); } },
     addhere:    { label:'Add here',         group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddSheet(1); } },
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
-    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'wip',
+    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'prepared',
                   /* Rehearse when you may have it; whoever cannot lands in Listen,
                      and the sheet follows the mode they landed in. */
-                  go: () => { openScene(DEMO_SCENE); switchMode('rehearse'); openSettings(currentMode); } },
-    voice:      { label:'Voice picker',     group:'sheets', st:'wip',
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); openSettings(currentMode); } },
+    voice:      { label:'Voice picker',     group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openVoicePicker('Michael'); } },
     speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'prepared',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
-    wizardset:  { label:'Wizard settings',  group:'sheets', st:'wip',
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
+    wizardset:  { label:'Wizard settings',  group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardSettings(); } },
-    handpick:   { label:'Hand over a script', group:'sheets', st:'wip',
+    handpick:   { label:'Hand over a script', group:'sheets', ver:1, st:'prepared',
                   go: () => {
                     openAccount(); openHandover();
                     const s = soleAdminScripts()[0];
@@ -7670,7 +7730,7 @@
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openAlert('deleteLine'); } },
     alertscript:{ label:'Delete script',    group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openAlert('deleteScript'); } },
-    alertall:   { label:'Record all my lines', group:'alerts', st:'wip',
+    alertall:   { label:'Record all my lines', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openAlert('wizardAll'); } },
     alertsignout:{ label:'Sign out',        group:'alerts', st:'wip',
                   go: () => { openAccount(); openAlert('signOut'); } },
@@ -7679,12 +7739,14 @@
     alertdelacct2:{ label:'Delete account — with scripts', group:'alerts', st:'wip',
                   go: () => { openAccount(); openHandover(); openAlert('deleteAccountScripts'); } },
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
-                  go: () => { openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
+    alertclearaudio: { label:'Clear audio', group:'alerts', st:'wip',
+                  go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); openAlert('clearAudio'); } },
 
     /* ---- states the app has no route to ---- */
-    lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'wip',
+    lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openLineEdit(emptyLine()); } },
-    audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'wip',
+    audioempty: { label:'Audio edit — empty', group:'proto', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openAudioEdit(emptyLine()); } }
   };
   /* ============================================================
@@ -8527,6 +8589,76 @@
     showScreen('scriptsScreen');
     renderScripts(); renderRecent(); renderNewFor(); renderContinue(); paintBellDot();
     toast('Script deleted');
+  }
+
+  /* ============================================================
+     GLOBAL SETTINGS
+     ============================================================ */
+  /* What the phone allows, which the app can read but not change — only the
+     phone's own settings can. In the app these are two separate answers; the
+     panel's Global settings — permissions off turns both down at once. */
+  const PHONE = { notifications: true, microphone: true };
+  /* Yours, whichever script is open. The audio kept for playing offline is a
+     figure the demo makes up. */
+  const GS = { missingAudio: true, shake: true, audioMB: 124 };
+  const APP_VERSION = '0.1 alpha · build 42';
+  function openGlobalSettings() {
+    renderGlobalSettings();
+    showScreen('globalSettingsScreen');
+  }
+  /* Painted on every way in: the account row follows whoever is looking, and the
+     rows the phone decides come and go with what it allows. */
+  function renderGlobalSettings() {
+    document.getElementById('gsName').textContent = ACCOUNT.name;
+    document.getElementById('gsEmail').textContent = ACCOUNT.email;
+    /* The missing-audio notification and the microphone come with a part. */
+    const records = castSomewhere();
+    /* A permission the phone has turned off: the slashed glyph, and the one way
+       back, the phone's settings — as in Android playback. */
+    const refused = (glyph, title, sub) => `
+      <button class="edit-row" onclick="toast('Opening system settings')">
+        <span class="er-ic"><i class="ph ${glyph} ic-20"></i></span>
+        <span class="er-label">${title}<span class="set-sub">${sub}</span></span>
+        <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
+      </button>`;
+    const notifs =
+      (PHONE.notifications ? '' : refused('ph-bell-slash', 'Notifications are off', "Only your phone's settings can turn them back on")) +
+      (records ? `
+      <div class="set-row">
+        <div>
+          <div class="set-label">Lines you still need to record</div>
+          <div class="set-sub">When a scene of yours has lines without audio</div>
+        </div>
+        <button class="toggle ${GS.missingAudio ? 'on' : ''}" onclick="gsToggle('missingAudio', this)" aria-label="Lines you still need to record"></button>
+      </div>` : '');
+    document.getElementById('gsNotifs').innerHTML = notifs;
+    /* Nothing to switch and nothing refused: no section at all. */
+    document.getElementById('gsNotifsWrap').style.display = notifs ? '' : 'none';
+    document.getElementById('gsStorage').innerHTML =
+      (records && !PHONE.microphone ? refused('ph-microphone-slash', 'The microphone is off', 'Rehearse and the Recording wizard need it') : '') + `
+      <div class="set-row">
+        <div>
+          <div class="set-label">Audio on this phone</div>
+          <div class="set-sub">${GS.audioMB ? GS.audioMB + ' MB · takes and voices kept for playing offline' : 'Nothing kept on this phone yet'}</div>
+        </div>
+        ${GS.audioMB ? `<button class="ae-use off" onclick="openAlert('clearAudio')">Clear</button>` : ''}
+      </div>`;
+    document.getElementById('gsVersion').textContent = APP_VERSION + ' · tap to copy';
+  }
+  function gsToggle(key, btn) {
+    GS[key] = !GS[key];
+    btn.classList.toggle('on', GS[key]);
+    /* The dashboard offers the shake too, and must not offer one that is off. */
+    if (key === 'shake') document.getElementById('dashShake').style.display = GS.shake ? '' : 'none';
+  }
+  function clearAudio() {
+    GS.audioMB = 0;
+    renderGlobalSettings();
+    sheetAction('Audio cleared');
+  }
+  function copyVersion() {
+    navigator.clipboard?.writeText('rhrs ' + APP_VERSION);
+    toast('Version copied');
   }
 
   /* ============================================================
