@@ -1344,6 +1344,13 @@
   }
   .wz-empty .we-back::before { content: none; }
   .wz-empty .we-back:active { transform: scale(0.97); }
+  /* Scene done: the same finished block, as a screen of its own, over the card
+     that ends a scene in Listen and Rehearse — here naming the next scene that
+     still needs you and how much it does. The tick holds the place of an
+     illustration. */
+  #wizardDoneBody .wz-empty { padding-top: 34px; }
+  .next-scene.wz-next .ns-name { margin-bottom: 8px; }
+  .next-scene.wz-next .ns-meta { margin-bottom: 18px; }
 
   /* Where the mode bar stands everywhere else. The wizard is not a mode you
      switch out of from here, so the bar names where you are and does nothing —
@@ -3015,6 +3022,19 @@
     <div class="list fades" id="wizardScenesList"></div>
   </div>
 
+  <!-- ============ SCREEN: RECORDING WIZARD — SCENE DONE ============
+       The last line of yours without audio in a scene has its take. The end of
+       the session, with the one next thing to do: the next scene that still
+       needs you, or — when there is none — the way back to the script. -->
+  <div class="screen" id="wizardDoneScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Scene recorded</span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="list fades" id="wizardDoneBody"></div>
+  </div>
+
   <!-- ============ SCREEN: RECORDING WIZARD ============
        Rehearse narrowed to one job: the lines of mine without audio. The list is
        the whole scene, because a line is said in answer to something; the filter
@@ -4478,6 +4498,8 @@
 
     wizardScenesScreen:   'detailScreen',
     wizardScreen:         'wizardScenesScreen',
+    /* The end of a scene's session goes up to the scenes, like the scene did. */
+    wizardDoneScreen:     'wizardScenesScreen',
 
     editScriptScreen:     'detailScreen',
     peopleScreen:         'editScriptScreen',
@@ -6442,6 +6464,10 @@
 
   /* ---- reading ---- */
   const READ_STEPS = ['Read the file', 'Find the characters', 'Split the scenes', 'Sort out the directions'];
+  /* The list names the steps; the line under the bar says the one under way, as
+     it happens — the wireframe's Finding the characters…, not the step's name
+     with dots after it. */
+  const READ_DOING = ['Reading the file…', 'Finding the characters…', 'Splitting the scenes…', 'Sorting out the directions…'];
   let readTimer = null, readStep = 0;
   function startReading() {
     if (!IMPORT.script) IMPORT.script = createImport();
@@ -6471,7 +6497,7 @@
         <div class="il-sub">${IMPORT.source === 'file' ? IMPORT.file : 'The text you pasted'}</div>
       </div>
       <div class="imp-bar"><div class="imp-fill" style="width:${pct}%"></div></div>
-      <div class="ac-note" style="padding-bottom:14px;">${readStep < READ_STEPS.length ? READ_STEPS[readStep] + '…' : 'Nearly there…'}</div>
+      <div class="ac-note" style="padding-bottom:14px;">${readStep < READ_STEPS.length ? READ_DOING[readStep] : 'Nearly there…'}</div>
       ${READ_STEPS.map((label, i) => `
       <div class="imp-step ${i < readStep ? 'done' : i === readStep ? 'now' : ''}">
         <span class="is-ic">${i < readStep ? '<i class="ph-bold ph-check ic-18"></i>' : i === readStep ? '<i class="ph ph-circle-dashed ic-18"></i>' : ''}</span>${label}
@@ -7391,6 +7417,9 @@
   function wzStart() {
     const line = SCRIPT[activeIdx];
     if (!line || !isMine(line)) return;
+    /* Whether this take fills a gap. The scene is done when its last gap is —
+       saying a recorded line again is not finishing anything. */
+    wz.filling = needsAudio(line);
     playing = false;
     wzSetState('rec');
     startRecording({ btn: 'wzRecBtn', time: 'wzRecTime', done: wzKeep });
@@ -7410,11 +7439,17 @@
   /* A take has landed: the card says so, Script detail counts down, and the
      wizard moves on if it was told to. */
   function wzSaved() {
+    /* The last gap in the scene filled: this scene's session is over, whatever
+       Auto-advance says, because there is no next line to go to. Only while the
+       wizard is here for the unrecorded ones — going through all of them, you
+       decide where it ends. */
+    const done = wz.filling && wz.filter === 'missing' && !wzTargets().length;
     renderWizard();
     renderScenes();
     renderWizardScenes();
     wzSetState('success');
     setTimeout(() => {
+      if (done) { if (activeScreen()?.id === 'wizardScreen') openWizardDone(); return; }
       if (!wz.autoAdvance) { renderWizard(); wzSync(); return; }
       /* Walking, the next thing is the next thing — most likely a cue, which is
          what you want to hear before you answer it. Otherwise it is the next
@@ -7424,6 +7459,46 @@
       if (!targets.length) { renderWizard(); wzSync(); return; }
       wzGo(targets.find(i => i > activeIdx) ?? targets[0]);
     }, SUCCESS_MS);
+  }
+
+  /* ---- step three: the scene is done ----
+     Not the finished block on top of a scene — that one is for coming back to a
+     scene with nothing left in it — but the end of the session, with the one
+     next thing to do: the next scene in the script's order that still needs
+     you, or the way back to the script when none does. The same card that ends
+     a scene in Listen and Rehearse. `allDone` is the panel's: it shows the end
+     as if nothing were left, without recording anything. */
+  function openWizardDone(allDone = false) {
+    renderWizardDone(allDone);
+    showScreen('wizardDoneScreen');
+  }
+  function renderWizardDone(allDone = false) {
+    const scenes = sceneList(), here = scenes[wz.scene] || scenes[0];
+    /* After this one first, then round from the top: a scene skipped on the way
+       is still owed. */
+    const order = [...scenes.slice(wz.scene + 1), ...scenes.slice(0, wz.scene)];
+    const next = allDone ? null : order.find(sc => sceneMissing(sc));
+    document.getElementById('wizardDoneBody').innerHTML = `
+      <div class="wz-empty">
+        <span class="we-tick"><i class="ph-bold ph-check ic-38"></i></span>
+        <div class="we-title">${here.title}</div>
+        <div class="we-sub">Every line of yours in it has audio now — the others can rehearse with your voice.</div>
+      </div>` + (next ? `
+      <div class="next-scene wz-next">
+        <div class="ns-label">Next scene to record</div>
+        <div class="ns-name cap-trim">${next.title}</div>
+        <div class="ns-meta"><span class="badge">${sceneMissing(next)} to record</span></div>
+        <button class="ns-go" onclick="openWizard(${scenes.indexOf(next)})">
+          Continue <i class="ph-bold ph-arrow-right ic-18"></i>
+        </button>
+      </div>` : `
+      <div class="next-scene end">
+        <div class="ns-label">Nothing left to record</div>
+        <div class="ns-name cap-trim">${currentScript.title}</div>
+        <button class="ns-go quiet" onclick="backToScript()">
+          Back to the script <i class="ph-bold ph-arrow-up-left ic-18"></i>
+        </button>
+      </div>`);
   }
 
   function openWizardSettings() {
@@ -7640,10 +7715,18 @@
     /* ---- recording ---- */
     wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
                   go: () => { openScript('s1'); openWizardScenes(); } },
-    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', ver:1, st:'prepared',
+    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', ver:1, st:'wip',
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
+    /* Reached in the app when the last line of yours without audio in a scene
+       gets its take. The panel shows it for the first scene without recording
+       anything, so the demo's counts stay as they are. */
+    wizdone:    { label:'Wizard — scene done', group:'recording', screen:'wizardDoneScreen', st:'wip',
+                  go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardDone(); } },
+    /* The same end with no scene of yours left without audio. A state. */
+    wizdoneall: { label:'Wizard — all recorded', group:'recording', st:'wip',
+                  go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardDone(true); } },
     evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', ver:1, st:'prepared',
                   go: () => {
                     openScript('s1');
@@ -8843,7 +8926,7 @@
         <i class="ph ph-caret-down ic-16"></i>
       </span>`;
   }
-  const OWN_SCREENS = ['wizardScenesScreen', 'wizardScreen', 'evaluationScreen', 'lineScreen', 'dirScreen', 'audioScreen'];
+  const OWN_SCREENS = ['wizardScenesScreen', 'wizardScreen', 'wizardDoneScreen', 'evaluationScreen', 'lineScreen', 'dirScreen', 'audioScreen'];
   function becomeMember(id) {
     if (!person(id) || id === ME) return;
     ME = id;
