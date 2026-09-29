@@ -1383,6 +1383,8 @@
     font-weight: 600; font-size: 19px; color: var(--noir);
     line-height: 1.3; margin-bottom: 8px;
   }
+  /* Where you left off is only a place, so its card ends on the name. */
+  .card .card-title:last-child { margin-bottom: 0; }
   .card .card-meta { display: flex; align-items: center; gap: 10px; }
   .card .meta-lines { font-size: 13px; color: var(--text-muted); font-weight: 500; }
   .badge {
@@ -2179,13 +2181,6 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .dash-continue .dc-chev { color: var(--on-mark); flex: 0 0 auto; display: flex; }
-  /* The read-out the scene's card carries on Script detail, the same here: how
-     long the scene is, and whether you are in it. */
-  .dash-continue .dc-meta {
-    display: flex; align-items: center; gap: 10px; margin-top: 8px;
-    font-size: 13px; font-weight: 500; color: var(--on-mark-soft);
-  }
-  .dash-continue .badge { color: var(--on-mark-tint); border-color: var(--on-mark-line); }
 
   .dash-recent-list { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
   /* One script, one box. The same object as a scene card or a line card, on a
@@ -5589,10 +5584,6 @@
         <div class="card-main">
           <div class="card-over">${fresh ? 'Start here' : 'Where you left off'}</div>
           <div class="card-title">${last.title}</div>
-          <div class="card-meta">
-            ${lineCount(last)}
-            ${last.assigned ? '<span class="badge">Assigned</span>' : ''}
-          </div>
         </div>
         <span class="chevron">${ICON.chevron}</span>
       </div>
@@ -5666,17 +5657,13 @@
     const s = lastScript();
     document.getElementById('dashContinue').style.display = s ? '' : 'none';
     if (!s) return;
-    /* The scene's own read-out, as its card on Script detail has it: how long
-       it is, and whether you are in it. */
-    const sc = (s.scenes || []).find(x => x.title === lastSceneOf(s));
-    const meta = (sc && sc.lines ? `<span>${sc.lines} lines</span>` : '') +
-                 (sc && sc.assigned ? '<span class="badge">Assigned</span>' : '');
+    /* Only the place: the label and the scene, as on Script detail. How long
+       the scene is and whether you are in it are on its card in the scene list;
+       which script it is, in the first box under this one. */
     document.getElementById('dashContinue').innerHTML = `
       <span class="dc-main">
         <span class="dc-over">Where you left off</span>
         <span class="dc-title">${lastSceneOf(s)}</span>
-        <span class="dc-sub">${s.title}</span>
-        ${meta ? `<span class="dc-meta">${meta}</span>` : ''}
       </span>
       <span class="dc-chev"><i class="ph ph-caret-right ic-20"></i></span>`;
   }
