@@ -713,7 +713,10 @@
   .pe-head .pe-name {
     font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--noir);
   }
-  .pe-head .pe-when { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+  /* The name is trimmed to its capitals and its baseline, so the line under it
+     brings back the room the descenders take: 10px sets it as far below the
+     baseline as the Import finished lede sets its own. */
+  .pe-head .pe-when { font-size: 13px; color: var(--text-muted); margin-top: 10px; }
   /* Taking a part off someone is a small, quiet control — it undoes a decision
      rather than making one. */
   .pe-x {
