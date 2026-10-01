@@ -2317,6 +2317,16 @@
     box-shadow: 0 4px 12px var(--lift-wine);
   }
   .gs-theme button:active { transform: scale(0.97); }
+  /* Licenses: who made each thing, then the licence it comes under in its own
+     words — small and quiet, the way small print is, but whole. */
+  .lic-name {
+    font-size: 14px; font-weight: 700; color: var(--noir);
+    padding: 0 4px 6px;
+  }
+  .lic-text {
+    font-size: 12.5px; line-height: 1.55; color: var(--text-muted);
+    white-space: pre-line; padding: 0 4px 8px;
+  }
 
   /* ============ EDIT PLAY ============ */
   .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.04); }
@@ -3199,10 +3209,10 @@
           <span class="er-label">Privacy Policy</span>
           <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
         </button>
-        <!-- Flutter's own page, showLicensePage: it gathers the licence of every
-             package in the build by itself, so nobody keeps this list by hand.
-             The prototype has no such page, so it says where it would go. -->
-        <button class="edit-row" onclick="toast('Licenses')">
+        <!-- The design's share — the fonts and the icons — on a screen of its
+             own. The packages the code is built on are the developers' to add;
+             Flutter gathers their licences by itself. -->
+        <button class="edit-row" onclick="openLicenses()">
           <span class="er-ic"><i class="ph ph-scroll ic-20"></i></span>
           <span class="er-label">Licenses<span class="set-sub">The fonts, the icons and the code rhrs is built on</span></span>
           <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
@@ -3211,8 +3221,27 @@
         <button class="edit-row" onclick="copyVersion()">
           <span class="er-label">Version<span class="set-sub" id="gsVersion"></span></span>
         </button>
+        <!-- The way to reach us that is not feedback, last of all: a page on the
+             website, like the two documents. -->
+        <button class="edit-row" onclick="openWeb('https://rhrs.app/contact')">
+          <span class="er-ic"><i class="ph ph-envelope-simple ic-20"></i></span>
+          <span class="er-label">Contact us</span>
+          <span class="er-chev"><i class="ph ph-arrow-square-out ic-18"></i></span>
+        </button>
       </div>
     </div>
+  </div>
+
+  <!-- ============ SCREEN: LICENSES ============
+       What rhrs is built on and on what terms. The prototype lists the design's
+       part — the two fonts and the icons; the app adds the code's packages. -->
+  <div class="screen" id="licensesScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Licenses</span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="list fades" id="licensesBody"></div>
   </div>
 
   <!-- ============ SCREEN: EDIT PLAY ============ -->
@@ -4489,6 +4518,7 @@
     scriptsScreen:        'dashboardScreen',
     detailScreen:         'scriptsScreen',
     globalSettingsScreen: 'dashboardScreen',
+    licensesScreen:       'globalSettingsScreen',
 
     readScreen:           'detailScreen',
     listenScreen:         'detailScreen',
@@ -7616,12 +7646,14 @@
                   } },
     notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
-    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'prepared',
+    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'wip',
                   go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); } },
     /* The same screen while the phone refuses both: the two slashed rows, each
        with its way back. A state, so no `screen` of its own. */
-    settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'prepared',
+    settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'wip',
                   go: () => { PHONE.notifications = PHONE.microphone = false; openGlobalSettings(); } },
+    licenses:   { label:'Licenses',         group:'home', screen:'licensesScreen', st:'wip',
+                  go: () => { openGlobalSettings(); openLicenses(); } },
     account:    { label:'Account',          group:'home', screen:'accountScreen', ver:1, st:'prepared',
                   go: () => openAccount() },
     handover:   { label:'Hand over your scripts', group:'home', screen:'handoverScreen', ver:1, st:'prepared',
@@ -7672,24 +7704,24 @@
                   go: () => { demoImport('script'); finishImport(); } },
 
     /* ---- who is on the script ---- */
-    people:     { label:'People',           group:'people', screen:'peopleScreen', st:'wip',
+    people:     { label:'People',           group:'people', screen:'peopleScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); } },
-    person:     { label:'Person',           group:'people', screen:'personScreen', st:'wip',
+    person:     { label:'Person',           group:'people', screen:'personScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); openPerson('ls'); } },
-    invite:     { label:'Invite',           group:'people', st:'wip',
+    invite:     { label:'Invite',           group:'people', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); openInvite(); } },
-    cast:       { label:'Cast',             group:'people', screen:'castScreen', st:'wip',
+    cast:       { label:'Cast',             group:'people', screen:'castScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openCast(); } },
-    whoyouhear: { label:'Who you hear',     group:'people', screen:'whoYouHearScreen', st:'wip',
+    whoyouhear: { label:'Who you hear',     group:'people', screen:'whoYouHearScreen', ver:1, st:'prepared',
                   /* By way of the part, which is the admin's door; Listen
                      settings and the corner of Script detail are the others. */
                   go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openWhoYouHear(); } },
-    join:       { label:'Join',             group:'people', screen:'joinScreen', st:'wip',
+    join:       { label:'Join',             group:'people', screen:'joinScreen', ver:1, st:'prepared',
                   /* Reached from a link, never from inside the app. */
                   go: () => openJoin() },
-    joinother:  { label:'Join — another address', group:'people', st:'wip',
+    joinother:  { label:'Join — another address', group:'people', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openJoin(true); } },
-    personinv:  { label:'Person — invited', group:'people', st:'wip',
+    personinv:  { label:'Person — invited', group:'people', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openPeople(); openPerson('jk'); } },
 
     /* ---- one scene, three modes ----
@@ -7808,9 +7840,9 @@
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openAlert('wizardAll'); } },
     alertsignout:{ label:'Sign out',        group:'alerts', ver:1, st:'prepared',
                   go: () => { openAccount(); openAlert('signOut'); } },
-    alertdelacct:{ label:'Delete account',  group:'alerts', st:'wip',
+    alertdelacct:{ label:'Delete account',  group:'alerts', ver:1, st:'prepared',
                   go: () => { openAccount(); openAlert('deleteAccount'); } },
-    alertdelacct2:{ label:'Delete account — with scripts', group:'alerts', st:'wip',
+    alertdelacct2:{ label:'Delete account — with scripts', group:'alerts', ver:1, st:'prepared',
                   go: () => { openAccount(); openHandover(); openAlert('deleteAccountScripts'); } },
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
@@ -8733,6 +8765,37 @@
   function copyVersion() {
     navigator.clipboard?.writeText('rhrs ' + APP_VERSION);
     toast('Version copied');
+  }
+
+  /* ---- licenses ----
+     The design's part of what rhrs is built on: the two fonts and the icons,
+     each with its copyright line as its licence file gives it. The licences ask
+     for their own words to travel with the app, so the texts are here in full,
+     once each: both fonts come under the same one. The code's packages are the
+     developers' to add — Flutter gathers those by itself. */
+  const LICENSES = [
+    { label: 'Fonts', licence: 'SIL Open Font License 1.1',
+      parts: [['Platypi', 'Copyright 2024 The Platypi Project Authors (https://github.com/d-sargent/platypi)'],
+              ['DM Sans', 'Copyright 2014 The DM Sans Project Authors (https://github.com/googlefonts/dm-fonts)']],
+      text: "SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n\nPREAMBLE\nThe goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.\n\nThe OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.\n\nDEFINITIONS\n\"Font Software\" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.\n\n\"Reserved Font Name\" refers to any names specified as such after the copyright statement(s).\n\n\"Original Version\" refers to the collection of Font Software components as distributed by the Copyright Holder(s).\n\n\"Modified Version\" refers to any derivative made by adding to, deleting, or substituting -- in part or in whole -- any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.\n\n\"Author\" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.\n\nPERMISSION & CONDITIONS\nPermission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:\n\n1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.\n\n2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.\n\n3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.\n\n4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.\n\n5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.\n\nTERMINATION\nThis license becomes null and void if any of the above conditions are not met.\n\nDISCLAIMER\nTHE FONT SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE." },
+    { label: 'Icons', licence: 'MIT License',
+      parts: [['Phosphor Icons', 'Copyright (c) 2020-2021 Phosphor Icons']],
+      text: "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE." }
+  ];
+  function openLicenses() {
+    renderLicenses();
+    showScreen('licensesScreen');
+  }
+  function renderLicenses() {
+    document.getElementById('licensesBody').innerHTML = `
+      <div class="ac-note" style="padding-top:0;">What rhrs is built on, and the licenses it is used under.</div>` +
+      LICENSES.map(l => `
+      <div class="gs-label" style="margin-top:22px;">${l.label}</div>
+      <div class="gs-group">${l.parts.map(([name, who]) => `
+        <div class="set-row"><div><div class="set-label">${name}</div><div class="set-sub">${who}</div></div></div>`).join('')}
+      </div>
+      <div class="lic-name">${l.licence}</div>
+      <div class="lic-text">${l.text}</div>`).join('');
   }
 
   /* ============================================================
