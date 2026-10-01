@@ -6815,8 +6815,9 @@
       !NOTIFS.some(n => !n.read && (n.kind !== 'missing' || owedOn().length));
   }
 
-  /* Both buttons and the shake end up in the same place. There is no feedback
-     screen yet, so for now it says where it would go. */
+  /* Both buttons and the shake end up in the same place. The feedback screen
+     is the app's own and already built there; the prototype only draws the ways
+     in, and says where they go. */
   function sendFeedback() { toast('Feedback'); }
 
   /* One sheet, several messages. Exact strings — they become translation keys. */
@@ -7598,7 +7599,7 @@
                               otpSync(); authSubmitCode(); } },
 
     /* ---- home ---- */
-    dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'wip',
+    dashboard:  { label:'Dashboard',        group:'home', screen:'dashboardScreen', ver:1, st:'prepared',
                   go: () => showScreen('dashboardScreen') },
     /* A library of one, never opened: Godot where it can be, a script somebody
        else runs, which is how most people meet their first. */
@@ -7612,11 +7613,11 @@
                   } },
     notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
-    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', st:'wip',
+    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'prepared',
                   go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); } },
     /* The same screen while the phone refuses both: the two slashed rows, each
        with its way back. A state, so no `screen` of its own. */
-    settingsoff: { label:'Global settings — permissions off', group:'home', st:'wip',
+    settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'prepared',
                   go: () => { PHONE.notifications = PHONE.microphone = false; openGlobalSettings(); } },
     account:    { label:'Account',          group:'home', screen:'accountScreen', ver:1, st:'prepared',
                   go: () => openAccount() },
@@ -7626,7 +7627,7 @@
     /* ---- the scripts ---- */
     scripts:    { label:'All scripts',      group:'library', screen:'scriptsScreen', ver:1, st:'prepared',
                   go: () => showScreen('scriptsScreen') },
-    detail:     { label:'Script detail',    group:'library', screen:'detailScreen', st:'wip',
+    detail:     { label:'Script detail',    group:'library', screen:'detailScreen', ver:1, st:'prepared',
                   go: () => openScript('s1') },
 
     /* ---- getting a script in ---- */
@@ -7700,19 +7701,19 @@
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); } },
 
     /* ---- recording ---- */
-    wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', st:'wip',
+    wizscenes:  { label:'Wizard — scenes',  group:'recording', screen:'wizardScenesScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); } },
-    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', ver:1, st:'wip',
+    wizard:     { label:'Recording wizard', group:'recording', screen:'wizardScreen', ver:1, st:'prepared',
                   /* Through the scene list, because that is the way in — and it
                      is what Back should find behind the wizard. */
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); } },
     /* Reached in the app when the last line of yours without audio in a scene
        gets its take. The panel shows it for the first scene without recording
        anything, so the demo's counts stay as they are. */
-    wizdone:    { label:'Wizard — scene done', group:'recording', screen:'wizardDoneScreen', st:'wip',
+    wizdone:    { label:'Wizard — scene done', group:'recording', screen:'wizardDoneScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardDone(); } },
     /* The same end with no scene of yours left without audio. A state. */
-    wizdoneall: { label:'Wizard — all recorded', group:'recording', st:'wip',
+    wizdoneall: { label:'Wizard — all recorded', group:'recording', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardDone(true); } },
     evaluation: { label:'Evaluation',       group:'recording', screen:'evaluationScreen', ver:1, st:'prepared',
                   go: () => {
@@ -7733,7 +7734,7 @@
                     stepLine('rehearse', 1);
                     openEvaluation('rehearse', null, true);
                   } },
-    audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'wip',
+    audio:      { label:'Audio edit',       group:'recording', screen:'audioScreen', ver:1, st:'prepared',
                   /* Reached in the app from a line's menu — Audio — on any line
                      of yours, and from the wizard's tag on a recorded line. */
                   /* One of mine, and one carrying a note, so the demo shows both
@@ -7743,20 +7744,20 @@
                                          ?? lineIdx().find(i => SCRIPT[i].mine)); } },
 
     /* ---- writing and editing ---- */
-    edit:       { label:'Edit script',      group:'editing', screen:'editScriptScreen', st:'wip',
+    edit:       { label:'Edit script',      group:'editing', screen:'editScriptScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); } },
     sceneedit:  { label:'Scene edit',       group:'editing', screen:'sceneEditScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openSceneEdit(0); } },
-    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', st:'wip',
+    dir:        { label:'Direction edit',   group:'editing', screen:'dirScreen', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0);
                               openDirEdit(SCRIPT.findIndex(it => it.stage)); } },
     addline:    { label:'Add line',         group:'editing', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddLine(1); } },
     adddir:     { label:'Add direction',    group:'editing', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddDirection(1); } },
-    character:  { label:'Edit character',   group:'editing', screen:'characterScreen', st:'wip',
+    character:  { label:'Edit character',   group:'editing', screen:'characterScreen', ver:1, st:'prepared',
                   go: () => { demoScene(); openEditScript(); openCharacter('Michael'); } },
-    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'wip',
+    line:       { label:'Line edit',        group:'editing', screen:'lineScreen', ver:1, st:'prepared',
                   go: () => { demoScene();
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
@@ -7802,7 +7803,7 @@
                   go: () => { openScript('s1'); openEditScript(); openAlert('deleteScript'); } },
     alertall:   { label:'Record all my lines', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openAlert('wizardAll'); } },
-    alertsignout:{ label:'Sign out',        group:'alerts', st:'wip',
+    alertsignout:{ label:'Sign out',        group:'alerts', ver:1, st:'prepared',
                   go: () => { openAccount(); openAlert('signOut'); } },
     alertdelacct:{ label:'Delete account',  group:'alerts', st:'wip',
                   go: () => { openAccount(); openAlert('deleteAccount'); } },
@@ -7810,7 +7811,7 @@
                   go: () => { openAccount(); openHandover(); openAlert('deleteAccountScripts'); } },
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
-    alertclearaudio: { label:'Clear audio', group:'alerts', st:'wip',
+    alertclearaudio: { label:'Clear audio', group:'alerts', ver:1, st:'prepared',
                   go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); openAlert('clearAudio'); } },
 
     /* ---- states the app has no route to ---- */
