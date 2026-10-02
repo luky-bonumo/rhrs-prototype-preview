@@ -5110,16 +5110,15 @@
     document.querySelectorAll('#setRehearse .js-speed-all').forEach(el => el.textContent = chip('rehearse'));
   }
   /* Swap sheets rather than stacking them — the speed sheet is the detail of
-     this row, not something on top of it. From the mode settings it opens on All
-     characters; from the figure under the scrubber, on whoever holds the line,
-     or on All characters where that row is not offered (your own, in Rehearse). */
+     this row, not something on top of it. */
   function openSpeedFromSettings() {
     document.getElementById('settingsSheet').classList.remove('open');
-    setTimeout(() => openSpeedSheet(true), 180);
+    setTimeout(openSpeedSheet, 180);
   }
-  function openSpeedSheet(fromSettings = false) {
-    const key = (SCRIPT[activeIdx] || {}).who || '';
-    speedOpen = !fromSettings && speedRows().some(r => r.key === key) ? key : -1;
+  /* It opens on All characters, wherever it is opened from: the speed of
+     everybody is the usual question, one part's the exception. */
+  function openSpeedSheet() {
+    speedOpen = -1;
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('speedSheet').classList.add('open');
@@ -7910,9 +7909,7 @@
     voice:      { label:'Voice picker',     group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openVoicePicker('Michael'); } },
     speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'wip',
-                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen');
-                              for (let k = 0; k < 8 && SCRIPT[activeIdx].who !== 'Michael'; k++) stepLine('listen', 1);
-                              openSpeedSheet(); } },
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
     wizardset:  { label:'Wizard settings',  group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardSettings(); } },
     handpick:   { label:'Hand over a script', group:'sheets', ver:1, st:'prepared',
