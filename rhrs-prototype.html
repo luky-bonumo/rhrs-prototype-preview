@@ -1769,6 +1769,7 @@
   .t-meta .speed {
     background: none; border: none; cursor: pointer;
     font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--accent);
+    display: inline-flex; align-items: center; gap: 5px;
   }
 
   /* --- Rehearse: paused action row --- */
@@ -5099,15 +5100,22 @@
     (i === -1 ? rows : [rows[i]]).forEach(r => setSpeedOf(r.key, value));
     renderSpeedSheet();
   }
-  /* The figure under the scrubber is the speed of whoever holds the line — the
-     narrator's on a direction — which is the row the sheet opens on. The mode
-     settings say one figure for their mode's rows, or Varies. */
+  /* Under the scrubber, what All characters says — the row the sheet opens on:
+     one figure while the parts agree, Varies once they do not. It used to be the
+     speed of whoever held the line, which on a direction was the narrator's and
+     said nothing about the others. A figure with an x says what it is; Varies
+     needs the glyph to. Evaluation plays one voice, the take's, so its figure is
+     that part's. The mode settings rows say the same for their mode. */
+  const SPEED_MODE = { listenScreen: 'listen', rehearseScreen: 'rehearse', wizardScreen: 'wizard' };
   function syncSpeedLabels() {
-    const line = SCRIPT[activeIdx] || {};
-    document.querySelectorAll('.speed').forEach(el => el.textContent = fmtSpeed(speedOf(line.who)));
-    const chip = mode => { const v = commonSpeed(speedRows(mode)); return v === null ? 'Varies' : fmtSpeed(v); };
-    document.querySelectorAll('#setListen .js-speed-all').forEach(el => el.textContent = chip('listen'));
-    document.querySelectorAll('#setRehearse .js-speed-all').forEach(el => el.textContent = chip('rehearse'));
+    const figure = mode => { const v = commonSpeed(speedRows(mode)); return v === null ? 'Varies' : fmtSpeed(v); };
+    document.querySelectorAll('.speed').forEach(el => {
+      const mode = SPEED_MODE[el.closest('.screen').id];
+      const f = mode ? figure(mode) : fmtSpeed(speedOf((SCRIPT[activeIdx] || {}).who));
+      el.innerHTML = f === 'Varies' ? '<i class="ph ph-gauge ic-16"></i>Varies' : f;
+    });
+    document.querySelectorAll('#setListen .js-speed-all').forEach(el => el.textContent = figure('listen'));
+    document.querySelectorAll('#setRehearse .js-speed-all').forEach(el => el.textContent = figure('rehearse'));
   }
   /* Swap sheets rather than stacking them — the speed sheet is the detail of
      this row, not something on top of it. */
