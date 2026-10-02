@@ -208,6 +208,19 @@
   }
   .wf-tabbar span.on { color: var(--wf-ink); }
   .wf-tabbar span.gone { text-decoration: line-through; opacity: 0.45; }
+  /* The connection bar at the foot of a screen: dark, under everything. */
+  .wf-strip {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--wf-band); color: #F2F2F2;
+    border-radius: 0 0 12px 12px; padding: 8px 12px;
+    font-size: 11.5px; font-weight: 700;
+  }
+  .wf-strip .grow { flex: 1 1 auto; }
+  .wf-progress { height: 5px; border-radius: 3px; background: var(--wf-fill); margin-top: 6px; }
+  .wf-progress i { display: block; height: 100%; border-radius: 3px; background: var(--wf-ink); }
+  /* A message standing where the content would be. */
+  .wf-msg { text-align: center; display: flex; flex-direction: column; gap: 7px; padding: 6px 4px; }
+  .wf-msg > i { font-size: 30px; color: var(--wf-dim); }
 
   /* Between two screens: what takes you there. */
   .arrow {
@@ -265,13 +278,14 @@
 <header class="top">
   <div class="shell">
     <a class="back" href="index.html"><i class="ph ph-arrow-left"></i> rhrs design</a>
-    <h1>Four things the app <em>cannot do yet</em>.</h1>
+    <h1>Five things the app <em>cannot do yet</em>.</h1>
     <p class="lede">
       Who is on a script and what they may touch, who plays which part and in what voice,
-      how a script gets in at all, and what Global settings holds. Grey on purpose: these are
+      how a script gets in at all, what Global settings holds, and what still works without
+      a connection. Grey on purpose: these are
       the shapes and the words, not the design. The copy is real — at this stage the words are
       the part worth arguing about. From the meeting of 21 September 2026; Global settings
-      from 23 September.
+      from 23 September; Storage &amp; offline mode from 2 October.
     </p>
   </div>
 </header>
@@ -1142,6 +1156,153 @@
           <b>Still to decide:</b> is playback speed one value for Listen and Rehearse, or one each?
           And does <i>Audio on this phone</i> exist at all &mdash; does the app keep audio for
           playing offline?
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 5 -->
+  <section>
+    <div class="sec-label">Five</div>
+    <h2>Storage &amp; offline mode</h2>
+    <p class="note-line">
+      What still works without a connection, what the app says when something on our side
+      does not, and the one screen that says which scripts are ready to play offline — short
+      name <i>Storage</i>. The bar at the foot of the screen is built in the prototype already
+      (the <i>Connection</i> switch in its panel); everything here is new. Proposed 2 October.
+    </p>
+
+    <div class="canvas">
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Global settings</button><span>one row changed</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-label">Recording &amp; storage</div>
+            <div class="wf-row"><span class="grow">Audio on this phone<span class="r-sub">211 MB · 1 of 3 scripts ready offline</span></span><i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+
+        <div class="arrow"><i class="ph ph-arrow-right"></i>the row, or the bar when offline</div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Storage &amp; offline mode</button><span>new</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Storage &amp; offline mode</div>
+            <div class="wf-sub">211 MB on this phone</div>
+            <div class="wf-label">Your scripts</div>
+            <div class="wf-row"><span class="grow">I love you, you're fine, but change quickly<span class="r-sub">Ready offline · 124 MB</span></span><span class="wf-toggle on"></span></div>
+            <div class="wf-row"><span class="grow">The Cherry Orchard<span class="r-sub">Getting it ready — voices 18 of 40</span><span class="wf-progress"><i style="width:45%"></i></span></span><span class="wf-toggle on"></span></div>
+            <div class="wf-row"><span class="grow">Waiting for Godot<span class="r-sub">Reading only offline · 2 MB</span></span><span class="wf-toggle"></span></div>
+            <div class="wf-text">Reading works offline in every script. Listening needs the script ready; Rehearse and the Recording wizard need a connection.</div>
+            <div class="wf-btn ghost">Clear all audio</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Ready offline is per script, never per scene.</b> The text of every script you are on
+          is kept whenever you are online, so Read works offline always. Listen needs the audio:
+          the takes somebody recorded are downloaded, the voices nobody recorded are generated
+          first. Play a script through to the end in Listen and it is all on the phone — the row
+          says <i>Ready offline</i> by itself. The switch does the same at once.<br><br>
+          <b>Clear all audio</b> asks first, with the alert the Global settings row used to open —
+          <i>Clear the audio on this phone?</i> — and turns every switch off. The Global settings
+          row no longer clears anything; it leads here.
+        </div>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Listen — offline</button><span>a state</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Opening — the kitchen argument</div>
+            <div class="wf-row"><span class="grow">Nina<span class="r-sub">You're eating.</span></span></div>
+            <div class="wf-row"><span class="grow">Michael<span class="r-sub">I'm eating.</span></span></div>
+            <div class="wf-msg">
+              <i class="ph ph-wifi-slash"></i>
+              <div class="wf-title">The rest of this scene is not on your phone</div>
+              <div class="wf-text">Listening needs a connection from here on. Reading works offline.</div>
+              <div class="wf-btn fill">Read the scene</div>
+            </div>
+          </div>
+          <div class="wf-strip"><i class="ph ph-wifi-slash"></i><span class="grow">No connection</span><i class="ph ph-caret-right"></i></div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Rehearse — offline</button><span>a state</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Opening — the kitchen argument</div>
+            <div class="wf-msg">
+              <i class="ph ph-wifi-slash"></i>
+              <div class="wf-title">Rehearse needs a connection</div>
+              <div class="wf-text">Every line of yours is checked as you say it, and that happens online. Reading works offline.</div>
+              <div class="wf-btn fill">Read the scene</div>
+            </div>
+          </div>
+          <div class="wf-strip"><i class="ph ph-wifi-slash"></i><span class="grow">No connection</span><i class="ph ph-caret-right"></i></div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Recording wizard — offline</button><span>a state</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Recording wizard</div>
+            <div class="wf-msg">
+              <i class="ph ph-wifi-slash"></i>
+              <div class="wf-title">The wizard needs a connection</div>
+              <div class="wf-text">Takes are checked and saved online. It opens again as soon as the phone is back online.</div>
+            </div>
+          </div>
+          <div class="wf-strip"><i class="ph ph-wifi-slash"></i><span class="grow">No connection</span><i class="ph ph-caret-right"></i></div>
+        </div>
+
+        <div class="note">
+          <b>Where the audio runs out, the scene says so</b> — in the place of the next card, not
+          in an alert: Listen plays what is on the phone and stops where it ends. Its way on is
+          Read, which always works.<br><br>
+          <b>Rehearse and the wizard do not work offline at all</b>, so they say it as soon as
+          they open, with nothing else on the screen.<br><br>
+          <b>Offline nothing is edited</b>, except private notes — they are yours, and go up when
+          the phone is back online.
+        </div>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Could not load</button><span>a state</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">People</div>
+            <div class="wf-msg">
+              <i class="ph ph-cloud-slash"></i>
+              <div class="wf-title">This could not load</div>
+              <div class="wf-text">The server did not answer in time.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-kind"><button class="wf-id" onclick="copyName(this)" title="Copy this name">Service issue</button><span>new</span><span class="wf-built no"><i class="ph ph-circle-dashed"></i>Not in the prototype yet</span></div>
+          <div class="wf-body">
+            <div class="wf-title">Something is not working</div>
+            <div class="wf-row flat"><span class="grow">Recordings are slow to load right now.</span></div>
+            <div class="wf-text">It is on our side, not your phone. Reading works; listening may stop and start.</div>
+            <div class="wf-btn fill">Send feedback</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <b>Could not load stands where the content would be</b>, on a screen with nothing kept to
+          show. Its sentence is the backend's — short — and there is no <i>Try again</i> for now:
+          the screen loads again by itself once it can.<br><br>
+          <b>Service issue is where the bar leads on an outage:</b> the backend's own short text,
+          one sentence of ours about what still works, and the way to feedback.<br><br>
+          <b>Still open:</b> a ready script that changes — a new take, an edited line — does it
+          download again by itself? What the screen says when the phone is out of space. Whether
+          switching a script off asks first, since its audio goes.
         </div>
 
       </div>

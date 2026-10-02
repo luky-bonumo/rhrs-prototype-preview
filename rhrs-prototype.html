@@ -102,6 +102,11 @@
     --lift-wine:   rgba(var(--wine-rgb), 0.28);
     --lift-noir:   rgba(var(--noir-rgb), 0.18);
     --lift-tick:   rgba(var(--accent-rgb), 0.35);
+    /* The connection bar at the foot of the screen is dark in both modes. Here
+       the darkest palette colour does it; the dark ground is near-black already,
+       so there it is the darkest thing there is with a rule along its top. */
+    --bar-bg:   rgb(var(--noir-rgb));
+    --bar-rule: rgba(var(--noir-rgb), 0);
     /* The desk the phone sits on and the switch that stands on it. Neither is
        part of the app, so neither follows the mode — the mock reads against the
        same grey either way, and a control that changed with the thing it controls
@@ -256,6 +261,8 @@
     --lift-wine:   rgba(0, 0, 0, 0.55);
     --lift-noir:   rgba(0, 0, 0, 0.5);
     --lift-tick:   rgba(0, 0, 0, 0.55);
+    --bar-bg:   rgb(var(--white-rgb));
+    --bar-rule: rgb(var(--stone-rgb));
   }
 
   /* ---- Optical centring for Platypi ----
@@ -1827,6 +1834,26 @@
     padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
     background: var(--mist);
   }
+
+  /* ---------- Connection bar ----------
+     At the foot of every screen while the phone is offline or the backend says
+     something is wrong — under the mode bar and the transport, so it covers no
+     control: the screen above it gets shorter instead. Dark, coral words, the
+     glyph saying which kind; the whole bar is the way to more. While it is
+     there it carries the safe area, so the bars above it give theirs up. */
+  .conn-bar {
+    display: none; flex: 0 0 auto; align-items: center; gap: 10px;
+    width: 100%; border: none; cursor: pointer; text-align: left;
+    background: var(--bar-bg); border-top: 1px solid var(--bar-rule);
+    color: var(--coral);
+    padding: 11px 20px calc(11px + env(safe-area-inset-bottom));
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  }
+  .conn-bar .cb-text { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .phone.has-bar .conn-bar { display: flex; }
+  .phone.has-bar .modebar { padding-bottom: 14px; }
+  .phone.has-bar .screen > .transport:last-child { padding-bottom: 22px; }
+  .phone.has-bar #aeTransport { padding-bottom: 46px; }
   .mode {
     display: flex; align-items: center; gap: 9px;
     background: none; border: none; cursor: pointer;
@@ -2582,6 +2609,9 @@
   <!-- Who is looking. A tool, not the app: the app never lets you be somebody
        else, but the prototype has to show every member's version of it. -->
   <div class="panel-viewer" id="panelViewer"></div>
+  <!-- Which bar the foot of the screen shows: none, offline, or a word from the
+       backend. The app reads these off the phone and the server. -->
+  <div class="panel-viewer" id="panelConn"></div>
   <div class="panel-body" id="panelBody"></div>
   <!-- Fixed, so it can hang off whichever chip was tapped. -->
   <div class="status-menu" id="statusMenu" hidden></div>
@@ -3897,6 +3927,13 @@
     <div class="settings-scroll fades" id="speedBody"></div>
   </div>
 
+  <!-- The connection bar: last in the phone, under every screen. -->
+  <button class="conn-bar" id="connBar" onclick="connBarTap()">
+    <i class="ph ph-wifi-slash ic-18" id="connIc"></i>
+    <span class="cb-text" id="connText"></span>
+    <i class="ph ph-caret-right ic-16"></i>
+  </button>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -4508,6 +4545,29 @@
     return v.toFixed(2).replace(/0$/, '') + 'x';
   }
 
+  /* ---- the connection bar ----
+     What the foot of the screen says: nothing, No connection, or the backend's
+     own short text. The app reads the phone and the server; the prototype is
+     told, from the panel. Where the bar leads — Storage & offline mode, the
+     detail of an outage — is drawn in the wireframes and not built yet, so for
+     now it says where it would go. */
+  let CONN = 'online';
+  const CONN_ISSUE = 'Recordings are slow to load right now.';
+  function setConn(v) {
+    CONN = v;
+    paintConnBar();
+    renderConnSwitch();
+  }
+  function paintConnBar() {
+    document.querySelector('.phone').classList.toggle('has-bar', CONN !== 'online');
+    if (CONN === 'online') return;
+    document.getElementById('connIc').className = 'ph ' + (CONN === 'offline' ? 'ph-wifi-slash' : 'ph-warning') + ' ic-18';
+    document.getElementById('connText').textContent = CONN === 'offline' ? 'No connection' : CONN_ISSUE;
+  }
+  function connBarTap() {
+    toast(CONN === 'offline' ? 'Storage & offline mode' : 'Service issue');
+  }
+
   /* ============================================================
      NAVIGATION
      ============================================================ */
@@ -4536,7 +4596,9 @@
     listenScreen:         'detailScreen',
     rehearseScreen:       'detailScreen',
 
-    wizardScenesScreen:   'detailScreen',
+    /* From its card on Script detail and from a notification on the dashboard,
+       so it goes back to whichever it came from. */
+    wizardScenesScreen:   'origin',
     wizardScreen:         'wizardScenesScreen',
     /* The end of a scene's session goes up to the scenes, like the scene did. */
     wizardDoneScreen:     'wizardScenesScreen',
@@ -4598,6 +4660,7 @@
     personScreen:     'peopleScreen',
     castScreen:       'editScriptScreen',
     whoYouHearScreen: 'detailScreen',
+    wizardScenesScreen: 'detailScreen',
     sceneEditScreen:  'editScriptScreen',
     characterScreen:  'castScreen',
     kindScreen:       'chooseFileScreen',
@@ -4665,12 +4728,17 @@
     paint(to);
     REDRAW[to]?.();
   }
-  function openScript(id) {
+  /* The script open, without going to its page — for a jump that lands deeper
+     in it and comes back to where it started. */
+  function enterScript(id) {
     if (UNOPENED.delete(id)) NOT_YET_IN.add(id);
     const s = SCRIPTS.find(x => x.id === id);
     currentScript = s;
     document.getElementById('detailTitle').textContent = s.title;
     renderScenes();
+  }
+  function openScript(id) {
+    enterScript(id);
     showScreen('detailScreen');
   }
   /* The corner: the pencil for whoever may edit the script, and for everyone
@@ -5053,7 +5121,26 @@
   /* The open row: a character's name, '' for the narrator, -1 for All
      characters, null for none. One at a time, so the list stays a list. */
   let speedOpen = -1;
+  /* Evaluation's own speed, for takes: judging one is not listening to the
+     scene, so changing it there changes nothing in Listen or Rehearse, nor the
+     other way round. One for every take. */
+  let evalSpeed = 1, speedEval = false;
   function renderSpeedSheet() {
+    if (speedEval) {
+      const v = evalSpeed;
+      document.getElementById('speedBody').innerHTML = `
+      <div class="speed-lede">For your takes, here in Evaluation only — Listen and Rehearse keep each part's own.</div>
+      <div class="sp-body">
+        <div class="speed-custom mine">
+          <button class="speed-step" onclick="stepEvalSpeed(-1)" aria-label="Slower" ${v <= SPEED_MIN ? 'disabled' : ''}><i class="ph-bold ph-minus ic-20"></i></button>
+          <span class="speed-val">${fmtSpeed(v)}</span>
+          <button class="speed-step" onclick="stepEvalSpeed(1)" aria-label="Faster" ${v >= SPEED_MAX ? 'disabled' : ''}><i class="ph-bold ph-plus ic-20"></i></button>
+        </div>
+        <div class="speed-row mine">${SPEEDS.map(p =>
+          `<button class="speed-opt ${v === p ? 'on' : ''}" onclick="setEvalSpeed(${p})">${fmtSpeed(p)}</button>`).join('')}</div>
+      </div>`;
+      return syncSpeedLabels();
+    }
     const rows = speedRows();
     const row = (i, label, cls, targets) => {
       const v = commonSpeed(targets), open = speedOpen === (i === -1 ? -1 : rows[i].key);
@@ -5083,6 +5170,8 @@
       rows.map((r, i) => row(i, r.label, r.mine ? 'mine' : 'others', [r])).join('');
     syncSpeedLabels();
   }
+  function stepEvalSpeed(dir) { evalSpeed = clampStep(evalSpeed + dir * SPEED_STEP); renderSpeedSheet(); }
+  function setEvalSpeed(v) { evalSpeed = v; renderSpeedSheet(); }
   function speedToggle(i) {
     const key = i === -1 ? -1 : speedRows()[i].key;
     speedOpen = speedOpen === key ? null : key;
@@ -5104,14 +5193,14 @@
      one figure while the parts agree, Varies once they do not. It used to be the
      speed of whoever held the line, which on a direction was the narrator's and
      said nothing about the others. A figure with an x says what it is; Varies
-     needs the glyph to. Evaluation plays one voice, the take's, so its figure is
-     that part's. The mode settings rows say the same for their mode. */
+     needs the glyph to. Evaluation has a speed of its own, for takes. The mode
+     settings rows say the same for their mode. */
   const SPEED_MODE = { listenScreen: 'listen', rehearseScreen: 'rehearse', wizardScreen: 'wizard' };
   function syncSpeedLabels() {
     const figure = mode => { const v = commonSpeed(speedRows(mode)); return v === null ? 'Varies' : fmtSpeed(v); };
     document.querySelectorAll('.speed').forEach(el => {
       const mode = SPEED_MODE[el.closest('.screen').id];
-      const f = mode ? figure(mode) : fmtSpeed(speedOf((SCRIPT[activeIdx] || {}).who));
+      const f = mode ? figure(mode) : fmtSpeed(evalSpeed);
       el.innerHTML = f === 'Varies' ? '<i class="ph ph-gauge ic-16"></i>Varies' : f;
     });
     document.querySelectorAll('#setListen .js-speed-all').forEach(el => el.textContent = figure('listen'));
@@ -5126,6 +5215,7 @@
   /* It opens on All characters, wherever it is opened from: the speed of
      everybody is the usual question, one part's the exception. */
   function openSpeedSheet() {
+    speedEval = activeScreen()?.id === 'evaluationScreen';
     speedOpen = -1;
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
@@ -7106,19 +7196,21 @@
     NOTIFS.forEach(n => { n.read = true; });
     paintBellDot();
   }
+  /* A tap here is a detour: what it opens stands over the dashboard and Back
+     comes back to it, rather than walking up through screens nobody walked
+     through. A push from outside the app is the other case: there is nowhere it
+     came from, so the app opens it in its place. */
   function notifOpenWizard() {
     markNotificationsRead();
     closeSheet();
-    openScript('s1');
+    enterScript('s1');
     openWizardScenes();
   }
-  /* To the person, by way of the script's people — where an admin casts them. */
+  /* Straight to the person, where an admin casts them. */
   function notifOpenPerson(sid, id) {
     markNotificationsRead();
     closeSheet();
-    openScript(sid);
-    openEditScript();
-    openPeople();
+    enterScript(sid);
     openPerson(id);
   }
 
@@ -9079,6 +9171,18 @@
           const sub = m ? ROLES[m.role].label + ' · ' + (parts.length ? parts.join(', ') : 'not cast') : 'not on this script';
           return `<option value="${p.id}" ${p.id === ME ? 'selected' : ''}>${p.name} — ${sub}</option>`;
         }).join('')}</select>
+        <i class="ph ph-caret-down ic-16"></i>
+      </span>`;
+    renderConnSwitch();
+  }
+  function renderConnSwitch() {
+    const el = document.getElementById('panelConn');
+    if (!el) return;
+    el.innerHTML = `<span class="panel-label">Connection</span>
+      <span class="pv-wrap">
+        <select class="pv-select" onchange="setConn(this.value)" aria-label="Connection">${
+          [['online', 'Online — no bar'], ['offline', 'No connection'], ['issue', 'Service issue']].map(([v, l]) =>
+            `<option value="${v}" ${CONN === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <i class="ph ph-caret-down ic-16"></i>
       </span>`;
   }
