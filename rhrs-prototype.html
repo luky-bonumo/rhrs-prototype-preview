@@ -2046,22 +2046,40 @@
   .font-stepper .fs-val { font-size: 14px; font-weight: 600; color: var(--noir); min-width: 34px; text-align: center; }
 
   /* ---------- Playback speed sheet ----------
-     Two speeds, because the two jobs are different: your own lines are a cue you
-     want at natural pace, the other parts are something you may want to push
-     through faster. */
+     A speed for every character and for the narrator, the same in Listen and
+     Rehearse: a part is the same voice in both. The list says them all at a
+     glance; the row you open holds the control, and All characters moves every
+     row at once. */
   .speed-title {
     font-family: var(--font-display); font-weight: 700; font-size: 22px;
     color: var(--noir); text-align: center;
     padding: var(--sheet-gap) 24px 22px; border-bottom: 1px solid var(--divider); flex: 0 0 auto;
   }
-  .speed-group { padding: 20px 20px 24px; }
-  .speed-group + .speed-group { border-top: 1px solid var(--divider); }
-  .speed-label {
-    font-family: var(--font-display); font-weight: 700; font-size: 19px;
-    text-align: center; margin-bottom: 16px;
+  .speed-lede {
+    font-size: 13px; color: var(--text-muted); text-align: center;
+    padding: 4px 24px 6px;
   }
-  .speed-label.mine   { color: var(--coral); }
-  .speed-label.others { color: var(--wine); }
+  .sp-row { border-bottom: 1px solid var(--divider); }
+  .sp-row:last-child { border-bottom: none; }
+  .sp-head {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 15px 24px; text-align: left; font-family: var(--font-body);
+  }
+  .sp-head:active { background: rgba(var(--shadow-rgb),0.03); }
+  .sp-head .sp-name {
+    flex: 1 1 auto; min-width: 0;
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+  }
+  .sp-head .sp-val { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sp-head i { color: var(--text-muted); display: flex; transition: transform .2s ease; }
+  .sp-row.open .sp-head i { transform: rotate(180deg); }
+  /* Coral is you, wine everybody else — the narrator and All characters too. */
+  .sp-row.mine   .sp-name, .sp-row.mine   .sp-val { color: var(--coral); }
+  .sp-row.others .sp-name, .sp-row.others .sp-val { color: var(--wine); }
+  /* All characters is a control, not a part, so it does not wear a part's name. */
+  .sp-row.all .sp-name { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--noir); }
+  .sp-body { padding: 2px 20px 20px; }
   /* The custom control sits above the presets, because it is the finer of the
      two: the presets are the answer most of the time, the stepper is there when
      none of them is right. Reading down is coarse to fine. */
@@ -3672,11 +3690,10 @@
           <button class="set-link" onclick="openSpeedFromSettings()">
             <span class="link-left">
               <span class="set-label">Playback speed</span>
-              <span class="set-sub js-speed-sub">My lines / others' lines</span>
+              <span class="set-sub">For each character</span>
             </span>
             <span class="link-right">
-              <span class="speed-chip mine js-speed-mine">1.0x</span>
-              <span class="speed-chip others js-speed-others">1.0x</span>
+              <span class="speed-chip others js-speed-all">1.0x</span>
               <i class="ph ph-caret-right ic-20"></i>
             </span>
           </button>
@@ -3728,10 +3745,10 @@
           <button class="set-link" onclick="openSpeedFromSettings()">
             <span class="link-left">
               <span class="set-label">Playback speed</span>
-              <span class="set-sub">Others' lines · you speak your own</span>
+              <span class="set-sub">For each character · you say your own</span>
             </span>
             <span class="link-right">
-              <span class="speed-chip others js-speed-others">1.0x</span>
+              <span class="speed-chip others js-speed-all">1.0x</span>
               <i class="ph ph-caret-right ic-20"></i>
             </span>
           </button>
@@ -3870,28 +3887,13 @@
     <div class="set-scroll" id="requestBody"></div>
   </div>
 
-  <!-- playback speed, opened from the figure under the scrubber -->
+  <!-- playback speed, opened from the figure under the scrubber and from the
+       mode settings: a speed for every character and the narrator, painted by
+       renderSpeedSheet. -->
   <div class="settings-sheet" id="speedSheet">
     <div class="sheet-grabber"></div>
     <div class="speed-title cap-trim">Playback speed</div>
-    <div class="speed-group" id="speedMineGroup">
-      <div class="speed-label mine cap-trim">My lines</div>
-      <div class="speed-custom mine">
-        <button class="speed-step" id="speedMineDown" onclick="stepSpeed('mine', -1)" aria-label="Slower"><i class="ph-bold ph-minus ic-20"></i></button>
-        <span class="speed-val" id="speedMineVal">1.0x</span>
-        <button class="speed-step" id="speedMineUp" onclick="stepSpeed('mine', 1)" aria-label="Faster"><i class="ph-bold ph-plus ic-20"></i></button>
-      </div>
-      <div class="speed-row mine" id="speedMine"></div>
-    </div>
-    <div class="speed-group">
-      <div class="speed-label others cap-trim">Others' lines</div>
-      <div class="speed-custom others">
-        <button class="speed-step" id="speedOthersDown" onclick="stepSpeed('others', -1)" aria-label="Slower"><i class="ph-bold ph-minus ic-20"></i></button>
-        <span class="speed-val" id="speedOthersVal">1.0x</span>
-        <button class="speed-step" id="speedOthersUp" onclick="stepSpeed('others', 1)" aria-label="Faster"><i class="ph-bold ph-plus ic-20"></i></button>
-      </div>
-      <div class="speed-row others" id="speedOthers"></div>
-    </div>
+    <div class="settings-scroll fades" id="speedBody"></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -4489,7 +4491,16 @@
   const SPEED_MIN  = 0.25;
   const SPEED_MAX  = 2;
   const SPEED_STEP = 0.05;
-  const speed = { mine: 1, others: 1 };
+  /* A speed for every character and one for the narrator, under the key '' — no
+     part is called that. The same in Listen and Rehearse, because a part is the
+     same voice in both; kept on the script, because the characters are its.
+     Unset is 1.0x. In the app each member has their own, as with who you hear. */
+  const speedsHere = () => currentScript.speeds || (currentScript.speeds = {});
+  const speedOf = name => speedsHere()[name || ''] ?? 1;
+  const setSpeedOf = (name, v) => { speedsHere()[name || ''] = v; };
+  /* Nudge by one step and round to the step itself — floats would otherwise turn
+     1.7 into 1.7000000000000002 and no preset would ever match again. */
+  const clampStep = raw => Math.round(Math.round(Math.min(SPEED_MAX, Math.max(SPEED_MIN, raw)) / SPEED_STEP) * SPEED_STEP * 100) / 100;
 
   /* One decimal at least, two only when the step needs it: 1.0x, 1.7x, 1.75x. */
   function fmtSpeed(v) {
@@ -5025,51 +5036,90 @@
     const pct = Math.max(0, Math.min(1, (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth));
     bar.querySelector('.fill').style.width = (pct * 100) + '%';
   }
-  /* Two speeds, shown one at a time: the transport always reports the speed of
-     whoever currently holds the line, which is the one its buttons would change. */
-  function renderSpeedSheet() {
-    for (const group of ['mine', 'others']) {
-      const cap = group === 'mine' ? 'Mine' : 'Others';
-      const v = speed[group];
-      document.getElementById('speed' + cap).innerHTML = SPEEDS.map(p =>
-        `<button class="speed-opt ${v === p ? 'on' : ''}" onclick="setSpeed('${group}', ${p})">${fmtSpeed(p)}</button>`
-      ).join('');
-      document.getElementById('speed' + cap + 'Val').textContent = fmtSpeed(v);
-      document.getElementById('speed' + cap + 'Down').disabled = v <= SPEED_MIN;
-      document.getElementById('speed' + cap + 'Up').disabled   = v >= SPEED_MAX;
-    }
-    document.querySelectorAll('.js-speed-mine').forEach(el => el.textContent = fmtSpeed(speed.mine));
-    document.querySelectorAll('.js-speed-others').forEach(el => el.textContent = fmtSpeed(speed.others));
+  /* The rows the sheet offers in the mode you are in: every character in cast
+     order, then the narrator. Rehearse and the wizard leave your own parts out —
+     you say those lines, nothing plays them. */
+  function speedRows(mode = currentMode) {
+    const own = mode === 'rehearse' || mode === 'wizard';
+    return [...CHARACTERS.filter(c => !(own && c.mine)).map(c => ({ key: c.name, label: c.name, mine: c.mine })),
+            { key: '', label: 'Narrator', mine: false }];
   }
-  function setSpeed(group, value) {
-    speed[group] = value;
-    renderSpeedSheet();
+  /* One figure for a set of rows: theirs if they agree, null if they do not. */
+  function commonSpeed(rows) {
+    const v = rows.map(r => speedOf(r.key));
+    return v.every(x => x === v[0]) ? v[0] : null;
+  }
+  /* The open row: a character's name, '' for the narrator, -1 for All
+     characters, null for none. One at a time, so the list stays a list. */
+  let speedOpen = -1;
+  function renderSpeedSheet() {
+    const rows = speedRows();
+    const row = (i, label, cls, targets) => {
+      const v = commonSpeed(targets), open = speedOpen === (i === -1 ? -1 : rows[i].key);
+      const figure = v === null ? 'Varies' : fmtSpeed(v);
+      const lo = targets.every(r => speedOf(r.key) <= SPEED_MIN), hi = targets.every(r => speedOf(r.key) >= SPEED_MAX);
+      return `
+      <div class="sp-row ${cls} ${open ? 'open' : ''}">
+        <button class="sp-head" onclick="speedToggle(${i})">
+          <span class="sp-name cap-trim">${label}</span>
+          <span class="sp-val">${figure}</span>
+          <i class="ph ph-caret-down ic-18"></i>
+        </button>${open ? `
+        <div class="sp-body">
+          <div class="speed-custom ${cls}">
+            <button class="speed-step" onclick="stepSpeed(${i}, -1)" aria-label="Slower" ${lo ? 'disabled' : ''}><i class="ph-bold ph-minus ic-20"></i></button>
+            <span class="speed-val">${figure}</span>
+            <button class="speed-step" onclick="stepSpeed(${i}, 1)" aria-label="Faster" ${hi ? 'disabled' : ''}><i class="ph-bold ph-plus ic-20"></i></button>
+          </div>
+          <div class="speed-row ${cls}">${SPEEDS.map(p =>
+            `<button class="speed-opt ${v === p ? 'on' : ''}" onclick="setSpeed(${i}, ${p})">${fmtSpeed(p)}</button>`).join('')}</div>
+        </div>` : ''}
+      </div>`;
+    };
+    document.getElementById('speedBody').innerHTML =
+      '<div class="speed-lede">For each character, the same in Listen and Rehearse.</div>' +
+      row(-1, 'All characters', 'others all', rows) +
+      rows.map((r, i) => row(i, r.label, r.mine ? 'mine' : 'others', [r])).join('');
     syncSpeedLabels();
   }
-  /* Nudge by one step and round to the step itself — floats would otherwise turn
-     1.7 into 1.7000000000000002 and no preset would ever match again. */
-  function stepSpeed(group, dir) {
-    const raw = speed[group] + dir * SPEED_STEP;
-    const v = Math.round(Math.min(SPEED_MAX, Math.max(SPEED_MIN, raw)) / SPEED_STEP) * SPEED_STEP;
-    setSpeed(group, Math.round(v * 100) / 100);
+  function speedToggle(i) {
+    const key = i === -1 ? -1 : speedRows()[i].key;
+    speedOpen = speedOpen === key ? null : key;
+    renderSpeedSheet();
   }
+  /* All characters keeps the differences when it steps — everybody moves one
+     notch — and sets them all to the same figure when a preset is picked. */
+  function stepSpeed(i, dir) {
+    const rows = speedRows();
+    (i === -1 ? rows : [rows[i]]).forEach(r => setSpeedOf(r.key, clampStep(speedOf(r.key) + dir * SPEED_STEP)));
+    renderSpeedSheet();
+  }
+  function setSpeed(i, value) {
+    const rows = speedRows();
+    (i === -1 ? rows : [rows[i]]).forEach(r => setSpeedOf(r.key, value));
+    renderSpeedSheet();
+  }
+  /* The figure under the scrubber is the speed of whoever holds the line — the
+     narrator's on a direction — which is the row the sheet opens on. The mode
+     settings say one figure for their mode's rows, or Varies. */
   function syncSpeedLabels() {
-    const who = SCRIPT[activeIdx].mine ? 'mine' : 'others';
-    document.querySelectorAll('.speed').forEach(el => el.textContent = fmtSpeed(speed[who]));
+    const line = SCRIPT[activeIdx] || {};
+    document.querySelectorAll('.speed').forEach(el => el.textContent = fmtSpeed(speedOf(line.who)));
+    const chip = mode => { const v = commonSpeed(speedRows(mode)); return v === null ? 'Varies' : fmtSpeed(v); };
+    document.querySelectorAll('#setListen .js-speed-all').forEach(el => el.textContent = chip('listen'));
+    document.querySelectorAll('#setRehearse .js-speed-all').forEach(el => el.textContent = chip('rehearse'));
   }
   /* Swap sheets rather than stacking them — the speed sheet is the detail of
-     this row, not something on top of it. */
+     this row, not something on top of it. From the mode settings it opens on All
+     characters; from the figure under the scrubber, on whoever holds the line,
+     or on All characters where that row is not offered (your own, in Rehearse). */
   function openSpeedFromSettings() {
     document.getElementById('settingsSheet').classList.remove('open');
-    setTimeout(openSpeedSheet, 180);
+    setTimeout(() => openSpeedSheet(true), 180);
   }
-  function openSpeedSheet() {
-    /* In Rehearse the app only ever reads the cues — your own lines are yours to
-       say, so there is no speed to set for them. */
-    document.getElementById('speedMineGroup').style.display =
-      (currentMode === 'rehearse' || currentMode === 'wizard' || !can.act()) ? 'none' : '';
-    /* With no lines of your own there is one speed, and it is not "others'". */
-    document.querySelector('#speedSheet .speed-label.others').textContent = can.act() ? "Others' lines" : 'All lines';
+  function openSpeedSheet(fromSettings = false) {
+    const key = (SCRIPT[activeIdx] || {}).who || '';
+    speedOpen = !fromSettings && speedRows().some(r => r.key === key) ? key : -1;
     renderSpeedSheet();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('speedSheet').classList.add('open');
@@ -5502,8 +5552,7 @@
     document.querySelectorAll('.js-cast-only').forEach(el => el.style.display = act ? '' : 'none');
     document.querySelectorAll('.js-lines-label').forEach(el => el.lastChild.textContent = act ? "Others' lines" : 'Lines');
     document.querySelectorAll('.js-lines-sub').forEach(el => el.textContent = act ? 'Show the text of other characters' : 'Show the text of the lines');
-    document.querySelectorAll('.js-speed-sub').forEach(el => el.textContent = act ? "My lines / others' lines" : 'Every line');
-    document.querySelectorAll('#setListen .js-speed-mine').forEach(el => el.style.display = act ? '' : 'none');
+    syncSpeedLabels();
     document.getElementById('scrim').classList.add('open');
     document.getElementById('settingsSheet').classList.add('open');
   }
@@ -7854,14 +7903,16 @@
                   go: () => { openScript('s1'); openEditScript(); openSceneEdit(0); openAddSheet(1); } },
     castpick:   { label:'Change character', group:'sheets', ver:1, st:'prepared',
                   go: () => { demoScene(); openLineEdit(lineIdx()[0]); openCharacterPick(); } },
-    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'prepared',
+    modeset:    { label:'Mode settings',    group:'sheets', ver:1, st:'wip',
                   /* Rehearse when you may have it; whoever cannot lands in Listen,
                      and the sheet follows the mode they landed in. */
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); openSettings(currentMode); } },
     voice:      { label:'Voice picker',     group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openEditScript(); openCast(); openCharacter('Michael'); openVoicePicker('Michael'); } },
-    speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'prepared',
-                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openSpeedSheet(); } },
+    speed:      { label:'Playback speed',   group:'sheets', ver:1, st:'wip',
+                  go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen');
+                              for (let k = 0; k < 8 && SCRIPT[activeIdx].who !== 'Michael'; k++) stepLine('listen', 1);
+                              openSpeedSheet(); } },
     wizardset:  { label:'Wizard settings',  group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openWizardScenes(); openWizard(0); openWizardSettings(); } },
     handpick:   { label:'Hand over a script', group:'sheets', ver:1, st:'prepared',
