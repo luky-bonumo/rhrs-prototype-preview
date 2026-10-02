@@ -1082,14 +1082,14 @@
   .notif.go { cursor: pointer; }
   .notif.go:active { opacity: 0.6; }
   /* The glyph carries which kind it is. Coral when what is missing is mine,
-     wine when it is the app talking about itself. */
+     wine when it is about somebody else, or the app talking about itself. */
   .notif .n-ic {
     position: relative;
     flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
     width: 38px; height: 38px; border-radius: 50%;
   }
   .notif.mine .n-ic  { background: var(--coral-tint); color: var(--coral); }
-  .notif.app  .n-ic  { background: var(--wine-tint);  color: var(--wine); }
+  .notif.app  .n-ic, .notif.others .n-ic { background: var(--wine-tint); color: var(--wine); }
   .notif .n-main { flex: 1 1 auto; min-width: 0; }
   .notif .n-title {
     display: block;
@@ -6783,18 +6783,37 @@
   /* ============================================================
      NOTIFICATIONS
      ============================================================ */
-  /* Two kinds so far. The missing-audio one names the script and the scene,
+  /* Three kinds so far. The missing-audio one names the script and the scene,
      because a notification that says there is work but not where it is only
      sends you looking. Its count is read off the script, not stored here — the
      backend will send the titles, but the number has to agree with the app.
 
      Shake-to-feedback is the app talking about itself: during the alpha the
      fastest way to report something is to shake the phone, and nobody discovers
-     that on their own. */
+     that on their own.
+
+     Joined tells an admin that somebody invited to their script has accepted —
+     the Invite sheet promises it — and leads to that person, because casting
+     them is the likely next thing to do. The demo's is Tomas on the first
+     script, on the day his membership says he joined. */
   const NOTIFS = [
     { id:'n1', kind:'missing', read:false, time:'2 hours ago' },
-    { id:'n2', kind:'shake',   read:false, time:'Yesterday' }
+    { id:'n2', kind:'shake',   read:false, time:'Yesterday' },
+    { id:'n3', kind:'joined',  read:true,  time:'18 September', script:'s1', who:'td' }
   ];
+  /* Whether a notification is there for whoever is looking: the missing-audio
+     one while something is owed, the joined one for an admin of that script
+     and while the person is still on it, the app's own for everybody. */
+  function notifFor(n) {
+    if (n.kind === 'missing') return owedOn().length > 0;
+    if (n.kind === 'joined') {
+      const s = SCRIPTS.find(x => x.id === n.script);
+      return !!s && s.people.some(m => m.id === ME && m.role === 'admin')
+                 && s.people.some(m => m.id === n.who && !m.invited);
+    }
+    return true;
+  }
+  const WITH_ROLE = { reader: 'a reader', editor: 'an editor', admin: 'an admin' };
 
   /* Which scenes the missing audio is in. One scene can be named; more than one
      is a number, because a list of four titles in a notification is a wall. */
@@ -6830,6 +6849,24 @@
           </span>
         </button>`;
       }
+      if (n.kind === 'joined') {
+        if (!notifFor(n)) return '';
+        const s = SCRIPTS.find(x => x.id === n.script);
+        const m = s.people.find(x => x.id === n.who);
+        const parts = Object.keys(s.cast).filter(p => s.cast[p].includes(n.who));
+        return `<button class="notif others go" onclick="notifOpenPerson('${s.id}', '${m.id}')">
+          <span class="n-ic"><i class="ph ph-user-check ic-20"></i>${n.read ? '' : '<span class="n-dot"></span>'}</span>
+          <span class="n-main">
+            <span class="n-title">${m.name} accepted your invitation</span>
+            <span class="n-body">Joined as ${WITH_ROLE[m.role]} · ${parts.length ? 'cast as ' + parts.join(', ') : 'not cast yet'}</span>
+            <span class="n-where">${s.title}</span>
+            <span class="n-time">${n.time}</span>
+          </span>
+          <span class="n-right">
+            <span class="chevron">${ICON.chevron}</span>
+          </span>
+        </button>`;
+      }
       return `<div class="notif app">
         <span class="n-ic"><i class="ph ph-device-mobile-speaker ic-20"></i>${n.read ? '' : '<span class="n-dot"></span>'}</span>
         <span class="n-main">
@@ -6845,7 +6882,7 @@
   /* The dot is whether anything is unread, not a decoration switched on by hand. */
   function paintBellDot() {
     document.getElementById('bellDot').hidden =
-      !NOTIFS.some(n => !n.read && (n.kind !== 'missing' || owedOn().length));
+      !NOTIFS.some(n => !n.read && notifFor(n));
   }
 
   /* Both buttons and the shake end up in the same place. The feedback screen
@@ -7018,6 +7055,15 @@
     closeSheet();
     openScript('s1');
     openWizardScenes();
+  }
+  /* To the person, by way of the script's people — where an admin casts them. */
+  function notifOpenPerson(sid, id) {
+    markNotificationsRead();
+    closeSheet();
+    openScript(sid);
+    openEditScript();
+    openPeople();
+    openPerson(id);
   }
 
   /* ============================================================
@@ -7644,7 +7690,7 @@
                     showScreen('dashboardScreen');
                     REDRAW.dashboardScreen();
                   } },
-    notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
+    notifications: { label:'Notifications', group:'home', ver:1, st:'wip',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
     settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'wip',
                   go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); } },
@@ -7652,7 +7698,7 @@
        with its way back. A state, so no `screen` of its own. */
     settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'wip',
                   go: () => { PHONE.notifications = PHONE.microphone = false; openGlobalSettings(); } },
-    licenses:   { label:'Licenses',         group:'home', screen:'licensesScreen', st:'wip',
+    licenses:   { label:'Licenses',         group:'home', screen:'licensesScreen', ver:1, st:'prepared',
                   go: () => { openGlobalSettings(); openLicenses(); } },
     account:    { label:'Account',          group:'home', screen:'accountScreen', ver:1, st:'prepared',
                   go: () => openAccount() },
