@@ -3337,11 +3337,13 @@
   <!-- ============ SCREEN: STORAGE & OFFLINE MODE ============
        Which scripts are ready to play without a connection, and what that
        keeps on the phone. From Global settings, and from the bar at the foot
-       of any screen while the phone is offline. -->
+       of any screen while the phone is offline. Titled Storage & offline: the
+       whole name broke over two lines at phone width. The panel and the
+       wireframes keep it whole, the way Settings is Global settings. -->
   <div class="screen" id="storageScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
-      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Storage &amp; offline mode</span>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Storage &amp; offline</span>
       <span style="width:46px;flex:0 0 auto;"></span>
     </div>
     <div class="gs-list fades" id="storageBody"></div>
@@ -9208,7 +9210,7 @@
       (records && !PHONE.microphone ? refused('ph-microphone-slash', 'The microphone is off', 'Rehearse and the Recording wizard need it') : '') + `
       <button class="edit-row" onclick="openStorage()">
         <span class="er-ic"><i class="ph ph-download-simple ic-20"></i></span>
-        <span class="er-label">Audio on this phone<span class="set-sub">${storeSummary()}</span></span>
+        <span class="er-label">Storage &amp; offline<span class="set-sub">${storeSummary()}</span></span>
         <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
       </button>`;
     document.getElementById('gsVersion').textContent = APP_VERSION + ' · tap to copy';
