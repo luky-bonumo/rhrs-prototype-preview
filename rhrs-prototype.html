@@ -2391,6 +2391,9 @@
      name, how it stands — with a thin bar while it is being got ready. The bar
      is the import's: the app at work, so wine. */
   .st-total { font-size: 14px; color: var(--text-muted); padding: 2px 4px 14px; }
+  /* What the switches do, said first. Balanced, so its last word does not wait
+     alone on a line of its own. */
+  .st-lede .il-title { text-wrap: balance; }
   .st-row .st-main { flex: 1 1 auto; min-width: 0; }
   .st-row .imp-bar { height: 4px; margin: 9px 0 2px; }
 
@@ -2483,6 +2486,13 @@
   .msg .msg-said { font-size: 16px; color: var(--noir); margin-top: 12px; text-wrap: pretty; }
   .msg .msg-text { font-size: 14px; line-height: 1.45; color: var(--text-muted); margin-top: 6px; text-wrap: pretty; }
   .msg .ns-go { margin-top: 20px; }
+  /* Where to get the rest, under the way on: small print with the place in it,
+     the way the login words its links. */
+  .msg .msg-tip { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); margin-top: 18px; text-wrap: pretty; }
+  .msg .msg-tip button {
+    font: inherit; font-weight: 600; color: var(--wine); background: none; border: none; padding: 0;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+  }
   /* Rehearse, the wizard, and Listen with nothing on the phone have nothing to
      play, so the transport goes and the list runs down to what is under it. */
   .screen.net-off .transport, .screen.net-off .wz-filter { display: none; }
@@ -4041,13 +4051,15 @@
      current — and the line under the name is how it stands. `voices` of `of`
      is how far getting it ready has gone; `takes` and `lines` are changes a
      ready script is still catching up with; `blocked` means it is waiting for
-     room. The sizes (MB, all of it and the text alone) and the voices to
+     room. `heard` is how far into a scene the audio of a script that is not
+     switched on reaches, because it was listened to online — kept, not
+     promised. The sizes (MB, all of it and the text alone) and the voices to
      generate are made up, like the line counts of the two scripts with no
      text. The phone's own free space is PHONE_FREE. */
   const STORE_DEMO = {
     s1: { on: true,  voices: 46, of: 46, full: 124, text: 1 },
     s2: { on: true,  voices: 18, of: 40, full: 187, text: 2 },
-    s3: { on: false, voices: 0,  of: 52, full: 160, text: 2 }
+    s3: { on: false, voices: 0,  of: 52, full: 160, text: 2, heard: 3 }
   };
   let STORE = {}, PHONE_FREE = 0, storeTick = null;
   storeDemo();
@@ -4208,13 +4220,15 @@
 
   /* Offline, Listen plays what is on the phone and stops where it ends. A ready
      script has all of it, one still getting ready has the start, one switched
-     off has none. How far the start goes is one number here — the prototype
-     has a single scene of text — where the app knows it line by line. */
+     off whatever was listened to online (`heard`). How far the start goes is
+     one number here — the prototype has a single scene of text — where the app
+     knows it line by line. */
   const PARTLY_HERE = 3;
   function heardUpTo() {
     if (CONN !== 'offline') return SCRIPT.length;
     const st = storeOf(currentScript.id);
-    return storeReady(st) ? SCRIPT.length : st.on && st.voices ? PARTLY_HERE : 0;
+    if (storeReady(st)) return SCRIPT.length;
+    return st.on ? (st.voices ? PARTLY_HERE : 0) : st.heard;
   }
   function playableIdx(mode) {
     /* A direction that is switched off is not on screen, so it is not a place the
@@ -5077,13 +5091,14 @@
      what it means, the words the server sent if it sent any, what still works,
      and the way on where there is one. One block for every place that cannot
      show what it is for — offline, or when the server did not answer. */
-  function msgBlock(ic, title, text, go, said) {
+  function msgBlock(ic, title, text, go, said, tip) {
     return `<div class="msg">
       <span class="msg-ic"><i class="ph ${ic} ic-38"></i></span>
       <div class="msg-title">${title}</div>
       ${said ? `<div class="msg-said">${said}</div>` : ''}
       <div class="msg-text">${text}</div>
       ${go ? `<button class="ns-go" onclick="${go.act}">${go.label}</button>` : ''}
+      ${tip ? `<div class="msg-tip">${tip}</div>` : ''}
     </div>`;
   }
   /* What the modes and the wizard say offline. Reading always works, so it is
@@ -5095,11 +5110,19 @@
       'Every line of yours is checked as you say it, and that happens online. Reading works offline.', read);
     if (kind === 'wizard') return msgBlock('ph-wifi-slash', 'The wizard needs a connection',
       'Takes are checked and saved online. It opens again as soon as the phone is back online.');
+    /* Under Listen's message, where to get the rest: the whole script, once the
+       phone is online — or, when it is switched on already, that it is coming.
+       Rehearse and the wizard have nothing to get: they need the connection
+       itself. */
+    const store = `<button onclick="openStorage()">Storage &amp; offline</button>`;
+    const tip = storeOf(currentScript.id).on
+      ? `It is already set to download in ${store}, and finishes by itself once the phone is back online.`
+      : `Once you are online again, download the whole script in ${store} — then it plays without a connection.`;
     return kind === 'nothing'
       ? msgBlock('ph-wifi-slash', `This ${what} is not on your phone`,
-          'Listening needs a connection. Reading works offline.', read)
+          'Listening needs a connection. Reading works offline.', read, null, tip)
       : msgBlock('ph-wifi-slash', `The rest of this ${what} is not on your phone`,
-          'Listening needs a connection from here on. Reading works offline.', read);
+          'Listening needs a connection from here on. Reading works offline.', read, null, tip);
   }
   /* The mirror of the next scene, at the other end. Only in the single-scene flow
      — the whole script already runs the scenes together behind their marks — and
@@ -8228,16 +8251,18 @@
                   } },
     service:    { label:'Service issue',    group:'offline', screen:'serviceScreen', st:'wip',
                   go: () => { setConn('issue'); openServiceIssue(); } },
-    /* A script still getting ready, so Listen has the start of the scene and
-       not the rest — the second script where you are on it. */
+    /* A script listened to part-way online and never switched on, so Listen
+       has the start of the scene, says where it ends, and points to Storage &
+       offline — Godot where you are on it, else one still getting ready. */
     listenoff:  { label:'Listen — offline', group:'offline', st:'wip',
                   go: () => {
                     storeDemo();
                     setConn('offline');
-                    const s = storeScripts().find(x => { const st = storeOf(x.id); return st.on && st.voices < st.of; })
+                    const s = storeScripts().find(x => { const st = storeOf(x.id); return !st.on && st.heard; })
+                              || storeScripts().find(x => { const st = storeOf(x.id); return st.on && st.voices < st.of; })
                               || storeScripts()[0];
                     const st = storeOf(s.id);
-                    if (storeReady(st)) st.voices = Math.round(st.of / 2);
+                    if (storeReady(st)) { storeOff(s.id); st.heard = PARTLY_HERE; }
                     openScript(s.id);
                     openScene(sceneList()[0].title);
                     switchMode('listen');
@@ -9273,12 +9298,12 @@
      a panel state wants it full. */
   function storeDemo(free = 2400) {
     STORE = {};
-    Object.entries(STORE_DEMO).forEach(([id, st]) => { STORE[id] = { ...st, blocked: false, takes: 0, lines: 0 }; });
+    Object.entries(STORE_DEMO).forEach(([id, st]) => { STORE[id] = { heard: 0, ...st, blocked: false, takes: 0, lines: 0 }; });
     PHONE_FREE = free;
   }
   /* A script that came in later is kept as text only, until it is switched on. */
   const storeOf = id => STORE[id] ||
-    (STORE[id] = { on: false, voices: 0, of: 40, full: 150, text: 1, blocked: false, takes: 0, lines: 0 });
+    (STORE[id] = { on: false, voices: 0, of: 40, full: 150, text: 1, heard: 0, blocked: false, takes: 0, lines: 0 });
   const storeMB = st => st.on ? st.text + Math.round((st.full - st.text) * st.voices / st.of) : st.text;
   const storeReady = st => st.on && !st.blocked && st.voices >= st.of;
   /* A draft is not a script to listen to yet. */
@@ -9319,6 +9344,7 @@
     const scripts = storeScripts();
     const mb = scripts.reduce((sum, s) => sum + storeMB(storeOf(s.id)), 0);
     el.innerHTML = `
+      <div class="imp-lede st-lede"><div class="il-title">Download a script to listen offline</div></div>
       <div class="st-total">${mb} MB on this phone</div>
       <div class="gs-label">Your scripts</div>
       <div class="gs-group">${scripts.map(s => {
@@ -9358,9 +9384,10 @@
   }
   function storeOff(id) {
     const st = storeOf(id);
-    if (!st.on) return;
+    /* Off already: what goes is only what listening left behind. */
+    if (!st.on) { st.heard = 0; return; }
     PHONE_FREE += storeMB(st) - st.text;
-    Object.assign(st, { on: false, blocked: false, voices: 0, takes: 0, lines: 0 });
+    Object.assign(st, { on: false, blocked: false, voices: 0, heard: 0, takes: 0, lines: 0 });
     /* Room has come free: whatever was waiting for it carries on. */
     Object.entries(STORE).forEach(([k, w]) => {
       if (w.on && w.blocked && w.full - storeMB(w) <= storeRoom(k)) w.blocked = false;
