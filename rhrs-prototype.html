@@ -1725,6 +1725,10 @@
     flex: 0 0 auto;
   }
   .skip-btn:active { transform: scale(0.92); }
+  /* Offline, Listen stops where the audio on the phone does: there is nothing
+     to step on to, and the arrow says so the way a stepper at its end does. */
+  .skip-btn:disabled { opacity: 0.3; cursor: default; }
+  .skip-btn:disabled:active { transform: none; }
 
   /* Plain transport button. No halo — the scrubber already carries progress,
      so rings here would say nothing. They are reserved for live recording. */
@@ -1854,6 +1858,16 @@
   .phone.has-bar .modebar { padding-bottom: 14px; }
   .phone.has-bar .screen > .transport:last-child { padding-bottom: 22px; }
   .phone.has-bar #aeTransport { padding-bottom: 46px; }
+  /* ---------- Offline: what cannot change right now ----------
+     Offline nothing the others see can change; what is yours still does —
+     private notes, settings, who you hear. What you may never do is not drawn
+     at all (that is `can`). What you cannot do *now* stays where it is, dimmed
+     like a stepper at the end of its range, and a tap says why. The controls
+     carry `data-online` and nothing else needs to know the connection. A row
+     keeps its colour, because what it says is a fact: only its tap is held. */
+  .phone.offline [data-online] { opacity: 0.3; cursor: default; }
+  .phone.offline :is(.le-row, .le-text, .card)[data-online] { opacity: 1; }
+  .phone.offline [data-online]:active { transform: none; }
   .mode {
     display: flex; align-items: center; gap: 9px;
     background: none; border: none; cursor: pointer;
@@ -2326,7 +2340,7 @@
 
   /* ============ GLOBAL SETTINGS ============
      What is yours rather than a scene's. A row that goes somewhere carries a
-     glyph; a row that holds a control — a switch, Clear — carries none, and its
+     glyph; a row that holds a control — a switch — carries none, and its
      words start where the glyphs do, so a group reads down one edge. */
   .gs-list { flex: 1 1 auto; overflow-y: auto; padding: 16px 22px 30px; }
   .gs-list::-webkit-scrollbar { width: 0; }
@@ -2373,6 +2387,12 @@
     font-size: 12.5px; line-height: 1.55; color: var(--text-muted);
     white-space: pre-line; padding: 0 4px 8px;
   }
+  /* Storage & offline mode: the scripts, each with its switch and, under the
+     name, how it stands — with a thin bar while it is being got ready. The bar
+     is the import's: the app at work, so wine. */
+  .st-total { font-size: 14px; color: var(--text-muted); padding: 2px 4px 14px; }
+  .st-row .st-main { flex: 1 1 auto; min-width: 0; }
+  .st-row .imp-bar { height: 4px; margin: 9px 0 2px; }
 
   /* ============ EDIT PLAY ============ */
   .edit-card { background: var(--white); border-radius: 18px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.04); }
@@ -2425,7 +2445,7 @@
     font-family: var(--font-display); font-weight: 600; font-size: 19px;
     color: var(--noir); margin-bottom: 16px;
   }
-  .next-scene .ns-go {
+  .next-scene .ns-go, .msg .ns-go {
     display: inline-flex; align-items: center; gap: 9px;
     background: var(--wine); color: var(--white); border: none; cursor: pointer;
     border-radius: var(--radius-pill); padding: 13px 24px;
@@ -2433,7 +2453,7 @@
     letter-spacing: 0.6px; text-transform: uppercase;
     box-shadow: 0 5px 18px var(--lift-wine);
   }
-  .next-scene .ns-go:active { transform: scale(0.97); }
+  .next-scene .ns-go:active, .msg .ns-go:active { transform: scale(0.97); }
   /* The end is a terminus, not a door. The filled wine pill is the invitation to
      go on, and there is nowhere on: the button here only offers the way out, so
      it is outlined rather than filled and does not compete with the sentence
@@ -2446,6 +2466,27 @@
     border: 1.5px solid var(--wine-border);
     box-shadow: none;
   }
+
+  /* ---------- A message where the content would be ----------
+     Offline, or when the server does not answer, a screen says so in the place
+     of what it cannot show: after the last card Listen can play, instead of the
+     list in Rehearse and the wizard, instead of People when it did not load.
+     Not an alert — nothing was interrupted, and what it is about is right
+     there. The glyph is the bar's, in the bar's coral, so the two read as one
+     fact; the way on, where there is one, is the pill that ends a scene. */
+  .msg { text-align: center; padding: 30px 14px 20px; }
+  .msg .msg-ic { display: inline-flex; color: var(--coral); margin-bottom: 14px; }
+  .msg .msg-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 20px;
+    color: var(--noir); text-wrap: balance;
+  }
+  .msg .msg-said { font-size: 16px; color: var(--noir); margin-top: 12px; text-wrap: pretty; }
+  .msg .msg-text { font-size: 14px; line-height: 1.45; color: var(--text-muted); margin-top: 6px; text-wrap: pretty; }
+  .msg .ns-go { margin-top: 20px; }
+  /* Rehearse, the wizard, and Listen with nothing on the phone have nothing to
+     play, so the transport goes and the list runs down to what is under it. */
+  .screen.net-off .transport, .screen.net-off .wz-filter { display: none; }
+  .screen.net-off .scroll.fade-b { --fade-over: 0px; --fade-b: 22px; }
 
   /* A stage direction standing between lines is its own beat in the script, so it
      gets its own band: space and a rule on both sides, rather than reading as a
@@ -2673,7 +2714,7 @@
       </button>
       <!-- Under All scripts, sunk into the ground the same way: for whoever
            runs a script somewhere. Hidden for everyone else. -->
-      <button class="dash-alllink" id="dashNew" style="margin-top:-4px;" onclick="openNewScript()">
+      <button class="dash-alllink" id="dashNew" style="margin-top:-4px;" data-online onclick="openNewScript()">
         <i class="ph ph-plus ic-18"></i>
         New script
       </button>
@@ -2723,7 +2764,7 @@
       <!-- Two actions, so the title is centred between two 46px groups: the
            plus is for whoever runs a script somewhere, hidden for everyone else. -->
       <span style="display:flex;flex:0 0 auto;">
-        <button class="back" id="newScriptBtn" onclick="openNewScript()" aria-label="New script"><i class="ph ph-plus ic-22"></i></button>
+        <button class="back" id="newScriptBtn" data-online onclick="openNewScript()" aria-label="New script"><i class="ph ph-plus ic-22"></i></button>
         <button class="back" onclick="toast('Sort &amp; filter')" aria-label="Sort"><i class="ph ph-funnel ic-20"></i></button>
       </span>
     </div>
@@ -3293,6 +3334,31 @@
     <div class="list fades" id="licensesBody"></div>
   </div>
 
+  <!-- ============ SCREEN: STORAGE & OFFLINE MODE ============
+       Which scripts are ready to play without a connection, and what that
+       keeps on the phone. From Global settings, and from the bar at the foot
+       of any screen while the phone is offline. -->
+  <div class="screen" id="storageScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title cap-trim" style="font-size:22px;font-weight:700;">Storage &amp; offline mode</span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="gs-list fades" id="storageBody"></div>
+  </div>
+
+  <!-- ============ SCREEN: SERVICE ISSUE ============
+       Where the bar leads when something on our side is not working: the
+       backend's own short text, what still works, and the way to tell us. -->
+  <div class="screen" id="serviceScreen">
+    <div class="detail-header">
+      <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
+      <span class="h-title"></span>
+      <span style="width:46px;flex:0 0 auto;"></span>
+    </div>
+    <div class="list fades" id="serviceBody"></div>
+  </div>
+
   <!-- ============ SCREEN: EDIT PLAY ============ -->
   <div class="screen" id="editScriptScreen">
     <div class="detail-header">
@@ -3323,7 +3389,7 @@
       <!-- The scenes themselves, not three buttons that talk about them: each one
            moves with its own handles and opens into its lines. -->
       <div id="editScenes"></div>
-      <button class="le-danger" id="deleteScriptBtn" style="margin-top:22px;" onclick="openAlert('deleteScript')">
+      <button class="le-danger" id="deleteScriptBtn" style="margin-top:22px;" data-online onclick="openAlert('deleteScript')">
         <i class="ph ph-trash ic-20"></i>Delete script
       </button>
     </div>
@@ -3466,7 +3532,7 @@
           <button class="big-btn" onclick="togglePlay('listen')" aria-label="Play / pause">
             <i class="ph-fill ph-pause ic-38" id="listenBigIc"></i>
           </button>
-          <button class="skip-btn" onclick="stepLine('listen', 1)" aria-label="Next line"><i class="ph-bold ph-arrow-right ic-26"></i></button>
+          <button class="skip-btn" id="listenNext" onclick="stepLine('listen', 1)" aria-label="Next line"><i class="ph-bold ph-arrow-right ic-26"></i></button>
         </div>
         <div class="bar with-thumb" onclick="seek(event)"><div class="fill" id="listenFill" style="width:42%"></div></div>
         <div class="t-meta">
@@ -3962,6 +4028,27 @@
       { title:"Act II", lines: 188 }
     ] }
   ];
+  /* What this phone keeps, per script and never per scene. The text of every
+     script you are on is kept whenever the phone is online, so Read works
+     offline always. The audio is kept for the scripts switched on in Storage &
+     offline mode: the takes somebody recorded are downloaded, the voices nobody
+     recorded are generated first — and a script played through to the end in
+     Listen is on the phone anyway.
+
+     The switch is the wish — keep this script on the phone, and keep it
+     current — and the line under the name is how it stands. `voices` of `of`
+     is how far getting it ready has gone; `takes` and `lines` are changes a
+     ready script is still catching up with; `blocked` means it is waiting for
+     room. The sizes (MB, all of it and the text alone) and the voices to
+     generate are made up, like the line counts of the two scripts with no
+     text. The phone's own free space is PHONE_FREE. */
+  const STORE_DEMO = {
+    s1: { on: true,  voices: 46, of: 46, full: 124, text: 1 },
+    s2: { on: true,  voices: 18, of: 40, full: 187, text: 2 },
+    s3: { on: false, voices: 0,  of: 52, full: 160, text: 2 }
+  };
+  let STORE = {}, PHONE_FREE = 0, storeTick = null;
+  storeDemo();
   const SCENES = [
     { title:"Opening — the kitchen argument", lines:0, assigned:true },  // filled from SCRIPT
     { title:"Late night phone call", lines:42, assigned:true },
@@ -4117,11 +4204,22 @@
     rehearse: { stage: true,  note: false }
   };
 
+  /* Offline, Listen plays what is on the phone and stops where it ends. A ready
+     script has all of it, one still getting ready has the start, one switched
+     off has none. How far the start goes is one number here — the prototype
+     has a single scene of text — where the app knows it line by line. */
+  const PARTLY_HERE = 3;
+  function heardUpTo() {
+    if (CONN !== 'offline') return SCRIPT.length;
+    const st = storeOf(currentScript.id);
+    return storeReady(st) ? SCRIPT.length : st.on && st.voices ? PARTLY_HERE : 0;
+  }
   function playableIdx(mode) {
     /* A direction that is switched off is not on screen, so it is not a place the
-       playhead can stop either. */
+       playhead can stop either — nor, offline, is anything Listen has no audio for. */
+    const end = mode === 'listen' ? heardUpTo() : SCRIPT.length;
     return SCRIPT.map((it, i) =>
-      (it.who || (narrate[mode].stage && defaults.stage && it.stage)) ? i : -1
+      i < end && (it.who || (narrate[mode].stage && defaults.stage && it.stage)) ? i : -1
     ).filter(i => i >= 0);
   }
   /* Entering a scene or a mode starts at the top of what that mode can play —
@@ -4508,6 +4606,7 @@
     t.forEach(x => { x.use = false; });
     t.unshift({ id: takeKey(line) + '-' + Date.now(), len: takeLen(line), when: 'Just now', use: true });
     recSet(ME).add(lineRef(line));
+    storeChanged(line.sid || 's1', 'takes');
     return t[0];
   }
   const takeInUse = (line, id = ME) => takesFor(line, id).find(t => t.use);
@@ -4548,24 +4647,69 @@
   /* ---- the connection bar ----
      What the foot of the screen says: nothing, No connection, or the backend's
      own short text. The app reads the phone and the server; the prototype is
-     told, from the panel. Where the bar leads — Storage & offline mode, the
-     detail of an outage — is drawn in the wireframes and not built yet, so for
-     now it says where it would go. */
+     told, from the panel. Offline the bar leads to Storage & offline mode —
+     what you can still play — and on an outage to Service issue. */
   let CONN = 'online';
   const CONN_ISSUE = 'Recordings are slow to load right now.';
   function setConn(v) {
     CONN = v;
     paintConnBar();
     renderConnSwitch();
+    /* What the connection changes is drawn again where you stand: Listen,
+       Rehearse, the wizard, Storage. Read works either way, and a control
+       that cannot change anything offline is dimmed by the class alone. */
+    const here = activeScreen()?.id;
+    if (here === 'listenScreen' || here === 'rehearseScreen') switchMode(currentMode);
+    else if (['wizardScenesScreen', 'wizardScreen', 'storageScreen'].includes(here)) REDRAW[here]();
   }
   function paintConnBar() {
-    document.querySelector('.phone').classList.toggle('has-bar', CONN !== 'online');
+    const phone = document.querySelector('.phone');
+    phone.classList.toggle('has-bar', CONN !== 'online');
+    phone.classList.toggle('offline', CONN === 'offline');
     if (CONN === 'online') return;
     document.getElementById('connIc').className = 'ph ' + (CONN === 'offline' ? 'ph-wifi-slash' : 'ph-warning') + ' ic-18';
     document.getElementById('connText').textContent = CONN === 'offline' ? 'No connection' : CONN_ISSUE;
   }
   function connBarTap() {
-    toast(CONN === 'offline' ? 'Storage & offline mode' : 'Service issue');
+    if (CONN === 'offline') openStorage(); else openServiceIssue();
+  }
+  /* Offline, a tap on anything marked `data-online` is held before it lands
+     and says why instead. One listener for the whole phone, in the capture
+     phase, so no control has to ask about the connection itself. The value
+     says what kind of change it is; none means editing. */
+  const NEEDS_NET = {
+    edit:   'Editing needs a connection',
+    record: 'Recording needs a connection',
+    store:  'Changes here need a connection'
+  };
+  ['pointerdown', 'click'].forEach(type =>
+    document.querySelector('.phone').addEventListener(type, e => {
+      if (CONN !== 'offline') return;
+      const el = e.target.closest('[data-online]');
+      if (!el) return;
+      e.stopPropagation();
+      e.preventDefault();
+      if (type === 'click') toast(NEEDS_NET[el.dataset.online] || NEEDS_NET.edit);
+    }, true));
+
+  /* Where the bar leads on an outage: the backend's own short text, one
+     sentence of ours about what still works, and the way to tell us. */
+  function openServiceIssue() {
+    renderServiceIssue();
+    showScreen('serviceScreen');
+  }
+  function renderServiceIssue() {
+    document.getElementById('serviceBody').innerHTML = msgBlock('ph-warning', 'Something is not working',
+      'It is on our side, not your phone. Reading works; listening may stop and start.',
+      { label: '<i class="ph-bold ph-chat-circle-text ic-18"></i> Send feedback', act: 'sendFeedback()' },
+      CONN_ISSUE);
+  }
+  /* A screen with nothing kept to show, when the server did not answer: the
+     message stands where the content would be, in the backend's own short
+     words. No Try again for now — the screen loads by itself once it can. */
+  const NOT_LOADED = 'The server did not answer in time.';
+  function couldNotLoad(listId) {
+    document.getElementById(listId).innerHTML = msgBlock('ph-cloud-slash', 'This could not load', NOT_LOADED);
   }
 
   /* ============================================================
@@ -4591,6 +4735,11 @@
     detailScreen:         'scriptsScreen',
     globalSettingsScreen: 'dashboardScreen',
     licensesScreen:       'globalSettingsScreen',
+    /* From its row in Global settings, and from the bar at the foot of any
+       screen while the phone is offline — so it goes back where it came from.
+       Service issue is the bar on an outage, from anywhere too. */
+    storageScreen:        'origin',
+    serviceScreen:        'origin',
 
     readScreen:           'detailScreen',
     listenScreen:         'detailScreen',
@@ -4657,6 +4806,8 @@
     audioScreen:      'detailScreen',
     evaluationScreen: 'rehearseScreen',
     accountScreen:    'globalSettingsScreen',
+    storageScreen:    'globalSettingsScreen',
+    serviceScreen:    'dashboardScreen',
     personScreen:     'peopleScreen',
     castScreen:       'editScriptScreen',
     whoYouHearScreen: 'detailScreen',
@@ -4672,6 +4823,8 @@
   const REDRAW = {
     dashboardScreen:    () => { renderNewFor(); renderContinue(); renderRecent(); paintBellDot(); },
     globalSettingsScreen: () => renderGlobalSettings(),
+    storageScreen:      () => renderStorage(),
+    serviceScreen:      () => renderServiceIssue(),
     scriptsScreen:      () => renderScripts(),
     detailScreen:       () => renderScenes(),
     editScriptScreen:   () => { renderEditMeta(); renderEditScenes(); },
@@ -4749,6 +4902,7 @@
     const b = document.getElementById('detailAction');
     b.innerHTML = edits ? '<i class="ph ph-pencil-simple ic-21"></i>' : '<i class="ph ph-users-three ic-22"></i>';
     b.setAttribute('aria-label', edits ? 'Edit script' : 'Who you hear');
+    b.toggleAttribute('data-online', edits);
     /* Who you hear is a choice between two actors in one part. Where no part has
        two there is nothing behind the glyph, so it is not shown; the space stays,
        so the title does not move. */
@@ -4917,6 +5071,34 @@
       </button>
     </div>`;
   }
+  /* A message standing where the content would be: the glyph that says why,
+     what it means, the words the server sent if it sent any, what still works,
+     and the way on where there is one. One block for every place that cannot
+     show what it is for — offline, or when the server did not answer. */
+  function msgBlock(ic, title, text, go, said) {
+    return `<div class="msg">
+      <span class="msg-ic"><i class="ph ${ic} ic-38"></i></span>
+      <div class="msg-title">${title}</div>
+      ${said ? `<div class="msg-said">${said}</div>` : ''}
+      <div class="msg-text">${text}</div>
+      ${go ? `<button class="ns-go" onclick="${go.act}">${go.label}</button>` : ''}
+    </div>`;
+  }
+  /* What the modes and the wizard say offline. Reading always works, so it is
+     the way on wherever there is one. */
+  function offlineMsg(kind) {
+    const what = wholeOpen ? 'script' : 'scene';
+    const read = { label: `<i class="ph-bold ph-book-open ic-18"></i> Read the ${what}`, act: "switchMode('read')" };
+    if (kind === 'rehearse') return msgBlock('ph-wifi-slash', 'Rehearse needs a connection',
+      'Every line of yours is checked as you say it, and that happens online. Reading works offline.', read);
+    if (kind === 'wizard') return msgBlock('ph-wifi-slash', 'The wizard needs a connection',
+      'Takes are checked and saved online. It opens again as soon as the phone is back online.');
+    return kind === 'nothing'
+      ? msgBlock('ph-wifi-slash', `This ${what} is not on your phone`,
+          'Listening needs a connection. Reading works offline.', read)
+      : msgBlock('ph-wifi-slash', `The rest of this ${what} is not on your phone`,
+          'Listening needs a connection from here on. Reading works offline.', read);
+  }
   /* The mirror of the next scene, at the other end. Only in the single-scene flow
      — the whole script already runs the scenes together behind their marks — and
      only when there is a scene before this one. */
@@ -5014,7 +5196,19 @@
      ============================================================ */
   function renderCards(mode) {
     const isReh = mode === 'rehearse';
+    /* Offline, Rehearse does not work at all and says so with nothing else on
+       the screen. Listen plays what is on the phone and says where it ends — in
+       the place of the next card, and with no transport when there is nothing
+       to play at all. */
+    const end = mode === 'listen' ? heardUpTo() : SCRIPT.length;
+    const none = CONN === 'offline' && (isReh || !playableIdx('listen').length);
+    document.getElementById(mode + 'Screen').classList.toggle('net-off', none);
+    if (isReh && none) {
+      document.getElementById(mode + 'Scroll').innerHTML = offlineMsg('rehearse');
+      return;
+    }
     document.getElementById(mode + 'Scroll').innerHTML = prevSceneCard() + SCRIPT.map((line, idx) => {
+      if (idx >= end) return '';
       if (isSceneMark(line)) return sceneMark(line.scene);
       if (!line.who) return defaults.stage ? stageBlock(idx, line.stage, mode) : '';
       const isActive = idx === activeIdx;
@@ -5040,9 +5234,14 @@
         ${notesFor(line, idx)}
         ${lineBody(line, idx)}
       </div>`;
-    }).join('') + nextSceneCard();
+    }).join('') + (end < SCRIPT.length ? offlineMsg(none ? 'nothing' : 'rest') : nextSceneCard());
     applyTextStyle();
     applyAccent(mode);
+    /* Stopped where the audio on the phone ends: nothing to step on to. */
+    if (mode === 'listen') {
+      const list = playableIdx('listen');
+      document.getElementById('listenNext').disabled = end < SCRIPT.length && activeIdx === list[list.length - 1];
+    }
   }
 
   /* The transport takes the colour of whoever holds the line: coral when it is
@@ -5336,6 +5535,8 @@
     if (cue !== undefined) activeIdx = cue;
   }
   function syncRehearse() {
+    /* Offline there is nothing to say a line into, and the screen says so. */
+    if (CONN === 'offline') { stopRecording(); return; }
     rehSetState(SCRIPT[activeIdx].mine ? 'talking' : 'audio');
   }
   function rehSetState(state) {
@@ -5577,16 +5778,16 @@
     }
     /* The text is the script's, or yours when you hold the part; the note is
        anybody's, on any line. */
-    if (can.line(SCRIPT[sheetIdx])) html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`);
+    if (can.line(SCRIPT[sheetIdx])) html += item('edit', 'Edit line', false, null, `openLineEdit(${sheetIdx})`, true);
     html += item('note', 'Add / edit private note', false, null, `openLineEdit(${sheetIdx}); editOpen('note')`);
     if (isMine) html += item('record', 'Audio', true, null, `openAudioEdit(${sheetIdx})`);
     return html;
   }
-  function item(icon, label, accent, msg, run) {
+  function item(icon, label, accent, msg, run, net) {
     /* `run` is for the ones that lead somewhere real; the rest still say where
-       they would go. */
+       they would go. `net` marks a change, which waits offline. */
     const act = run ? `closeSheet(); ${run}` : `sheetAction('${msg}')`;
-    return `<button class="sheet-item ${accent ? 'accent' : ''}" onclick="${act}">
+    return `<button class="sheet-item ${accent ? 'accent' : ''}" ${net ? 'data-online' : ''} onclick="${act}">
       <span class="item-ic">${ICON[icon]}</span>${label}</button>`;
   }
   let sheetIdx = 0;
@@ -5610,10 +5811,10 @@
     /* A direction of its own is the script's, so only an editor or admin has
        the edit and the delete; the note is anybody's. */
     document.getElementById('sheetItems').innerHTML =
-      (can.edit() ? item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`) : '') +
+      (can.edit() ? item('edit', 'Edit direction', false, null, `openDirEdit(${idx})`, true) : '') +
       item('note', 'Add a private note', false, 'Private note') +
       (can.edit() ? '<div class="sheet-sep"></div>' +
-        item('trash', 'Delete', true, null, `openDirEdit(${idx}); openAlert('deleteDirection')`) : '');
+        item('trash', 'Delete', true, null, `openDirEdit(${idx}); openAlert('deleteDirection')`, true) : '');
     document.getElementById('scrim').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
@@ -5717,7 +5918,7 @@
     /* Only the scripts you are on: membership belongs to a script. An import
        left half-way waits here as a draft and opens where it was left. */
     document.getElementById('scriptsList').innerHTML = myScripts().map(s => `
-      <div class="card" onclick="${s.draft ? `resumeImport('${s.id}')` : `openScript('${s.id}')`}">
+      <div class="card" ${s.draft ? 'data-online' : ''} onclick="${s.draft ? `resumeImport('${s.id}')` : `openScript('${s.id}')`}">
         <div class="card-main">
           <div class="card-title">${s.title}</div>
           <div class="card-meta">
@@ -5916,13 +6117,13 @@
             <span class="le-top">${m.you ? 'You' : m.name}</span>
             <span class="le-sub">${c.lines ? recordedCount(m.id, c.name) + ' of ' + c.lines + ' lines recorded' : 'Nothing to record yet'}</span>
           </span>
-          ${admin ? `<button class="pe-x" onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
+          ${admin ? `<button class="pe-x" data-online onclick="askUncast('${c.name}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
           </button>` : ''}
         </div>`).join('')}
       ${actors.length ? '' : '<div class="ae-empty">Not cast</div>'}
       ${admin ? `
-      <button class="se-add" onclick="openCastPick('${c.name}')">
+      <button class="se-add" data-online onclick="openCastPick('${c.name}')">
         <i class="ph ph-plus ic-18"></i>Cast someone${actors.length ? ' else' : ''}
       </button>` : ''}
 
@@ -5938,11 +6139,11 @@
 
       <div class="le-label">Voice, until it is recorded</div>
       ${admin
-        ? `<button class="le-row" onclick="openVoicePicker('${c.name}')">${voiceMain}${chev}</button>`
+        ? `<button class="le-row" data-online onclick="openVoicePicker('${c.name}')">${voiceMain}${chev}</button>`
         : `<div class="le-row" style="cursor:default;">${voiceMain}</div>`}
 
       ${edits ? `
-      <button class="le-danger" onclick="openAlert('deleteCharacter')">
+      <button class="le-danger" data-online onclick="openAlert('deleteCharacter')">
         <i class="ph ph-trash ic-20"></i>Delete character
       </button>` : ''}`);
     growTextarea(document.getElementById('leInput'));
@@ -6013,7 +6214,7 @@
       </button>` : `
       <div class="le-row ${m.you ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">${body}</div>`;
     }).join('') + (admin ? `
-      <button class="se-add" style="margin-top:6px;" onclick="openInvite()">
+      <button class="se-add" style="margin-top:6px;" data-online onclick="openInvite()">
         <i class="ph ph-plus ic-18"></i>Invite someone
       </button>` : `
       <div class="ac-note">The admin invites people, sets their role and casts them.</div>`);
@@ -6048,7 +6249,7 @@
         </span>
         <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
       </button>
-      <button class="le-row" style="margin-bottom:10px;" onclick="toast('Invitation sent again')">
+      <button class="le-row" style="margin-bottom:10px;" data-online onclick="toast('Invitation sent again')">
         <span class="le-main">
           <span class="le-top">Send it again</span>
           <span class="le-sub">To ${emailOf(m.id)}</span>
@@ -6063,7 +6264,7 @@
             <span class="le-top cap-trim">${p}</span>
             <span class="le-sub">${(CHARACTERS.find(c => c.name === p) || {}).lines ? (CHARACTERS.find(c => c.name === p) || {}).lines + ' lines · ' : ''}rehearses and records them</span>
           </span>
-          ${admin ? `<button class="pe-x" onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
+          ${admin ? `<button class="pe-x" data-online onclick="askUncast('${p}', '${m.id}')" aria-label="Take the part away">
             <i class="ph ph-x ic-18"></i>
           </button>` : ''}
         </div>`).join('')
@@ -6076,13 +6277,13 @@
         </div>`
       : '<div class="ae-empty">Not cast in anything yet</div>'}
       ${admin ? `
-      <button class="se-add" onclick="openPartPick()">
+      <button class="se-add" data-online onclick="openPartPick()">
         <i class="ph ph-plus ic-18"></i>Cast in a part
       </button>` : ''}
 
       <div class="le-label">Role</div>
       ${Object.entries(ROLES).filter(([key]) => admin || m.role === key).map(([key, r]) => admin ? `
-        <button class="le-row ${m.role === key ? 'chosen' : ''}" style="margin-bottom:10px;" onclick="setRole('${key}')">
+        <button class="le-row ${m.role === key ? 'chosen' : ''}" style="margin-bottom:10px;" data-online onclick="setRole('${key}')">
           <span class="le-main">
             <span class="le-top">${r.label}</span>
             <span class="le-sub">${r.line}</span>
@@ -6099,10 +6300,10 @@
         records it and may rewrite the lines they say — reader, editor and admin alike.${admin ? '' : ' The admin sets both.'}</div>
 
       ${admin ? (m.invited ? `
-      <button class="le-danger" onclick="cancelInvite()">
+      <button class="le-danger" data-online onclick="cancelInvite()">
         <i class="ph ph-x ic-20"></i>Cancel the invitation
       </button>` : `
-      <button class="le-danger" onclick="openAlert('removeMember')">
+      <button class="le-danger" data-online onclick="openAlert('removeMember')">
         <i class="ph ph-sign-out ic-20"></i>Remove from the script
       </button>`) : ''}`;
   }
@@ -6214,7 +6415,7 @@
     el.innerHTML = `
       <div class="le-label">Read aloud by</div>
       ${admin
-        ? `<button class="le-row" style="margin-bottom:10px;" onclick="openVoicePicker(null)">${narrator}${chev}</button>`
+        ? `<button class="le-row" style="margin-bottom:10px;" data-online onclick="openVoicePicker(null)">${narrator}${chev}</button>`
         : `<div class="le-row" style="margin-bottom:10px;cursor:default;">${narrator}</div>`}
       <div class="le-label">Parts</div>` + CHARACTERS.map(c => {
         const main = extra => `
@@ -6232,7 +6433,7 @@
           `<span class="le-sub" style="color:var(--wine);font-weight:600;">You hear ${heard.you ? 'yourself' : heard.name}</span>`)}${chev}</button>` : `
       <div class="le-row ${c.mine ? 'mine' : ''}" style="margin-bottom:10px;cursor:default;">${main()}</div>`;
       }).join('') + (edits ? `
-      <button class="se-add" style="margin-top:6px;" onclick="openCharacter(null)">
+      <button class="se-add" style="margin-top:6px;" data-online onclick="openCharacter(null)">
         <i class="ph ph-plus ic-18"></i>Add a character
       </button>` : '') + (admin ? '' : `
       <div class="ac-note">The director casts the parts${edits ? ' and picks the voices' : ''}. Where a part has two actors, you choose which of them you hear — nobody else is affected.</div>`);
@@ -7384,6 +7585,12 @@
     showScreen('wizardScenesScreen');
   }
   function renderWizardScenes() {
+    /* Offline the wizard says so the moment it opens, with nothing else on the
+       screen: every take is checked and saved online. */
+    if (CONN === 'offline') {
+      document.getElementById('wizardScenesList').innerHTML = offlineMsg('wizard');
+      return;
+    }
     const scenes = sceneList(), left = scriptMissing();
     document.getElementById('wizardScenesList').innerHTML = `
       <div class="wzs-head">
@@ -7477,6 +7684,15 @@
   }
 
   function renderWizard() {
+    /* The connection gone with the wizard open: the same message, and the
+       microphone goes with the transport. */
+    const off = CONN === 'offline';
+    document.getElementById('wizardScreen').classList.toggle('net-off', off);
+    if (off) {
+      stopRecording();
+      document.getElementById('wizardScroll').innerHTML = offlineMsg('wizard');
+      return;
+    }
     renderWizardFilter();
     const targets = wzTargets();
     document.getElementById('wizardScroll').innerHTML =
@@ -7991,6 +8207,55 @@
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
 
+    /* ---- storage & offline mode ----
+       The offline states set the panel's Connection switch, and it holds until
+       it is set again — the switch is the one place the prototype keeps it. */
+    storage:    { label:'Storage & offline mode', group:'offline', screen:'storageScreen', st:'wip',
+                  go: () => { storeDemo(); openGlobalSettings(); openStorage(); } },
+    /* A script switched on with less room left than it needs: the row says so
+       and waits. Switching another script off makes the room. A state. */
+    storagefull: { label:'Storage & offline mode — out of space', group:'offline', st:'wip',
+                  go: () => {
+                    storeDemo();
+                    const s = storeScripts().find(x => !storeOf(x.id).on) || storeScripts()[0];
+                    storeOff(s.id);
+                    const st = storeOf(s.id);
+                    PHONE_FREE -= storeRoom(s.id) - (st.full - st.text - 120);   // 120 MB short
+                    st.on = st.blocked = true;
+                    openGlobalSettings(); openStorage();
+                  } },
+    service:    { label:'Service issue',    group:'offline', screen:'serviceScreen', st:'wip',
+                  go: () => { setConn('issue'); openServiceIssue(); } },
+    /* A script still getting ready, so Listen has the start of the scene and
+       not the rest — the second script where you are on it. */
+    listenoff:  { label:'Listen — offline', group:'offline', st:'wip',
+                  go: () => {
+                    storeDemo();
+                    setConn('offline');
+                    const s = storeScripts().find(x => { const st = storeOf(x.id); return st.on && st.voices < st.of; })
+                              || storeScripts()[0];
+                    const st = storeOf(s.id);
+                    if (storeReady(st)) st.voices = Math.round(st.of / 2);
+                    openScript(s.id);
+                    openScene(sceneList()[0].title);
+                    switchMode('listen');
+                    /* The moment it runs out: the playhead on the last line the
+                       phone has, stopped, and the message right under it. */
+                    const list = playableIdx('listen');
+                    activeIdx = list[list.length - 1];
+                    togglePlay('listen');
+                    requestAnimationFrame(() => { scrollToActive('listen', 'auto'); refocusPlayer('listen'); });
+                  } },
+    rehearseoff: { label:'Rehearse — offline', group:'offline', st:'wip',
+                  go: () => { setConn('offline'); openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); } },
+    wizoff:     { label:'Recording wizard — offline', group:'offline', st:'wip',
+                  go: () => { setConn('offline'); openScript('s1'); openWizardScenes(); } },
+    /* The server did not answer, on a screen with nothing kept to show — the
+       phone is online, so the switch goes back to it. Any redraw — coming back
+       to People — loads it again. */
+    notloaded:  { label:'Could not load',   group:'offline', st:'wip',
+                  go: () => { setConn('online'); openScript('s1'); openEditScript(); openPeople(); couldNotLoad('peopleList'); } },
+
     /* ---- sheets: they slide over whatever you are on ---- */
     linemenu:   { label:'Line menu',        group:'sheets', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen');
@@ -8041,7 +8306,9 @@
     androidalert: { label:'Android playback', group:'alerts', ver:1, st:'prepared',
                   go: () => { openScript('s1'); openScene(DEMO_SCENE); switchMode('listen'); openAlert('android'); } },
     alertclearaudio: { label:'Clear audio', group:'alerts', ver:1, st:'prepared',
-                  go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); openAlert('clearAudio'); } },
+                  /* Clear all audio, on Storage — the row in Global settings leads there. */
+                  go: () => { PHONE.notifications = PHONE.microphone = true; storeDemo();
+                              openGlobalSettings(); openStorage(); openAlert('clearAudio'); } },
 
     /* ---- states the app has no route to ---- */
     lineempty:  { label:'Line edit — empty',  group:'proto', ver:1, st:'prepared',
@@ -8117,7 +8384,7 @@
 
   /* On the right, where the thumb already is, with a rule between it and the row
      so it reads as a handle on the row rather than part of what the row says. */
-  const grip = kind => `<span class="se-grip" onpointerdown="dragBegin(event, '${kind}')"
+  const grip = kind => `<span class="se-grip" data-online onpointerdown="dragBegin(event, '${kind}')"
       onpointermove="dragMove(event)" onpointerup="dragEnd()" onpointercancel="dragEnd()"
       aria-label="Drag to reorder"><i class="ph ph-dots-six-vertical ic-20"></i></span>`;
 
@@ -8135,7 +8402,7 @@
         </button>
         ${grip('scene')}
       </div>`).join('') + `</div>` +
-      `<button class="se-add" onclick="addScene()">
+      `<button class="se-add" data-online onclick="addScene()">
         <i class="ph ph-plus ic-18"></i>Add scene
       </button>`;
   }
@@ -8190,7 +8457,7 @@
          kind rather than a heading for the row. */
       /* While the import is being checked there is nothing to add between the
          rows and nothing to drag: what is wrong is said, not fixed by hand. */
-      return (checking ? '' : `<div class="se-ins"><button onclick="openAddSheet(${i})" aria-label="Add here">
+      return (checking ? '' : `<div class="se-ins"><button data-online onclick="openAddSheet(${i})" aria-label="Add here">
           <i class="ph-bold ph-plus ic-14"></i>
         </button></div>`) + `
       <div class="se-row ${kind}">
@@ -8205,13 +8472,13 @@
         ${checking ? '' : grip('item')}
       </div>`;
     }).join('') + `</div>` + (checking ? `
-      <button class="se-add" onclick="openRequest('script')">
+      <button class="se-add" data-online onclick="openRequest('script')">
         <i class="ph ph-warning-circle ic-18"></i>Something is wrong here
       </button>` : `
-      <button class="se-add" onclick="openAddLine(${items.length})">
+      <button class="se-add" data-online onclick="openAddLine(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add line
       </button>
-      <button class="se-add" onclick="openAddDirection(${items.length})">
+      <button class="se-add" data-online onclick="openAddDirection(${items.length})">
         <i class="ph ph-plus ic-18"></i>Add direction
       </button>`);
     growTextarea(document.getElementById('leInput'));
@@ -8274,7 +8541,7 @@
 
       <div class="le-label">Character</div>
       ${can.edit() ? `
-      <button class="le-row ${line.mine ? 'mine' : 'others'}" onclick="openCharacterPick()">
+      <button class="le-row ${line.mine ? 'mine' : 'others'}" data-online onclick="openCharacterPick()">
         <span class="le-main">
           <span class="le-top cap-trim">${line.who}</span>
           <span class="le-sub">${line.mine ? 'Your part' : 'Someone else'}</span>
@@ -8326,7 +8593,7 @@
         <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
       </button>
 
-      ${can.edit() ? `<button class="le-danger" onclick="openAlert('deleteLine')">
+      ${can.edit() ? `<button class="le-danger" data-online onclick="openAlert('deleteLine')">
         <i class="ph ph-trash ic-20"></i>Delete line
       </button>` : ''}`}`;
     applyTextStyle();
@@ -8368,6 +8635,7 @@
       if (!v) return toast(lineDraft ? 'A line needs something to say' : 'Saved');
       if (lineDraft) return commitLine(v);
       lineItem().text = v;
+      storeChanged(currentScript.id, 'lines');
     },
     note: v => { lineItem().note = v || undefined; },
     dir:  v => { lineItem().dir  = v || undefined; },
@@ -8425,8 +8693,11 @@
       return value ? `<div class="le-label">${icon || ''}${label}</div><div class="le-text" style="cursor:default;">${value}</div>` : '';
     }
     const editing = editingKey === key;
+    /* A private note is yours and changes offline too. Everything else written
+       here is read by the others, so offline it waits for a connection. */
+    const net = key === 'note' ? '' : 'data-online';
     const trigger = value && !editing
-      ? `<button class="le-trigger" onclick="editOpen('${key}')">
+      ? `<button class="le-trigger" ${net} onclick="editOpen('${key}')">
            <i class="ph ph-pencil-simple ic-14"></i>Edit
          </button>` : '';
     let body;
@@ -8436,16 +8707,16 @@
         </div>
         <div class="le-edit-actions">
           <button class="cancel" onclick="editCancel()">Cancel</button>
-          <button class="save" onclick="editSave('${key}')">Save</button>
+          <button class="save" ${net} onclick="editSave('${key}')">Save</button>
         </div>`;
     } else if (!value) {
-      body = `<button class="se-add" onclick="editOpen('${key}')">
+      body = `<button class="se-add" ${net} onclick="editOpen('${key}')">
           <i class="ph ph-plus ic-18"></i>${addLabel}
         </button>`;
     } else {
       /* The trigger says the way in out loud; tapping the text is the way anyone
          tries first. Both work — naming it was never meant to take it away. */
-      body = `<div class="le-text" onclick="editOpen('${key}')">${value}</div>`;
+      body = `<div class="le-text" ${net} onclick="editOpen('${key}')">${value}</div>`;
     }
     return `<div class="le-label">${icon || ''}${label}${trigger}</div>${body}`;
   }
@@ -8572,7 +8843,7 @@
       </div>
       ${aeNotes(line)}
       ${aeRec ? '' : `
-        <button class="ae-record" onclick="aeStartRec()">
+        <button class="ae-record" data-online="record" onclick="aeStartRec()">
           <i class="ph-fill ph-microphone ic-20"></i>Record a new take
         </button>
         <div class="list-sublabel">Takes</div>
@@ -8650,8 +8921,8 @@
         </div>
         ${t.use
           ? '<button class="ae-use on" disabled>In use</button>'
-          : `<button class="ae-use off" onclick="useTake('${t.id}')">Use</button>`}
-        <button class="ae-del" onclick="askDeleteTake('${t.id}')" aria-label="Delete take">
+          : `<button class="ae-use off" data-online onclick="useTake('${t.id}')">Use</button>`}
+        <button class="ae-del" data-online onclick="askDeleteTake('${t.id}')" aria-label="Delete take">
           <i class="ph ph-trash ic-18"></i>
         </button>
       </div>
@@ -8850,7 +9121,7 @@
         <span class="le-chev"><i class="ph ph-copy ic-20"></i></span>
       </button>
 
-      ${can.edit() ? `<button class="le-danger" onclick="openAlert('deleteDirection')">
+      ${can.edit() ? `<button class="le-danger" data-online onclick="openAlert('deleteDirection')">
         <i class="ph ph-trash ic-20"></i>Delete direction
       </button>` : ''}`}`;
     applyTextStyle();
@@ -8898,9 +9169,8 @@
      phone's own settings can. In the app these are two separate answers; the
      panel's Global settings — permissions off turns both down at once. */
   const PHONE = { notifications: true, microphone: true };
-  /* Yours, whichever script is open. The audio kept for playing offline is a
-     figure the demo makes up. */
-  const GS = { missingAudio: true, shake: true, audioMB: 124 };
+  /* Yours, whichever script is open. */
+  const GS = { missingAudio: true, shake: true };
   const APP_VERSION = '0.1 alpha · build 42';
   function openGlobalSettings() {
     renderGlobalSettings();
@@ -8936,13 +9206,11 @@
     document.getElementById('gsNotifsWrap').style.display = notifs ? '' : 'none';
     document.getElementById('gsStorage').innerHTML =
       (records && !PHONE.microphone ? refused('ph-microphone-slash', 'The microphone is off', 'Rehearse and the Recording wizard need it') : '') + `
-      <div class="set-row">
-        <div>
-          <div class="set-label">Audio on this phone</div>
-          <div class="set-sub">${GS.audioMB ? GS.audioMB + ' MB · takes and voices kept for playing offline' : 'Nothing kept on this phone yet'}</div>
-        </div>
-        ${GS.audioMB ? `<button class="ae-use off" onclick="openAlert('clearAudio')">Clear</button>` : ''}
-      </div>`;
+      <button class="edit-row" onclick="openStorage()">
+        <span class="er-ic"><i class="ph ph-download-simple ic-20"></i></span>
+        <span class="er-label">Audio on this phone<span class="set-sub">${storeSummary()}</span></span>
+        <span class="er-chev"><i class="ph ph-caret-right ic-18"></i></span>
+      </button>`;
     document.getElementById('gsVersion').textContent = APP_VERSION + ' · tap to copy';
   }
   function gsToggle(key, btn) {
@@ -8951,9 +9219,11 @@
     /* The dashboard offers the shake too, and must not offer one that is off. */
     if (key === 'shake') document.getElementById('dashShake').style.display = GS.shake ? '' : 'none';
   }
+  /* Clear all audio, from Storage: every switch goes off, and the phone keeps
+     the text it always keeps. */
   function clearAudio() {
-    GS.audioMB = 0;
-    renderGlobalSettings();
+    Object.keys(STORE).forEach(storeOff);
+    renderStorage();
     sheetAction('Audio cleared');
   }
   function copyVersion() {
@@ -8990,6 +9260,144 @@
       </div>
       <div class="lic-name">${l.licence}</div>
       <div class="lic-text">${l.text}</div>`).join('');
+  }
+
+  /* ============================================================
+     STORAGE & OFFLINE MODE
+     ============================================================ */
+  /* The scripts you are on and what this phone keeps of each (STORE, with the
+     data up top). Back to the drawn state: two of three switched on, one of
+     them halfway. `free` is the room left on the phone, in MB — plenty, unless
+     a panel state wants it full. */
+  function storeDemo(free = 2400) {
+    STORE = {};
+    Object.entries(STORE_DEMO).forEach(([id, st]) => { STORE[id] = { ...st, blocked: false, takes: 0, lines: 0 }; });
+    PHONE_FREE = free;
+  }
+  /* A script that came in later is kept as text only, until it is switched on. */
+  const storeOf = id => STORE[id] ||
+    (STORE[id] = { on: false, voices: 0, of: 40, full: 150, text: 1, blocked: false, takes: 0, lines: 0 });
+  const storeMB = st => st.on ? st.text + Math.round((st.full - st.text) * st.voices / st.of) : st.text;
+  const storeReady = st => st.on && !st.blocked && st.voices >= st.of;
+  /* A draft is not a script to listen to yet. */
+  const storeScripts = () => myScripts().filter(s => !s.draft);
+  /* The room one more script would have: what is free on the phone, less what
+     the scripts already getting ready will still take. */
+  function storeRoom(except) {
+    return PHONE_FREE - Object.entries(STORE).reduce((n, [id, st]) =>
+      n + (id !== except && st.on && !st.blocked ? st.full - storeMB(st) : 0), 0);
+  }
+  function openStorage() {
+    renderStorage();
+    showScreen('storageScreen');
+  }
+  /* Under the name, how it stands — one line, the state and what is left. */
+  function storeLine(id) {
+    const st = storeOf(id);
+    if (!st.on) return `Reading only offline · ${st.text}\u00a0MB`;
+    if (st.blocked) return `Waiting for space — needs ${st.full - storeMB(st) - Math.max(0, storeRoom(id))}\u00a0MB more`;
+    const n = (key, what) => st[key] + ' ' + what + (st[key] === 1 ? '' : 's');
+    const left = st.voices < st.of ? `voices\u00a0${st.voices}\u00a0of\u00a0${st.of}`
+      : [st.takes ? n('takes', 'new take') : '', st.lines ? n('lines', 'edited line') : ''].filter(Boolean).join(', ');
+    if (!left) return `Ready offline · ${storeMB(st)}\u00a0MB`;
+    return (CONN === 'offline' ? 'Waiting for a connection' : st.voices < st.of ? 'Getting it ready' : 'Updating') + ' — ' + left;
+  }
+  /* The row in Global settings that leads here says the same in one line. */
+  function storeSummary() {
+    const scripts = storeScripts();
+    const mb = scripts.reduce((sum, s) => sum + storeMB(storeOf(s.id)), 0);
+    const ready = scripts.filter(s => storeReady(storeOf(s.id))).length;
+    return mb + ' MB · ' + (scripts.length === 1
+      ? (ready ? 'ready offline' : 'reading only offline')
+      : ready + ' of ' + scripts.length + ' scripts ready offline');
+  }
+  function renderStorage() {
+    const el = document.getElementById('storageBody');
+    if (!el) return;
+    const scripts = storeScripts();
+    const mb = scripts.reduce((sum, s) => sum + storeMB(storeOf(s.id)), 0);
+    el.innerHTML = `
+      <div class="st-total">${mb} MB on this phone</div>
+      <div class="gs-label">Your scripts</div>
+      <div class="gs-group">${scripts.map(s => {
+        const st = storeOf(s.id), busy = st.on && !st.blocked && st.voices < st.of;
+        return `
+        <div class="set-row st-row">
+          <div class="st-main">
+            <div class="set-label">${s.title}</div>
+            <div class="set-sub">${storeLine(s.id)}</div>
+            ${busy ? `<div class="imp-bar"><div class="imp-fill" style="width:${Math.round(st.voices / st.of * 100)}%"></div></div>` : ''}
+          </div>
+          <button class="toggle ${st.on ? 'on' : ''}" data-online="store" onclick="storeSwitch('${s.id}', this)" aria-label="Ready offline"></button>
+        </div>`;
+      }).join('')}
+      </div>
+      <div class="ac-note" style="padding-top:0;">Reading works offline in every script. Listening needs the script ready${
+        castSomewhere() ? '; Rehearse and the Recording wizard need a connection' : ''}.</div>
+      ${Object.values(STORE).some(st => st.on) ? `
+      <button class="le-danger" data-online="store" onclick="openAlert('clearAudio')">
+        <i class="ph ph-broom ic-20"></i>Clear all audio
+      </button>` : ''}`;
+    storeRun();
+  }
+  /* The switch is the wish. On: get it ready, or wait for room when it does
+     not fit. Off: the audio goes from the phone and the text stays — nothing
+     asked, because switching on again brings it all back. */
+  function storeSwitch(id, btn) {
+    const st = storeOf(id);
+    btn.classList.toggle('on', !st.on);
+    if (st.on) storeOff(id);
+    else {
+      Object.assign(st, { on: true, voices: 0, takes: 0, lines: 0 });
+      st.blocked = st.full - st.text > storeRoom(id);
+    }
+    /* The switch finishes its slide before the row is drawn again. */
+    setTimeout(renderStorage, 220);
+  }
+  function storeOff(id) {
+    const st = storeOf(id);
+    if (!st.on) return;
+    PHONE_FREE += storeMB(st) - st.text;
+    Object.assign(st, { on: false, blocked: false, voices: 0, takes: 0, lines: 0 });
+    /* Room has come free: whatever was waiting for it carries on. */
+    Object.entries(STORE).forEach(([k, w]) => {
+      if (w.on && w.blocked && w.full - storeMB(w) <= storeRoom(k)) w.blocked = false;
+    });
+  }
+  /* A ready script that changes follows by itself — a new take, a line said
+     differently — and the row says so while it does. */
+  function storeChanged(id, kind) {
+    const st = STORE[id];
+    if (!st || !storeReady(st)) return;
+    st[kind]++;
+    storeRun();
+  }
+  /* Getting ready and keeping up, a step at a time while the phone is online.
+     The app does it in the background; here it starts with the first look at
+     Storage, or the first change to a ready script, and stops once nothing is
+     left to do. */
+  function storeRun() {
+    if (storeTick) return;
+    storeTick = setInterval(() => {
+      if (CONN === 'offline') return;
+      let busy = false;
+      Object.values(STORE).forEach(st => {
+        if (!st.on || st.blocked) return;
+        if (st.voices < st.of) {
+          const before = storeMB(st);
+          st.voices = Math.min(st.of, st.voices + Math.max(1, Math.round(st.of / 30)));
+          PHONE_FREE -= storeMB(st) - before;
+          busy = true;
+        } else if (st.takes || st.lines) {
+          if (st.takes) st.takes--; else st.lines--;
+          busy = true;
+        }
+      });
+      const here = activeScreen()?.id;
+      if (here === 'storageScreen') renderStorage();
+      if (here === 'globalSettingsScreen') renderGlobalSettings();
+      if (!busy) { clearInterval(storeTick); storeTick = null; }
+    }, 700);
   }
 
   /* ============================================================
@@ -9030,7 +9438,7 @@
       <button class="le-danger" onclick="openAlert('signOut')">
         <i class="ph ph-sign-out ic-20"></i>Sign out
       </button>
-      <button class="ac-delete" onclick="startDeleteAccount()">Delete account</button>`;
+      <button class="ac-delete" data-online onclick="startDeleteAccount()">Delete account</button>`;
     growTextarea(document.getElementById('leInput'));
   }
   function copyEmail() {
@@ -9137,6 +9545,7 @@
     ['One scene, three modes', 'scene'],
     ['Recording',           'recording'],
     ['Writing and editing', 'editing'],
+    ['Storage & offline mode', 'offline'],
     ['Sheets',              'sheets'],
     ['Alerts',              'alerts'],
     ['Prototype only',      'proto']
