@@ -1843,17 +1843,18 @@
      At the foot of every screen while the phone is offline or the backend says
      something is wrong — under the mode bar and the transport, so it covers no
      control: the screen above it gets shorter instead. Dark, coral words, the
-     glyph saying which kind; the whole bar is the way to more. While it is
-     there it carries the safe area, so the bars above it give theirs up. */
+     glyph saying which kind, both in the middle and with no chevron
+     (2026-10-06); the whole bar is still the way to more. While it is there it
+     carries the safe area, so the bars above it give theirs up. */
   .conn-bar {
-    display: none; flex: 0 0 auto; align-items: center; gap: 10px;
-    width: 100%; border: none; cursor: pointer; text-align: left;
+    display: none; flex: 0 0 auto; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; border: none; cursor: pointer; text-align: center;
     background: var(--bar-bg); border-top: 1px solid var(--bar-rule);
     color: var(--coral);
     padding: 11px 20px calc(11px + env(safe-area-inset-bottom));
     font-family: var(--font-body); font-size: 14px; font-weight: 600;
   }
-  .conn-bar .cb-text { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conn-bar .cb-text { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .phone.has-bar .conn-bar { display: flex; }
   .phone.has-bar .modebar { padding-bottom: 14px; }
   .phone.has-bar .screen > .transport:last-child { padding-bottom: 22px; }
@@ -2387,7 +2388,7 @@
     font-size: 12.5px; line-height: 1.55; color: var(--text-muted);
     white-space: pre-line; padding: 0 4px 8px;
   }
-  /* Storage & offline mode: the scripts, each with its switch and, under the
+  /* Storage & offline: the scripts, each with its switch and, under the
      name, how it stands — with a thin bar while it is being got ready. The bar
      is the import's: the app at work, so wine. */
   .st-total { font-size: 14px; color: var(--text-muted); padding: 2px 4px 14px; }
@@ -3344,12 +3345,10 @@
     <div class="list fades" id="licensesBody"></div>
   </div>
 
-  <!-- ============ SCREEN: STORAGE & OFFLINE MODE ============
+  <!-- ============ SCREEN: STORAGE & OFFLINE ============
        Which scripts are ready to play without a connection, and what that
        keeps on the phone. From Global settings, and from the bar at the foot
-       of any screen while the phone is offline. Titled Storage & offline: the
-       whole name broke over two lines at phone width. The panel and the
-       wireframes keep it whole, the way Settings is Global settings. -->
+       of any screen while the phone is offline. -->
   <div class="screen" id="storageScreen">
     <div class="detail-header">
       <button class="back" onclick="goBack()" aria-label="Back"><i class="ph ph-caret-left ic-22"></i></button>
@@ -4009,7 +4008,6 @@
   <button class="conn-bar" id="connBar" onclick="connBarTap()">
     <i class="ph ph-wifi-slash ic-18" id="connIc"></i>
     <span class="cb-text" id="connText"></span>
-    <i class="ph ph-caret-right ic-16"></i>
   </button>
 
   <div class="toast" id="toast"></div>
@@ -4043,7 +4041,7 @@
   /* What this phone keeps, per script and never per scene. The text of every
      script you are on is kept whenever the phone is online, so Read works
      offline always. The audio is kept for the scripts switched on in Storage &
-     offline mode: the takes somebody recorded are downloaded, the voices nobody
+     offline: the takes somebody recorded are downloaded, the voices nobody
      recorded are generated first — and a script played through to the end in
      Listen is on the phone anyway.
 
@@ -4663,7 +4661,7 @@
   /* ---- the connection bar ----
      What the foot of the screen says: nothing, No connection, or the backend's
      own short text. The app reads the phone and the server; the prototype is
-     told, from the panel. Offline the bar leads to Storage & offline mode —
+     told, from the panel. Offline the bar leads to Storage & offline —
      what you can still play — and on an outage to Service issue. */
   let CONN = 'online';
   const CONN_ISSUE = 'Recordings are slow to load right now.';
@@ -8232,14 +8230,14 @@
                               openLineEdit(lineIdx().find(i => SCRIPT[i].mine && SCRIPT[i].note)
                                         ?? lineIdx()[0]); } },
 
-    /* ---- storage & offline mode ----
+    /* ---- storage & offline ----
        The offline states set the panel's Connection switch, and it holds until
        it is set again — the switch is the one place the prototype keeps it. */
-    storage:    { label:'Storage & offline mode', group:'offline', screen:'storageScreen', st:'wip',
+    storage:    { label:'Storage & offline', group:'offline', screen:'storageScreen', st:'wip',
                   go: () => { storeDemo(); openGlobalSettings(); openStorage(); } },
     /* A script switched on with less room left than it needs: the row says so
        and waits. Switching another script off makes the room. A state. */
-    storagefull: { label:'Storage & offline mode — out of space', group:'offline', st:'wip',
+    storagefull: { label:'Storage & offline — out of space', group:'offline', st:'wip',
                   go: () => {
                     storeDemo();
                     const s = storeScripts().find(x => !storeOf(x.id).on) || storeScripts()[0];
@@ -9290,7 +9288,7 @@
   }
 
   /* ============================================================
-     STORAGE & OFFLINE MODE
+     STORAGE & OFFLINE
      ============================================================ */
   /* The scripts you are on and what this phone keeps of each (STORE, with the
      data up top). Back to the drawn state: two of three switched on, one of
@@ -9574,7 +9572,7 @@
     ['One scene, three modes', 'scene'],
     ['Recording',           'recording'],
     ['Writing and editing', 'editing'],
-    ['Storage & offline mode', 'offline'],
+    ['Storage & offline',   'offline'],
     ['Sheets',              'sheets'],
     ['Alerts',              'alerts'],
     ['Prototype only',      'proto']
