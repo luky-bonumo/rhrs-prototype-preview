@@ -8077,13 +8077,13 @@
                     showScreen('dashboardScreen');
                     REDRAW.dashboardScreen();
                   } },
-    notifications: { label:'Notifications', group:'home', ver:1, st:'wip',
+    notifications: { label:'Notifications', group:'home', ver:1, st:'prepared',
                   go: () => { showScreen('dashboardScreen'); openNotifications(); } },
-    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'wip',
+    settings:   { label:'Global settings',  group:'home', screen:'globalSettingsScreen', ver:1, st:'prepared',
                   go: () => { PHONE.notifications = PHONE.microphone = true; openGlobalSettings(); } },
     /* The same screen while the phone refuses both: the two slashed rows, each
        with its way back. A state, so no `screen` of its own. */
-    settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'wip',
+    settingsoff: { label:'Global settings — permissions off', group:'home', ver:1, st:'prepared',
                   go: () => { PHONE.notifications = PHONE.microphone = false; openGlobalSettings(); } },
     licenses:   { label:'Licenses',         group:'home', screen:'licensesScreen', ver:1, st:'prepared',
                   go: () => { openGlobalSettings(); openLicenses(); } },
@@ -8233,11 +8233,11 @@
     /* ---- storage & offline ----
        The offline states set the panel's Connection switch, and it holds until
        it is set again — the switch is the one place the prototype keeps it. */
-    storage:    { label:'Storage & offline', group:'offline', screen:'storageScreen', st:'wip',
+    storage:    { label:'Storage & offline', group:'offline', screen:'storageScreen', ver:1, st:'prepared',
                   go: () => { storeDemo(); openGlobalSettings(); openStorage(); } },
     /* A script switched on with less room left than it needs: the row says so
        and waits. Switching another script off makes the room. A state. */
-    storagefull: { label:'Storage & offline — out of space', group:'offline', st:'wip',
+    storagefull: { label:'Storage & offline — out of space', group:'offline', ver:1, st:'prepared',
                   go: () => {
                     storeDemo();
                     const s = storeScripts().find(x => !storeOf(x.id).on) || storeScripts()[0];
@@ -8247,12 +8247,12 @@
                     st.on = st.blocked = true;
                     openGlobalSettings(); openStorage();
                   } },
-    service:    { label:'Service issue',    group:'offline', screen:'serviceScreen', st:'wip',
+    service:    { label:'Service issue',    group:'offline', screen:'serviceScreen', ver:1, st:'prepared',
                   go: () => { setConn('issue'); openServiceIssue(); } },
     /* A script listened to part-way online and never switched on, so Listen
        has the start of the scene, says where it ends, and points to Storage &
        offline — Godot where you are on it, else one still getting ready. */
-    listenoff:  { label:'Listen — offline', group:'offline', st:'wip',
+    listenoff:  { label:'Listen — offline', group:'offline', ver:1, st:'prepared',
                   go: () => {
                     storeDemo();
                     setConn('offline');
@@ -8271,14 +8271,14 @@
                     togglePlay('listen');
                     requestAnimationFrame(() => { scrollToActive('listen', 'auto'); refocusPlayer('listen'); });
                   } },
-    rehearseoff: { label:'Rehearse — offline', group:'offline', st:'wip',
+    rehearseoff: { label:'Rehearse — offline', group:'offline', ver:1, st:'prepared',
                   go: () => { setConn('offline'); openScript('s1'); openScene(DEMO_SCENE); switchMode('rehearse'); } },
-    wizoff:     { label:'Recording wizard — offline', group:'offline', st:'wip',
+    wizoff:     { label:'Recording wizard — offline', group:'offline', ver:1, st:'prepared',
                   go: () => { setConn('offline'); openScript('s1'); openWizardScenes(); } },
     /* The server did not answer, on a screen with nothing kept to show — the
        phone is online, so the switch goes back to it. Any redraw — coming back
        to People — loads it again. */
-    notloaded:  { label:'Could not load',   group:'offline', st:'wip',
+    notloaded:  { label:'Could not load',   group:'offline', ver:1, st:'prepared',
                   go: () => { setConn('online'); openScript('s1'); openEditScript(); openPeople(); couldNotLoad('peopleList'); } },
 
     /* ---- sheets: they slide over whatever you are on ---- */
